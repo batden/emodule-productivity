@@ -3,7 +3,7 @@
 # Korostil Daniel <ted.korostiled@gmail.com>, 2011.
 msgid ""
 msgstr ""
-"Project-Id-Version: skel.HEAD\n"
+"Project-Id-Version: productivity.HEAD\n"
 "Report-Msgid-Bugs-To: http://trac.enlightenment.org/e\n"
 "POT-Creation-Date: 2010-09-09 08:01-0700\n"
 "PO-Revision-Date: 2011-02-06 10:53+0300\n"
@@ -19,7 +19,7 @@ msgstr ""
 
 #. create our config dialog
 #: ../src/e_mod_config.c:44
-msgid "Skeleton Module"
+msgid "Productivity Module"
 msgstr "Скілет"
 
 #: ../src/e_mod_config.c:84
@@ -32,13 +32,13 @@ msgstr "Використовувати перемикач 1"
 
 #. add right-side item
 #: ../src/e_mod_main.c:82
-#| msgid "Skeleton"
-msgid "Skel"
+#| msgid "Productivity"
+msgid "Productivity"
 msgstr "Скілет"
 
 #: ../src/e_mod_main.c:113
 msgid ""
-"Skeleton Module Configuration data needed upgrading. Your old "
+"Productivity Module Configuration data needed upgrading. Your old "
 "configuration<br> has been wiped and a new set of defaults initialized. "
 "This<br>will happen regularly during development, so don't report a<br>bug. "
 "This simply means the module needs new configuration<br>data by default for "
@@ -56,7 +56,7 @@ msgstr ""
 
 #: ../src/e_mod_main.c:133
 msgid ""
-"Your Skeleton Module configuration is NEWER than the module version. This is "
+"Your Productivity Module configuration is NEWER than the module version. This is "
 "very<br>strange. This should not happen unless you downgraded<br>the module "
 "or copied the configuration from a place where<br>a newer version of the "
 "module was running. This is bad and<br>as a precaution your configuration "
@@ -69,11 +69,11 @@ msgstr ""
 "за незручності.<br>"
 
 #: ../src/e_mod_main.c:300
-msgid "Skeleton"
+msgid "Productivity"
 msgstr "Скілет"
 
 #: ../src/e_mod_main.c:385
-msgid "Skeleton Configuration Updated"
+msgid "Productivity Configuration Updated"
 msgstr "Налаштування скілету оновлено"
 
 #: ../src/e_mod_main.c:447

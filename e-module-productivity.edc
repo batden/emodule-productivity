@@ -28,7 +28,7 @@ collections
      }
    group 
      {
-	name: "modules/skel/main";
+	name: "modules/productivity/main";
 	max: 128 128;
 	parts 
 	  {

@@ -16,8 +16,8 @@ config.sub
 configure
 configure.ac.orig
 depcomp
-e-module-skel.edj
-e_modules-skel.spec
+e-module-productivity.edj
+e_modules-productivity.spec
 install-sh
 libtool
 ltmain.sh
@@ -90,7 +90,7 @@ po/remove-potcdate.sed
 po/remove-potcdate.sin
 po/ru.gmo
 po/sk.gmo
-po/skel.pot
+po/productivity.pot
 po/sl.gmo
 po/stamp-po
 po/sv.gmo

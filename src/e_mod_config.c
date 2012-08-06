@@ -20,14 +20,14 @@ static int _basic_apply(E_Config_Dialog *cfd, E_Config_Dialog_Data *cfdata);
 
 /* Function for calling our personal dialog menu */
 E_Config_Dialog *
-e_int_config_skel_module(E_Container *con, const char *params) 
+e_int_config_productivity_module(E_Container *con, const char *params) 
 {
    E_Config_Dialog *cfd = NULL;
    E_Config_Dialog_View *v = NULL;
    char buf[4096];
 
    /* is this config dialog already visible ? */
-   if (e_config_dialog_find("Skel", "advanced/skel")) return NULL;
+   if (e_config_dialog_find("Productivity", "advanced/productivity")) return NULL;
 
    v = E_NEW(E_Config_Dialog_View, 1);
    if (!v) return NULL;
@@ -38,14 +38,14 @@ e_int_config_skel_module(E_Container *con, const char *params)
    v->basic.apply_cfdata = _basic_apply;
 
    /* Icon in the theme */
-   snprintf(buf, sizeof(buf), "%s/e-module-skel.edj", skel_conf->module->dir);
+   snprintf(buf, sizeof(buf), "%s/e-module-productivity.edj", productivity_conf->module->dir);
 
    /* create our config dialog */
-   cfd = e_config_dialog_new(con, D_("Skeleton Module"), "Skel", 
-                             "advanced/skel", buf, 0, v, NULL);
+   cfd = e_config_dialog_new(con, D_("Productivity Module"), "Productivity", 
+                             "advanced/productivity", buf, 0, v, NULL);
 
    e_dialog_resizable_set(cfd->dia, 1);
-   skel_conf->cfd = cfd;
+   productivity_conf->cfd = cfd;
    return cfd;
 }
 
@@ -63,7 +63,7 @@ _create_data(E_Config_Dialog *cfd)
 static void 
 _free_data(E_Config_Dialog *cfd, E_Config_Dialog_Data *cfdata) 
 {
-   skel_conf->cfd = NULL;
+   productivity_conf->cfd = NULL;
    E_FREE(cfdata);
 }
 
@@ -71,7 +71,7 @@ static void
 _fill_data(E_Config_Dialog_Data *cfdata) 
 {
    /* load a temp copy of the config variables */
-   cfdata->switch1 = skel_conf->switch1;
+   cfdata->switch1 = productivity_conf->switch1;
 }
 
 static Evas_Object *
@@ -94,7 +94,7 @@ _basic_create(E_Config_Dialog *cfd, Evas *evas, E_Config_Dialog_Data *cfdata)
 static int 
 _basic_apply(E_Config_Dialog *cfd, E_Config_Dialog_Data *cfdata) 
 {
-   skel_conf->switch1 = cfdata->switch1;
+   productivity_conf->switch1 = cfdata->switch1;
    e_config_save_queue();
    return 1;
 }

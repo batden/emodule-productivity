@@ -15,20 +15,20 @@ EDJE_FLAGS = -v \
 	     -id $(top_srcdir)/images
 
 filesdir = $(datadir)
-files_DATA = module.desktop e-module-skel.edj
+files_DATA = module.desktop e-module-productivity.edj
 
 EXTRA_DIST = module.desktop.in \
-	     e_modules-skel.spec.in \
-	     e-module-skel.edc \
+	     e_modules-productivity.spec.in \
+	     e-module-productivity.edc \
 	     images/module_icon.png
 
-e-module-skel.edj: Makefile e-module-skel.edc images/module_icon.png
+e-module-productivity.edj: Makefile e-module-productivity.edc images/module_icon.png
 
 %.edj:  %.edc
 	$(EDJE_CC) $(EDJE_FLAGS) $< $@
 
 clean-local:
-	 rm -rf *.edj module.desktop e_modules-skel.spec *~
+	 rm -rf *.edj module.desktop e_modules-productivity.spec *~
 
 uninstall:
 	 rm -rf $(DESTDIR)$(datadir)

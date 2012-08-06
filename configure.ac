@@ -3,7 +3,7 @@ dnl Process this file with autoconf to produce a configure script.
 # get rid of that stupid cache mechanism
 rm -f config.cache
 
-AC_INIT(skel, 0.0.1, devilhorns@comcast.net)
+AC_INIT(productivity, 0.0.1, thanatermesis@gmail.com)
 AC_PREREQ(2.52)
 AC_CONFIG_SRCDIR(configure.ac)
 AC_CANONICAL_BUILD
@@ -68,7 +68,7 @@ AC_OUTPUT([
 Makefile
 src/Makefile
 module.desktop
-e_modules-skel.spec
+e_modules-productivity.spec
 $po_makefile_in
 ], [
 ])

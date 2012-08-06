@@ -19,8 +19,8 @@ msgstr ""
 
 #. create our config dialog
 #: ../src/e_mod_config.c:44
-msgid "Skeleton Module"
-msgstr "Skeleto modulis"
+msgid "Productivity Module"
+msgstr "Productivityeto modulis"
 
 #: ../src/e_mod_config.c:84
 msgid "General"
@@ -32,7 +32,7 @@ msgstr "Naudoti 1 jungiklį"
 
 #: ../src/e_mod_main.c:113
 msgid ""
-"Skeleton Module Configuration data needed upgrading. Your old "
+"Productivity Module Configuration data needed upgrading. Your old "
 "configuration<br> has been wiped and a new set of defaults initialized. "
 "This<br>will happen regularly during development, so don't report a<br>bug. "
 "This simply means the module needs new configuration<br>data by default for "
@@ -40,7 +40,7 @@ msgid ""
 "set of defaults will fix<br>that by adding it in. You can re-configure "
 "things now to your<br>liking. Sorry for the inconvenience.<br>"
 msgstr ""
-"Skeleto modulio konfigūracijos duomenys turi būti atnaujinti. Jūsų sena "
+"Productivityeto modulio konfigūracijos duomenys turi būti atnaujinti. Jūsų sena "
 "konfigūracija<br>buvo ištrinta ir įrašyti nauji numatytieji "
 "nustatymai.<br>Tobulinimo metu tai nutiks dažnai, todėl nesiųskite pranešimo "
 "apie klaidą.<br>Tai reiškia, kad modulio veikimui reikia naujų "
@@ -51,13 +51,13 @@ msgstr ""
 
 #: ../src/e_mod_main.c:133
 msgid ""
-"Your Skeleton Module configuration is NEWER than the module version. This is "
+"Your Productivity Module configuration is NEWER than the module version. This is "
 "very<br>strange. This should not happen unless you downgraded<br>the module "
 "or copied the configuration from a place where<br>a newer version of the "
 "module was running. This is bad and<br>as a precaution your configuration "
 "has been now restored to<br>defaults. Sorry for the inconvenience.<br>"
 msgstr ""
-"Jūsų skeleto modulio konfigūracija yra NAUJESNĖ nei modulio versija. Tai "
+"Jūsų productivityeto modulio konfigūracija yra NAUJESNĖ nei modulio versija. Tai "
 "labai keista.<br>To neturėtų nutikti, nebent įrašėte senesnę modulio "
 "versiją,<br>arba nukopijavote konfigūraciją iš sistemos su naujesne modulio "
 "versija.<br>Tai yra blogai, todėl saugumo sumetimais Jūsų konfigūracijos "
@@ -65,12 +65,12 @@ msgstr ""
 "nepatogumus.<br>"
 
 #: ../src/e_mod_main.c:300
-msgid "Skeleton"
-msgstr "Skeletas"
+msgid "Productivity"
+msgstr "Productivityetas"
 
 #: ../src/e_mod_main.c:385
-msgid "Skeleton Configuration Updated"
-msgstr "Skeleto konfigūracija atnaujinta"
+msgid "Productivity Configuration Updated"
+msgstr "Productivityeto konfigūracija atnaujinta"
 
 #: ../src/e_mod_main.c:442
 msgid "Configuration"

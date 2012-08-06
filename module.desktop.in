@@ -1,11 +1,11 @@
 [Desktop Entry]
 Type=Link
-Name=Skeleton
+Name=Productivity
 Name[ru]=Скелет
-Name[de]=Skelett
-Name[eo]=Skeleto
-Name[el]=Skel
-Icon=e-module-skel
+Name[de]=Productivityett
+Name[eo]=Productivityeto
+Name[el]=Productivity
+Icon=e-module-productivity
 Comment=Not meant for users. Basis for building new ones.
 Comment[ru]=Не предназначен для пользователей. База для создания новых модулей.
 Comment[cs]=Není pro uživatele. Jen jako základ pro vytváøení nových modulù.

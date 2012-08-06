@@ -16,8 +16,8 @@ msgstr ""
 
 #. create new config dialog
 #: ../src/e_mod_config.c:39
-msgid "Skeleton Module"
-msgstr "Skeleton Modul"
+msgid "Productivity Module"
+msgstr "Productivity Modul"
 
 #: ../src/e_mod_config.c:79
 msgid "General"
@@ -29,7 +29,7 @@ msgstr "Upotrijebi Prekidač 1"
 
 #: ../src/e_mod_main.c:107
 msgid ""
-"Skeleton Module Configuration data needed upgrading. Your old "
+"Productivity Module Configuration data needed upgrading. Your old "
 "configuration<br> has been wiped and a new set of defaults initialized. "
 "This<br>will happen regularly during development, so don't report a<br>bug. "
 "This simply means the module needs new configuration<br>data by default for "
@@ -37,7 +37,7 @@ msgid ""
 "set of defaults will fix<br>that by adding it in. You can re-configure "
 "things now to your<br>liking. Sorry for the inconvenience.<br>"
 msgstr ""
-"Konfiguracija Skeleton Modula je trebala nadogradnju. Stara "
+"Konfiguracija Productivity Modula je trebala nadogradnju. Stara "
 "konfiguracija<br>je izbrisana a novi set zadanih vrijednosti je pokrenut. "
 "Ovo<br>će se događati regularno tijekom razvoja, te nemojte prijavljivati "
 "kao grešku.<br> Ovo prosto znači da modul normalno treba nove konfiguracione "
@@ -48,25 +48,25 @@ msgstr ""
 
 #: ../src/e_mod_main.c:127
 msgid ""
-"Your Skeleton Module configuration is NEWER than the module version. This is "
+"Your Productivity Module configuration is NEWER than the module version. This is "
 "very<br>strange. This should not happen unless you downgraded<br>the module "
 "or copied the configuration from a place where<br>a newer version of the "
 "module was running. This is bad and<br>as a precaution your configuration "
 "has been now restored to<br>defaults. Sorry for the inconvenience.<br>"
 msgstr ""
-"Konfiguracija Skeleton Modula je NOVIJA od inačice modula. Ovo je jako čudno."
+"Konfiguracija Productivity Modula je NOVIJA od inačice modula. Ovo je jako čudno."
 "<br> Ovo se nije smjelo desiti, osim da ste možda unazadili <br>modul ili "
 "ste kopirali konfiguraciju gdje je novija inačica modula bila aktivna.<br> "
 "Ovo nije dobro i kao predostrožnost vaša konfiguracija je vraćena na zadane "
 "vrijednosti.<br> Žao nam je zbog neugodnosti.<br>"
 
 #: ../src/e_mod_main.c:294
-msgid "Skeleton"
-msgstr "Skeleton"
+msgid "Productivity"
+msgstr "Productivity"
 
 #: ../src/e_mod_main.c:377
-msgid "Skeleton Configuration Updated"
-msgstr "Konfiguracija Skeleton Osvježena"
+msgid "Productivity Configuration Updated"
+msgstr "Konfiguracija Productivity Osvježena"
 
 #: ../src/e_mod_main.c:434
 msgid "Configuration"

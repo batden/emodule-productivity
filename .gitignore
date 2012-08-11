@@ -54,6 +54,14 @@ m4/ulonglong.m4
 m4/wchar_t.m4
 m4/wint_t.m4
 m4/xsize.m4
+m4/fcntl-o.m4
+m4/glibc2.m4
+m4/intl.m4
+m4/intldir.m4
+m4/intlmacosx.m4
+m4/lock.m4
+m4/threadlib.m4
+m4/visibility.m4
 missing
 mkinstalldirs
 module.desktop
@@ -105,6 +113,8 @@ src/e_mod_config.lo
 src/e_mod_config.o
 src/e_mod_main.lo
 src/e_mod_main.o
+src/e_mod_log.lo
+src/e_mod_log.o
 src/module.la
 stamp-h1
 

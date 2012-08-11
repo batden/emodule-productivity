@@ -24,27 +24,53 @@ define([AC_LIBTOOL_LANG_CXX_CONFIG], [:])dnl
 define([AC_LIBTOOL_LANG_F77_CONFIG], [:])dnl
 AC_PROG_LIBTOOL
 
+AC_DISABLE_STATIC
+
 m4_ifdef([AM_GNU_GETTEXT_VERSION], [
-AM_GNU_GETTEXT_VERSION([0.14])
+AM_GNU_GETTEXT_VERSION([0.18])
 ])
 
 m4_ifdef([AM_GNU_GETTEXT], [
-AM_GNU_GETTEXT([external])
+AM_GNU_GETTEXT([external], [need-ngettext])
 po_makefile_in=po/Makefile.in
 AM_CONDITIONAL([HAVE_PO], [true])
 ],[
 AM_CONDITIONAL([HAVE_PO], [false])
 ])
 AC_SUBST(LTLIBINTL)
+if test "x$LIBINTL" = "x"; then
+  LIBINTL="$INTLLIBS"
+fi
 
-PKG_CHECK_MODULES(E, [enlightenment])
+if test "x${POSUB}" = "x" ; then
+   have_po="no"
+fi
+
+AM_CONDITIONAL([HAVE_PO], [test "x${have_po}" = "xyes"])
+
 release=$(pkg-config --variable=release enlightenment)
 MODULE_ARCH="$host_os-$host_cpu-$release"
 AC_SUBST(MODULE_ARCH)
 AC_DEFINE_UNQUOTED(MODULE_ARCH, "$MODULE_ARCH", "Module architecture")
 
 # Find edje_cc
-PKG_CHECK_MODULES(EDJE, [edje >= 0.5.0])
+PKG_CHECK_MODULES(E, [
+    eina >= 1.6.99
+    evas >= 1.6.99
+    ecore >= 1.6.99
+    edje >= 1.6.99
+    edbus >= 1.6.99
+    enlightenment >= 0.16.999
+])
+requirements_e="\
+eina >= 1.6.99 \
+evas >= 1.6.99 \
+ecore >= 1.6.99 \
+edje >= 1.6.99 \
+edbus >= 1.6.99 \
+enlightenment >= 0.16.999"
+
+
 AC_ARG_WITH(edje-cc,
   AC_HELP_STRING([--with-edje-cc=PATH], [specify a specific path to edje_cc]),
   [
@@ -72,3 +98,11 @@ e_modules-productivity.spec
 $po_makefile_in
 ], [
 ])
+echo
+cat << SUMMARY_EOF
+Summary:
+ * project.........: $PACKAGE $VERSION
+ * install.........: $datadir
+ * CFLAGS..........: $CFLAGS
+ * LDFLAGS.........: $LDFLAGS
+SUMMARY_EOF

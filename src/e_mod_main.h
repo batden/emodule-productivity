@@ -3,11 +3,11 @@
 
 #ifdef ENABLE_NLS
 # include <libintl.h>
-# define D_(string) dgettext(PACKAGE, string)
+# define _(string) dgettext(PACKAGE, string)
 #else
 # define bindtextdomain(domain,dir)
 # define bind_textdomain_codeset(domain,codeset)
-# define D_(string) (string)
+# define _(string) (string)
 #endif
 
 #undef EINA_LOG_DOMAIN_DEFAULT

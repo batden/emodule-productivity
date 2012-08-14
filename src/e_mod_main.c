@@ -80,10 +80,10 @@ e_modapi_init(E_Module *m)
    /* Display this Modules config info in the main Config Panel */
 
    /* starts with a category, create it if not already exists */
-   e_configure_registry_category_add("advanced", 80, D_("Advanced"), 
+   e_configure_registry_category_add("advanced", 80, _("Advanced"), 
                                      NULL, "preferences-advanced");
    /* add right-side item */
-   e_configure_registry_item_add("advanced/productivity", 110, D_("Productivity"), 
+   e_configure_registry_item_add("advanced/productivity", 110, _("Productivity"), 
                                  NULL, buf, e_int_config_productivity_module);
 
    /* Define EET Data Storage for the config file */
@@ -114,7 +114,7 @@ e_modapi_init(E_Module *m)
              /* config too old */
              _productivity_conf_free();
              ecore_timer_add(1.0, _productivity_conf_timer,
-                             D_("Productivity Module Configuration data needed "
+                             _("Productivity Module Configuration data needed "
                                 "upgrading. Your old configuration<br> has been"
                                 " wiped and a new set of defaults initialized. "
                                 "This<br>will happen regularly during "
@@ -134,7 +134,7 @@ e_modapi_init(E_Module *m)
              /* config too new...wtf ? */
              _productivity_conf_free();
              ecore_timer_add(1.0, _productivity_conf_timer, 
-                             D_("Your Productivity Module configuration is NEWER "
+                             _("Your Productivity Module configuration is NEWER "
                                 "than the module version. This is "
                                 "very<br>strange. This should not happen unless"
                                 " you downgraded<br>the module or "
@@ -305,7 +305,7 @@ _gc_orient(E_Gadcon_Client *gcc, E_Gadcon_Orient orient)
 static const char *
 _gc_label(const E_Gadcon_Client_Class *client_class) 
 {
-   return D_("Productivity");
+   return _("Productivity");
 }
 
 /* so E can keep a unique instance per-container */
@@ -390,7 +390,7 @@ _productivity_conf_free(void)
 static Eina_Bool 
 _productivity_conf_timer(void *data) 
 {
-   e_util_dialog_internal( D_("Productivity Configuration Updated"), data);
+   e_util_dialog_internal( _("Productivity Configuration Updated"), data);
    return EINA_FALSE;
 }
 
@@ -432,7 +432,7 @@ _productivity_cb_mouse_down(void *data, Evas *evas, Evas_Object *obj, void *even
         /* create popup menu */
         m = e_menu_new();
         mi = e_menu_item_new(m);
-        e_menu_item_label_set(mi, D_("Settings"));
+        e_menu_item_label_set(mi, _("Settings"));
         e_util_menu_item_theme_icon_set(mi, "preferences-system");
         e_menu_item_callback_set(mi, _productivity_cb_menu_configure, NULL);
 

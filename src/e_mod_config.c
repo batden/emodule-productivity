@@ -41,7 +41,7 @@ e_int_config_productivity_module(E_Container *con, const char *params)
    snprintf(buf, sizeof(buf), "%s/e-module-productivity.edj", productivity_conf->module->dir);
 
    /* create our config dialog */
-   cfd = e_config_dialog_new(con, D_("Productivity Module"), "Productivity", 
+   cfd = e_config_dialog_new(con, _("Productivity Module"), "Productivity", 
                              "advanced/productivity", buf, 0, v, NULL);
 
    e_dialog_resizable_set(cfd->dia, 1);
@@ -81,9 +81,9 @@ _basic_create(E_Config_Dialog *cfd, Evas *evas, E_Config_Dialog_Data *cfdata)
 
    o = e_widget_list_add(evas, 0, 0);
 
-   of = e_widget_framelist_add(evas, D_("General"), 0);
+   of = e_widget_framelist_add(evas, _("General"), 0);
    e_widget_framelist_content_align_set(of, 0.0, 0.0);
-   ow = e_widget_check_add(evas, D_("Use Switch 1"), 
+   ow = e_widget_check_add(evas, _("Use Switch 1"), 
                            &(cfdata->switch1));
    e_widget_framelist_object_append(of, ow);
    e_widget_list_object_append(o, of, 1, 1, 0.5);

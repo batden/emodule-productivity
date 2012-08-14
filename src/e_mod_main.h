@@ -10,6 +10,32 @@
 # define D_(string) (string)
 #endif
 
+#undef EINA_LOG_DOMAIN_DEFAULT
+#define EINA_LOG_DOMAIN_DEFAULT _productivity_log
+
+#ifdef ERR
+# undef ERR
+#endif
+#define ERR(...) EINA_LOG_DOM_ERR(_productivity_log, __VA_ARGS__)
+#ifdef INF
+# undef INF
+#endif
+#define INF(...) EINA_LOG_DOM_INFO(_productivity_log, __VA_ARGS__)
+#ifdef WRN
+# undef WRN
+#endif
+#define WRN(...) EINA_LOG_DOM_WARN(_productivity_log, __VA_ARGS__)
+#ifdef CRIT
+# undef CRIT
+#endif
+#define CRIT(...) EINA_LOG_DOM_CRIT(_productivity_log, __VA_ARGS__)
+#ifdef DBG
+# undef DBG
+#endif
+#define DBG(...) EINA_LOG_DOM_DBG(_productivity_log, __VA_ARGS__)
+
+static int _productivity_log = -1;
+
 /* Macros used for config file versioning */
 /* You can increment the EPOCH value if the old configuration is not
  * compatible anymore, it creates an entire new one.
@@ -91,6 +117,8 @@ EAPI int e_modapi_save(E_Module *m);
 
 /* Function for calling the module's Configuration Dialog */
 E_Config_Dialog *e_int_config_productivity_module(E_Container *con, const char *params);
+
+void e_mod_log_cb(const Eina_Log_Domain *d, Eina_Log_Level level, const char *file, const char *fnc, int line, const char *fmt, void *data, va_list args);
 
 extern Config *productivity_conf;
 

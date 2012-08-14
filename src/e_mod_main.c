@@ -16,6 +16,8 @@ static Config_Item *_productivity_conf_item_get(const char *id);
 static void _productivity_cb_mouse_down(void *data, Evas *evas, Evas_Object *obj, void *event);
 static void _productivity_cb_menu_post(void *data, E_Menu *menu);
 static void _productivity_cb_menu_configure(void *data, E_Menu *mn, E_Menu_Item *mi);
+static void _productivity_mod_menu_add(void *data, E_Menu *m);
+static void _productivity_mod_run_cb(void *data, E_Menu *m, E_Menu_Item *mi);
 
 /* Local Structures */
 typedef struct _Instance Instance;
@@ -155,6 +157,10 @@ e_modapi_init(E_Module *m)
     * this is not written */
    productivity_conf->module = m;
 
+   productivity_conf->maug =
+        e_int_menus_menu_augmentation_add_sorted("config/1", _("Productivity"),
+                _productivity_mod_menu_add, NULL, NULL, NULL);
+   
    /* Tell any gadget containers (shelves, etc) that we provide a module
     * for the user to enjoy */
    e_gadcon_provider_register(&_gc_class);
@@ -471,4 +477,24 @@ _productivity_cb_menu_configure(void *data, E_Menu *mn, E_Menu_Item *mi)
    if (!productivity_conf) return;
    if (productivity_conf->cfd) return;
    e_int_config_productivity_module(mn->zone->container, NULL);
+}
+
+
+/* menu item callback(s) */
+static void 
+_productivity_mod_run_cb(void *data __UNUSED__, E_Menu *m, E_Menu_Item *mi __UNUSED__)
+{
+   e_configure_registry_call("advanced/productivity", m->zone->container, NULL);
+}
+
+/* menu item add hook */
+static void
+_productivity_mod_menu_add(void *data __UNUSED__, E_Menu *m)
+{
+   E_Menu_Item *mi;
+
+   mi = e_menu_item_new(m);
+   e_menu_item_label_set(mi, _("Productivity"));
+   e_util_menu_item_theme_icon_set(mi, "preferences-desktop-shelf");
+   e_menu_item_callback_set(mi, _productivity_mod_run_cb, NULL);
 }

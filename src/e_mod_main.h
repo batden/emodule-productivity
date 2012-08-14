@@ -70,6 +70,8 @@ struct _Config
     * e_modapi_init, in case you need to access it. (not written to disk) */
    E_Module *module;
 
+   E_Int_Menu_Augmentation *maug;
+
    /* if you open a config dialog, store a reference to it in a pointer like
     * this one, so if the user opens a second time the dialog, you know it's
     * already open. Also needed for destroy the dialog when we are exiting */

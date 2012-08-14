@@ -63,7 +63,7 @@ EAPI E_Module_Api e_modapi = {E_MODULE_API_VERSION, "Productivity"};
 EAPI void *
 e_modapi_init(E_Module *m) 
 {
-   char buf[4096];
+   char buf[PATH_MAX];
 
    _productivity_log = eina_log_domain_register("E_MOD_PRODUCTIVITY",EINA_COLOR_CYAN);
    eina_log_print_cb_set(e_mod_log_cb, NULL);
@@ -240,7 +240,7 @@ static E_Gadcon_Client *
 _gc_init(E_Gadcon *gc, const char *name, const char *id, const char *style) 
 {
    Instance *inst = NULL;
-   char buf[4096];
+   char buf[PATH_MAX];
 
    /* theme file */
    snprintf(buf, sizeof(buf), "%s/e-module-productivity.edj", 
@@ -328,7 +328,7 @@ static Evas_Object *
 _gc_icon(const E_Gadcon_Client_Class *client_class, Evas *evas) 
 {
    Evas_Object *o = NULL;
-   char buf[4096];
+   char buf[PATH_MAX];
 
    /* theme */
    snprintf(buf, sizeof(buf), "%s/e-module-productivity.edj", productivity_conf->module->dir);

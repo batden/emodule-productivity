@@ -45,8 +45,8 @@ Config *productivity_conf = NULL;
 static const E_Gadcon_Client_Class _gc_class = 
 {
    GADCON_CLIENT_CLASS_VERSION, "productivity", 
-     {_gc_init, _gc_shutdown, _gc_orient, _gc_label, _gc_icon, 
-          _gc_id_new, NULL, NULL},
+   {_gc_init, _gc_shutdown, _gc_orient, _gc_label, _gc_icon, 
+      _gc_id_new, NULL, NULL},
    E_GADCON_CLIENT_STYLE_PLAIN
 };
 
@@ -61,7 +61,12 @@ EAPI E_Module_Api e_modapi = {E_MODULE_API_VERSION, "Productivity"};
 EAPI void *
 e_modapi_init(E_Module *m) 
 {
-  char buf[4096];
+   char buf[4096];
+
+   _productivity_log = eina_log_domain_register("E_MOD_PRODUCTIVITY",EINA_COLOR_CYAN);
+   eina_log_print_cb_set(e_mod_log_cb, NULL);
+   eina_log_domain_level_set("E_MOD_PRODUCTIVITY", EINA_LOG_LEVEL_DBG);
+   INF("Initialized Productivity Module");
 
    /* Location of message catalogs for localization */
    snprintf(buf, sizeof(buf), "%s/locale", e_module_dir_get(m));
@@ -83,18 +88,18 @@ e_modapi_init(E_Module *m)
 
    /* Define EET Data Storage for the config file */
    conf_item_edd = E_CONFIG_DD_NEW("Config_Item", Config_Item);
-   #undef T
-   #undef D
-   #define T Config_Item
-   #define D conf_item_edd
+#undef T
+#undef D
+#define T Config_Item
+#define D conf_item_edd
    E_CONFIG_VAL(D, T, id, STR);
    E_CONFIG_VAL(D, T, switch2, INT);
 
    conf_edd = E_CONFIG_DD_NEW("Config", Config);
-   #undef T
-   #undef D
-   #define T Config
-   #define D conf_edd
+#undef T
+#undef D
+#define T Config
+#define D conf_edd
    E_CONFIG_VAL(D, T, version, INT);
    E_CONFIG_VAL(D, T, switch1, UCHAR); /* our var from header */
    E_CONFIG_LIST(D, T, conf_items, conf_item_edd); /* the list */
@@ -107,20 +112,20 @@ e_modapi_init(E_Module *m)
         if ((productivity_conf->version >> 16) < MOD_CONFIG_FILE_EPOCH) 
           {
              /* config too old */
-	    _productivity_conf_free();
-	     ecore_timer_add(1.0, _productivity_conf_timer,
-			     D_("Productivity Module Configuration data needed "
-			     "upgrading. Your old configuration<br> has been"
-			     " wiped and a new set of defaults initialized. "
-			     "This<br>will happen regularly during "
-			     "development, so don't report a<br>bug. "
-			     "This simply means the module needs "
-			     "new configuration<br>data by default for "
-			     "usable functionality that your old<br>"
-			     "configuration simply lacks. This new set of "
-			     "defaults will fix<br>that by adding it in. "
-			     "You can re-configure things now to your<br>"
-			     "liking. Sorry for the inconvenience.<br>"));
+             _productivity_conf_free();
+             ecore_timer_add(1.0, _productivity_conf_timer,
+                             D_("Productivity Module Configuration data needed "
+                                "upgrading. Your old configuration<br> has been"
+                                " wiped and a new set of defaults initialized. "
+                                "This<br>will happen regularly during "
+                                "development, so don't report a<br>bug. "
+                                "This simply means the module needs "
+                                "new configuration<br>data by default for "
+                                "usable functionality that your old<br>"
+                                "configuration simply lacks. This new set of "
+                                "defaults will fix<br>that by adding it in. "
+                                "You can re-configure things now to your<br>"
+                                "liking. Sorry for the inconvenience.<br>"));
           }
 
         /* Ardvarks */
@@ -128,17 +133,17 @@ e_modapi_init(E_Module *m)
           {
              /* config too new...wtf ? */
              _productivity_conf_free();
-	     ecore_timer_add(1.0, _productivity_conf_timer, 
-			     D_("Your Productivity Module configuration is NEWER "
-			     "than the module version. This is "
-			     "very<br>strange. This should not happen unless"
-			     " you downgraded<br>the module or "
-			     "copied the configuration from a place where"
-			     "<br>a newer version of the module "
-			     "was running. This is bad and<br>as a "
-			     "precaution your configuration has been now "
-			     "restored to<br>defaults. Sorry for the "
-			     "inconvenience.<br>"));
+             ecore_timer_add(1.0, _productivity_conf_timer, 
+                             D_("Your Productivity Module configuration is NEWER "
+                                "than the module version. This is "
+                                "very<br>strange. This should not happen unless"
+                                " you downgraded<br>the module or "
+                                "copied the configuration from a place where"
+                                "<br>a newer version of the module "
+                                "was running. This is bad and<br>as a "
+                                "precaution your configuration has been now "
+                                "restored to<br>defaults. Sorry for the "
+                                "inconvenience.<br>"));
           }
      }
 
@@ -168,7 +173,7 @@ e_modapi_shutdown(E_Module *m)
    e_configure_registry_item_del("advanced/productivity");
 
    /* Remove the config panel category if we can. E will tell us.
-    category stays if other items using it */
+      category stays if other items using it */
    e_configure_registry_category_del("advanced");
 
    /* Kill the config dialog */
@@ -189,8 +194,8 @@ e_modapi_shutdown(E_Module *m)
 
         /* remove it */
         productivity_conf->conf_items = 
-          eina_list_remove_list(productivity_conf->conf_items, 
-                                productivity_conf->conf_items);
+           eina_list_remove_list(productivity_conf->conf_items, 
+                                 productivity_conf->conf_items);
 
         /* cleanup stringshares */
         if (ci->id) eina_stringshare_del(ci->id);
@@ -205,6 +210,10 @@ e_modapi_shutdown(E_Module *m)
    /* Clean EET */
    E_CONFIG_DD_FREE(conf_item_edd);
    E_CONFIG_DD_FREE(conf_edd);
+
+   INF("Shutting down Productivity");
+   eina_log_domain_unregister(_productivity_log);
+   _productivity_log = -1;
    return 1;
 }
 
@@ -367,8 +376,8 @@ _productivity_conf_free(void)
 
         ci = productivity_conf->conf_items->data;
         productivity_conf->conf_items = 
-          eina_list_remove_list(productivity_conf->conf_items, 
-                                productivity_conf->conf_items);
+           eina_list_remove_list(productivity_conf->conf_items, 
+                                 productivity_conf->conf_items);
         /* EPA */
         if (ci->id) eina_stringshare_del(ci->id);
         E_FREE(ci);

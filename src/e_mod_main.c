@@ -1,5 +1,6 @@
 #include <e.h>
 #include "e_mod_main.h"
+#include "e_mod_config.h"
 
 /* Local Function Prototypes */
 static E_Gadcon_Client *_gc_init(E_Gadcon *gc, const char *name, const char *id, const char *style);
@@ -38,6 +39,8 @@ struct _Instance
    Config_Item *conf_item;
 };
 
+int _productivity_log;
+
 /* Local Variables */
 static Eina_List *instances = NULL;
 static E_Config_DD *conf_edd = NULL;
@@ -64,8 +67,10 @@ EAPI void *
 e_modapi_init(E_Module *m) 
 {
    char buf[PATH_MAX];
+   Eina_List *apps;
 
    _productivity_log = eina_log_domain_register("E_MOD_PRODUCTIVITY",EINA_COLOR_CYAN);
+   printf("PROD_LOG:%d\n", _productivity_log);
    eina_log_print_cb_set(e_mod_log_cb, NULL);
    eina_log_domain_level_set("E_MOD_PRODUCTIVITY", EINA_LOG_LEVEL_DBG);
    INF("Initialized Productivity Module");
@@ -117,17 +122,17 @@ e_modapi_init(E_Module *m)
              _productivity_conf_free();
              ecore_timer_add(1.0, _productivity_conf_timer,
                              _("Productivity Module Configuration data needed "
-                                "upgrading. Your old configuration<br> has been"
-                                " wiped and a new set of defaults initialized. "
-                                "This<br>will happen regularly during "
-                                "development, so don't report a<br>bug. "
-                                "This simply means the module needs "
-                                "new configuration<br>data by default for "
-                                "usable functionality that your old<br>"
-                                "configuration simply lacks. This new set of "
-                                "defaults will fix<br>that by adding it in. "
-                                "You can re-configure things now to your<br>"
-                                "liking. Sorry for the inconvenience.<br>"));
+                               "upgrading. Your old configuration<br> has been"
+                               " wiped and a new set of defaults initialized. "
+                               "This<br>will happen regularly during "
+                               "development, so don't report a<br>bug. "
+                               "This simply means the module needs "
+                               "new configuration<br>data by default for "
+                               "usable functionality that your old<br>"
+                               "configuration simply lacks. This new set of "
+                               "defaults will fix<br>that by adding it in. "
+                               "You can re-configure things now to your<br>"
+                               "liking. Sorry for the inconvenience.<br>"));
           }
 
         /* Ardvarks */
@@ -137,15 +142,15 @@ e_modapi_init(E_Module *m)
              _productivity_conf_free();
              ecore_timer_add(1.0, _productivity_conf_timer, 
                              _("Your Productivity Module configuration is NEWER "
-                                "than the module version. This is "
-                                "very<br>strange. This should not happen unless"
-                                " you downgraded<br>the module or "
-                                "copied the configuration from a place where"
-                                "<br>a newer version of the module "
-                                "was running. This is bad and<br>as a "
-                                "precaution your configuration has been now "
-                                "restored to<br>defaults. Sorry for the "
-                                "inconvenience.<br>"));
+                               "than the module version. This is "
+                               "very<br>strange. This should not happen unless"
+                               " you downgraded<br>the module or "
+                               "copied the configuration from a place where"
+                               "<br>a newer version of the module "
+                               "was running. This is bad and<br>as a "
+                               "precaution your configuration has been now "
+                               "restored to<br>defaults. Sorry for the "
+                               "inconvenience.<br>"));
           }
      }
 
@@ -158,9 +163,18 @@ e_modapi_init(E_Module *m)
    productivity_conf->module = m;
 
    productivity_conf->maug =
-        e_int_menus_menu_augmentation_add_sorted("config/1", _("Productivity"),
-                _productivity_mod_menu_add, NULL, NULL, NULL);
+      e_int_menus_menu_augmentation_add_sorted("config/1", _("Productivity"),
+                                               _productivity_mod_menu_add, NULL, NULL, NULL);
    
+   e_module_delayed_set(m, 3);
+   //Load all work applications into productivity_conf->apps.
+   productivity_conf->apps = e_mod_config_worktools_pre_load();
+   //Creates data, and adds callbacks
+   e_mod_config_windows_create_data(NULL);
+
+   //ecore_event_handler_add(E_EVENT_BORDER_FOCUS_IN, tasks_cb_window_focus_in, NULL);
+
+
    /* Tell any gadget containers (shelves, etc) that we provide a module
     * for the user to enjoy */
    e_gadcon_provider_register(&_gc_class);

@@ -61,6 +61,7 @@ PKG_CHECK_MODULES(E, [
     edje >= 1.6.99
     edbus >= 1.6.99
     enlightenment >= 0.16.999
+    elementary >= 1.6.999
 ])
 requirements_e="\
 eina >= 1.6.99 \
@@ -68,7 +69,8 @@ evas >= 1.6.99 \
 ecore >= 1.6.99 \
 edje >= 1.6.99 \
 edbus >= 1.6.99 \
-enlightenment >= 0.16.999"
+enlightenment >= 0.16.999 \
+elementary >= 1.6.999"
 
 
 AC_ARG_WITH(edje-cc,

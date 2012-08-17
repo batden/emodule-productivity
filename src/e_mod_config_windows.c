@@ -31,7 +31,7 @@ e_mod_config_windows_create_data(void *data __UNUSED__)
    cwl->handlers = eina_list_append
       (cwl->handlers, ecore_event_handler_add
        (E_EVENT_BORDER_REMOVE, _e_mod_config_window_event_border_remove_cb, cwl));
-   cwl->handlers = eina_list_append
+/*   cwl->handlers = eina_list_append
       (cwl->handlers, ecore_event_handler_add
        (E_EVENT_BORDER_ICONIFY, _e_mod_config_window_event_border_iconify_cb, cwl));
    cwl->handlers = eina_list_append
@@ -46,7 +46,7 @@ e_mod_config_windows_create_data(void *data __UNUSED__)
    cwl->handlers = eina_list_append
       (cwl->handlers, ecore_event_handler_add
        (E_EVENT_BORDER_PROPERTY, _e_mod_config_window_event_border_property_cb, cwl));
-
+*/
    cwl->borders = eina_list_clone(e_border_client_list());
 
    if(cwl->borders) return EINA_TRUE;
@@ -99,26 +99,22 @@ _e_mod_config_window_event_border_add_cb(void *data, int type __UNUSED__, void *
    E_Config_Window_List *cwl;
    E_Config_Window_List_Data *cwldata;
 
+   //cwldata = E_NEW(E_Config_Window_List_Data, 1);
    cwl = data;
-   if(cwl->cwldata) E_FREE(cwl->cwldata);
-   cwl->cwldata = NULL;
-   cwldata = cwl->cwldata;
    ev = event;
 
-   cwl->borders = eina_list_append(cwl->borders, ev->border);
 
-   cwldata = E_NEW(E_Config_Window_List_Data, 1);
-
-   cwldata->name = eina_stringshare_add(ev->border->client.icccm.name);
+   /*cwldata->name = eina_stringshare_add(ev->border->client.icccm.name);
    cwldata->command = eina_stringshare_add(ev->border->client.icccm.command.argv[0]);
    cwldata->pid = ev->border->client.netwm.pid;
    cwldata->seconds = _e_mod_config_windows_current_time_get();
-   cwl->cwldata_list = eina_list_append(cwl->cwldata_list, cwldata);
+   
+   cwl->cwldata_list = eina_list_append(cwl->cwldata_list, cwldata);*/
+   cwl->borders = eina_list_append(cwl->borders, ev->border);
 
    INF(ev->border->client.icccm.name);
    INF(ev->border->client.icccm.class);  
    INF("APP: %s PID:%d",ev->border->client.icccm.name, ev->border->client.netwm.pid);
-   //_tasks_refill_all();
    return EINA_TRUE;
 }
 
@@ -141,7 +137,7 @@ _e_mod_config_window_event_border_remove_cb(void *data, int type __UNUSED__, voi
    INF(ev->border->client.icccm.name);
    INF(ev->border->client.icccm.class);  
    INF("APP: %s PID:%d",ev->border->client.icccm.name, ev->border->client.netwm.pid);
-
+/*
    EINA_LIST_FOREACH(cwl->borders, l, bd)
      {
         INF("LIST:%s",bd->client.icccm.name);
@@ -150,17 +146,19 @@ _e_mod_config_window_event_border_remove_cb(void *data, int type __UNUSED__, voi
 
    EINA_LIST_FOREACH(cwl->cwldata_list, l, cwldata)
      {
-        INF("NAME:%s",cwldata->name);
-        INF("Command:%s",cwldata->command);
-        INF("PID:%d EXIT_PID %d",cwldata->pid,ev->border->client.netwm.pid);
+        WRN("NAME:%s",cwldata->name);
+        WRN("Command:%s",cwldata->command);
+        WRN("PID:%d EXIT_PID %d",cwldata->pid,ev->border->client.netwm.pid);
         if(cwldata->pid == ev->border->client.netwm.pid)
           {
-             INF("Pid Match Found!");
-             INF(":%s ran for %d seconds",cwldata->command, (seconds - cwldata->seconds));
+             CRI("Pid Match Found!");
+             CRI(":%s ran for %d seconds",cwldata->command, (seconds - cwldata->seconds));
+            // eina_stringshare_del(cwldata->name);
+            // eina_stringshare_del(cwldata->command);
              cwl->cwldata_list = eina_list_remove(cwl->cwldata_list, cwldata);
           }
      }
-
+*/
    return EINA_TRUE;
 }
 

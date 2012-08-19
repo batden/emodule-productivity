@@ -16,8 +16,18 @@ struct _E_Config_App_List
 //    e_mod_config_schedule.c
 struct _E_Config_Schedule_Data
 {
-   Evas_Object *start;
-   Evas_Object *stop;
+   Evas_Object *start_btn;
+   Evas_Object *stop_btn;
+   Evas_Object *start_clk;
+   Evas_Object *stop_clk;
+   Evas_Object *break_slider;
+   int break_min;
+   struct
+   {
+       int hour;
+       int min;
+       int sec;
+   }start_time, stop_time;
 };
 
 //    e_mod_config.c
@@ -34,6 +44,7 @@ struct _E_Config_Dialog_Data
 
    // e_mod_config_windows.c
    E_Border                *border;
+   Ecore_Timer             *clock_delay;
 };
 
 //    e_mod_config_windows.c
@@ -71,5 +82,6 @@ Eina_Bool    e_mod_config_windows_create_data(void *data);
 Eina_List   *e_mod_config_worktools_pre_load();
 
 //    e_mod_config_schedule.c
+Eina_Bool    e_mod_config_schedule_create_data(E_Config_Dialog_Data *cfdata);
 Evas_Object *e_mod_config_schedule_new(Evas_Object *otb, Evas *evas,
                                        E_Config_Dialog_Data *cfdata);

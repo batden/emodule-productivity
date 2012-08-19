@@ -52,6 +52,7 @@ _create_data(E_Config_Dialog *cfd)
    
    cfdata = E_NEW(E_Config_Dialog_Data, 1);
    
+   e_mod_config_schedule_create_data(cfdata);
    e_mod_config_worktools_create_data(cfdata);
    return cfdata;
 }
@@ -229,6 +230,7 @@ _basic_create(E_Config_Dialog *cfd, Evas *evas, E_Config_Dialog_Data *cfdata)
    otb = e_widget_toolbook_add(evas, 24, 24);
    e_mod_config_schedule_new(otb, evas, cfdata);
    e_mod_config_worktools_new(otb, evas, cfdata);
+   e_widget_toolbook_page_show(otb, 0);
 
 /*  ot = e_widget_table_add(evas, EINA_FALSE);
    e_widget_toolbook_page_append(otb, NULL, _("Tickets"), ot, 1, 1, 1, 1, 0.5, 0.0);

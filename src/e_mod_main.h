@@ -28,7 +28,7 @@ extern int _productivity_log;
  * You need to increment GENERATION when you add new values to the
  * configuration file but is not needed to delete the existing conf  */
 #define MOD_CONFIG_FILE_EPOCH 0x0001
-#define MOD_CONFIG_FILE_GENERATION 0x008d
+#define MOD_CONFIG_FILE_GENERATION 0x008e
 #define MOD_CONFIG_FILE_VERSION \
    ((MOD_CONFIG_FILE_EPOCH << 16) | MOD_CONFIG_FILE_GENERATION)
 
@@ -40,6 +40,42 @@ extern int _productivity_log;
 
 typedef struct _Config Config;
 typedef struct _Config_Item Config_Item;
+typedef struct _Config_Schedule_Start Config_Schedule_Start;
+
+typedef struct _Month Month;
+typedef struct _Day   Day;
+typedef struct _Intervals Intervals;
+
+struct _Intervals
+{
+   int lock;
+   int id;
+   int break_min;
+   struct
+     {
+        int hour;
+        int min;
+        int sec;
+     }start, stop;
+};
+
+struct _Day
+{
+   const char *name;
+   int mday;
+   double total_time_worked;
+   Intervals *iv;
+   Eina_List *iv_list;
+};
+
+
+struct _Month
+{
+   const char *name;
+   int mon;
+   Day day;
+   Eina_List *day_list;
+};
 
 /* Base config struct. Store Item Count, etc
  * 
@@ -52,29 +88,22 @@ typedef struct _Config_Item Config_Item;
  * Version used to know when user config too old */
 struct _Config 
 {
-   /* Store a reference to the module instance provided by enlightenment in
-    * e_modapi_init, in case you need to access it. (not written to disk) */
    E_Module *module;
-
    E_Int_Menu_Augmentation *maug;
-
-   /* if you open a config dialog, store a reference to it in a pointer like
-    * this one, so if the user opens a second time the dialog, you know it's
-    * already open. Also needed for destroy the dialog when we are exiting */
    E_Config_Dialog *cfd;
-
-   /* List of configuration items, when we save to disk, if we have a list of
-    * items (Config_Item) they will be saved too */
    Eina_List *conf_items;
-
-   /* config file version */
    int version;
-
-   /* actual config properties; Define your own. (globally per-module) */
-   unsigned char switch1;
+   long timestamp;
 
    /*Work application list*/
    Eina_List *apps;
+
+   Eina_List *iv_list;
+   Eina_List *day_list;
+   Eina_List *month_list;
+   Intervals iv;
+   Day day;
+   Month month;
 };
 
 /* This struct used to hold config for individual items from above list */

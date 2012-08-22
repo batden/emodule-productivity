@@ -91,7 +91,7 @@ e_mod_config_schedule_new(Evas_Object *otb, Evas *evas, E_Config_Dialog_Data *cf
    cfdata->schedule.break_slider = elm_slider_add(bx);
    elm_slider_unit_format_set(cfdata->schedule.break_slider, "%1.0f Minutes");
    elm_slider_min_max_set(cfdata->schedule.break_slider, 0, 15);
-   elm_slider_value_set(cfdata->schedule.break_slider,10);
+   elm_slider_value_set(cfdata->schedule.break_slider,cfdata->schedule.break_min);
    //evas_object_size_hint_align_set(sl, EVAS_HINT_FILL, 0.5);
    //evas_object_size_hint_weight_set(sl, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
    elm_box_pack_end(bx, cfdata->schedule.break_slider);
@@ -113,11 +113,52 @@ e_mod_config_schedule_new(Evas_Object *otb, Evas *evas, E_Config_Dialog_Data *cf
    e_widget_toolbook_page_append(otb, NULL, _("Schedule"), ot, 1, 1, 1, 1, 0.5, 0.0);
 
    /*
-   if (cfdata->clock_delay) ecore_timer_del(cfdata->clock_delay);
-   cfdata->clock_delay = ecore_timer_add(0.1, e_mod_config_schedule_clock_fill_delay
-                                         , cfdata);
-   */
+      if (cfdata->clock_delay) ecore_timer_del(cfdata->clock_delay);
+      cfdata->clock_delay = ecore_timer_add(0.1, e_mod_config_schedule_clock_fill_delay
+      , cfdata);
+      */
 }
+
+Eina_Bool
+e_mod_config_schedule_save_config(E_Config_Dialog_Data *cfdata)
+{
+   Month *m, mm;
+   Day *d;
+   Intervals *iv;
+   Eina_List *l, *ll, *lll;
+
+   time_t tt;
+   struct tm *tm;
+
+   time(&tt);
+   tm = localtime(&tt); 
+
+   INF("Saving Config");
+   productivity_conf->timestamp = e_mod_timestamp_get();
+   
+  // mm = E_NEW(Month, 1);
+   EINA_LIST_FOREACH(productivity_conf->month_list, l, m)
+     {
+        productivity_conf->month.name = eina_stringshare_add("AGUST");
+        productivity_conf->month.mon = m->mon+1;
+        productivity_conf->month.day.name = eina_stringshare_add("MADMAN");
+        productivity_conf->month.day.mday = 32;
+        productivity_conf->month.day_list = eina_list_append(m->day_list,
+                                                             &productivity_conf->month.day);
+     }
+
+   //productivity_conf->month.day_list = eina_list_append(productivity_conf->month.day_list, d);
+
+   //eina_list_free(productivity_conf->month_list);
+
+   //productivity_conf->month.day_list = eina_list_append(productivity_conf->month.day_list,d);
+   //productivity_conf->month.day_list = eina_list_append(productivity_conf->month.day_list,d);
+   productivity_conf->month_list = eina_list_append(productivity_conf->month_list,
+                                                    &productivity_conf->month);
+   productivity_conf->day_list = eina_list_append(productivity_conf->day_list,
+                                                  &productivity_conf->month.day);
+} 
+
 
 static void
 _start_clock_cb(void *data, Evas_Object *obj, void *event_info)
@@ -212,6 +253,9 @@ _e_mod_config_schedule_start_working_cb(void *data, void *data2)
         elm_clock_edit_mode_set(csd->start_clk, digedit);
         elm_clock_edit_mode_set(csd->stop_clk, digedit);
         elm_object_disabled_set(csd->break_slider, EINA_TRUE);
+        if(csd->lock == EINA_FALSE);
+        csd->lock = EINA_TRUE;
+        ERR("LOCK??:%d",csd->lock);
         INF("Start Working");
      }
 }
@@ -233,6 +277,10 @@ _e_mod_config_schedule_stop_working_cb(void *data, void *data2)
         elm_clock_edit_mode_set(csd->start_clk, digedit);
         elm_clock_edit_mode_set(csd->stop_clk, digedit);
         elm_object_disabled_set(csd->break_slider, EINA_FALSE);
+        if(csd->lock == EINA_TRUE)
+          csd->lock = EINA_FALSE;
+        ERR("LOCK??:%d", csd->lock);
+
         INF("Stop Working");
      }
 }
@@ -268,6 +316,13 @@ _e_mod_config_schedule_clock_fill_delay(E_Config_Schedule_Data *csd)
 
    time(&tt);
    tm = localtime(&tt);
+
+   csd->id = productivity_conf->iv.id;
+   csd->lock = (Eina_Bool) productivity_conf->iv.lock;
+   ERR("LOCK?:%d",csd->lock);
+   csd->break_min = productivity_conf->iv.break_min;
+
+
 
    csd->start_time.hour = tm->tm_hour;
    csd->start_time.min  = tm->tm_min;

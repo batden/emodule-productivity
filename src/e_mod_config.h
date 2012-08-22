@@ -21,6 +21,8 @@ struct _E_Config_Schedule_Data
    Evas_Object *start_clk;
    Evas_Object *stop_clk;
    Evas_Object *break_slider;
+   Eina_Bool lock : 1;
+   int id;
    int break_min;
    struct
    {
@@ -79,7 +81,10 @@ Evas_Object *e_mod_config_worktools_new(Evas_Object *otb, Evas *evas,
 Eina_Bool    e_mod_config_worktools_create_data(E_Config_Dialog_Data *cfdata);
 Eina_Bool    e_mod_config_worktools_save(E_Config_Dialog_Data *cfdata);
 Eina_Bool    e_mod_config_windows_create_data(void *data);
-Eina_List   *e_mod_config_worktools_pre_load();
+Eina_List   *e_mod_config_worktools_selected_get();
+
+//    e_mod_config_windows.c
+long         e_mod_timestamp_get();
 
 //    e_mod_config_schedule.c
 Eina_Bool    e_mod_config_schedule_create_data(E_Config_Dialog_Data *cfdata);

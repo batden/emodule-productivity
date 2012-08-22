@@ -106,6 +106,7 @@ static int
 _basic_apply(E_Config_Dialog *cfd, E_Config_Dialog_Data *cfdata) 
 {
    e_mod_config_worktools_save(cfdata);
+   e_mod_config_schedule_save_config(cfdata);
    e_config_save_queue();
    return 1;
 }

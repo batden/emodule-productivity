@@ -54,8 +54,6 @@ e_mod_config_windows_create_data(void *data __UNUSED__)
    return EINA_FALSE;
 }
 
-
-
 Eina_Bool
 tasks_cb_window_focus_in(void *data __UNUSED__, int type __UNUSED__, void *event)
 {
@@ -88,6 +86,11 @@ tasks_cb_window_focus_in(void *data __UNUSED__, int type __UNUSED__, void *event
    return EINA_TRUE;
 }
 
+long
+e_mod_timestamp_get()
+{
+   return _e_mod_config_windows_current_time_get();
+}
 /***********************************************************************************
   INTERNALS
  ************************************************************************************/

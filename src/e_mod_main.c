@@ -20,6 +20,11 @@ static void _productivity_cb_menu_configure(void *data, E_Menu *mn, E_Menu_Item 
 static void _productivity_mod_menu_add(void *data, E_Menu *m);
 static void _productivity_mod_run_cb(void *data, E_Menu *m, E_Menu_Item *mi);
 
+static Month * _e_mod_main_month_conf_item_get();
+static Day  _e_mod_main_day_conf_item_get();
+static Intervals * _e_mod_main_intervals_get();
+static void _config_init();
+
 /* Local Structures */
 typedef struct _Instance Instance;
 struct _Instance 
@@ -45,6 +50,10 @@ int _productivity_log;
 static Eina_List *instances = NULL;
 static E_Config_DD *conf_edd = NULL;
 static E_Config_DD *conf_item_edd = NULL;
+static E_Config_DD *month_edd = NULL;
+static E_Config_DD *day_edd = NULL;
+static E_Config_DD *intervals_edd = NULL;
+
 Config *productivity_conf = NULL;
 
 static const E_Gadcon_Client_Class _gc_class = 
@@ -93,26 +102,52 @@ e_modapi_init(E_Module *m)
    e_configure_registry_item_add("advanced/productivity", 110, _("Productivity"), 
                                  NULL, buf, e_int_config_productivity_module);
 
+ /*  conf_schedule_edd = E_CONFIG_DD_NEW("Schedule", Config_Schedule);
+   
+#undef T
+#undef D
+#define T Config_Schedule
+#define D conf_schedule_edd
+   E_CONFIG_VAL(D, T, break_min, INT);
+
+*/
+   _config_init();
+
    /* Define EET Data Storage for the config file */
-   conf_item_edd = E_CONFIG_DD_NEW("Config_Item", Config_Item);
+  /* conf_item_edd = E_CONFIG_DD_NEW("Config_Item", Config_Item);
 #undef T
 #undef D
 #define T Config_Item
 #define D conf_item_edd
    E_CONFIG_VAL(D, T, id, STR);
    E_CONFIG_VAL(D, T, switch2, INT);
-
-   conf_edd = E_CONFIG_DD_NEW("Config", Config);
+   //E_CONFIG_VAL(D, T, break_min, INT);*/
+/*
+   conf_schedule_edd = E_CONFIG_DD_NEW("Config_Schedule", Config_Schedule_Start);
+#undef T
+#undef D
+#define T Config_Schedule_Start
+#define D conf_schedule_edd
+   E_CONFIG_VAL(D, T, break_min, INT);
+   E_CONFIG_VAL(D, T, start.sec, INT);
+   E_CONFIG_VAL(D, T, stop.sec, INT);
+   E_CONFIG_VAL(D, T, start.hour, INT);
+*/
+  /* conf_edd = E_CONFIG_DD_NEW("Config", Config);
 #undef T
 #undef D
 #define T Config
 #define D conf_edd
    E_CONFIG_VAL(D, T, version, INT);
-   E_CONFIG_VAL(D, T, switch1, UCHAR); /* our var from header */
-   E_CONFIG_LIST(D, T, conf_items, conf_item_edd); /* the list */
+   //E_CONFIG_VAL(D, T, switch1, UCHAR); 
+   E_CONFIG_LIST(D, T, conf_items, conf_item_edd); 
+   E_CONFIG_LIST(D, T, conf_schedule_start, conf_item_edd);
+   E_CONFIG_LIST(D, T, month_list, conf_item_edd);*/
+ //  E_CONFIG_LIST(D, T, day_list, month_edd);  
 
    /* Tell E to find any existing module data. First run ? */
    productivity_conf = e_config_domain_load("module.productivity", conf_edd);
+   
    if (productivity_conf) 
      {
         /* Check config version */
@@ -156,7 +191,36 @@ e_modapi_init(E_Module *m)
 
    /* if we don't have a config yet, or it got erased above, 
     * then create a default one */
-   if (!productivity_conf) _productivity_conf_new();
+   if (!productivity_conf)  _productivity_conf_new();
+/*
+   Eina_List *l, *ll, *lll;
+   Month *mnt;
+   Day *day;
+   Intervals *iv;
+   EINA_LIST_FOREACH(productivity_conf->month_list, l, mnt)
+     {
+        productivity_conf->month.name = eina_stringshare_add(mnt->name);
+        productivity_conf->month.mon = mnt->mon;
+        //productivity_conf->day_list = eina_list_clone(mnt->day_list);
+
+        EINA_LIST_FOREACH(mnt->day_list, ll, day)
+          {
+             productivity_conf->day.name = eina_stringshare_add(day->name);
+             productivity_conf->day.mday = day->mday;
+             productivity_conf->day.total_time_worked = day->total_time_worked;
+            productivity_conf->month.day_list = eina_list_append(productivity_conf->month.day_list, day);
+
+             EINA_LIST_FOREACH(day->iv_list, lll, iv)
+               {
+                  productivity_conf->iv.break_min = iv->break_min;
+               }
+          }
+     }
+   ERR("NUMBER!!!:%d\n",productivity_conf->month.mon);
+   */
+
+        
+
 
    /* create a link from the modules config to the module
     * this is not written */
@@ -168,12 +232,9 @@ e_modapi_init(E_Module *m)
    
    e_module_delayed_set(m, 3);
    //Load all work applications into productivity_conf->apps.
-   productivity_conf->apps = e_mod_config_worktools_pre_load();
+   productivity_conf->apps = e_mod_config_worktools_selected_get();
    //Creates data, and adds callbacks
    e_mod_config_windows_create_data(NULL);
-
-   //ecore_event_handler_add(E_EVENT_BORDER_FOCUS_IN, tasks_cb_window_focus_in, NULL);
-
 
    /* Tell any gadget containers (shelves, etc) that we provide a module
     * for the user to enjoy */
@@ -243,6 +304,8 @@ e_modapi_shutdown(E_Module *m)
 EAPI int 
 e_modapi_save(E_Module *m) 
 {
+   ERR("SAVING!!!!!!!!!!!!");
+   productivity_conf->timestamp = e_mod_timestamp_get();
    e_config_domain_save("module.productivity", conf_edd, productivity_conf);
    return 1;
 }
@@ -371,8 +434,9 @@ _productivity_conf_new(void)
 
    /* setup defaults */
    IFMODCFG(0x008d);
-   productivity_conf->switch1 = 1;
-   _productivity_conf_item_get(NULL);
+  // _productivity_conf_item_get(NULL);
+   CRI("CREATING NEW CONFIG!!!");
+   _e_mod_main_month_conf_item_get();
    IFMODCFGEND;
 
    /* update the version */
@@ -429,6 +493,67 @@ _productivity_conf_item_get(const char *id)
    productivity_conf->conf_items = eina_list_append(productivity_conf->conf_items, ci);
    return ci;
 }
+
+static Month *
+_e_mod_main_month_conf_item_get()
+{
+   Month *m;
+   char buf[16];
+   time_t tt;
+   struct tm *tm;
+
+   time(&tt);
+   tm = localtime(&tt);
+   strftime(buf, 16, "%B", tm);
+
+   m = E_NEW(Month, 1);
+   m->name = eina_stringshare_add(buf);
+   m->mon = tm->tm_mon;
+   m->day = _e_mod_main_day_conf_item_get();
+   m->day_list = eina_list_append(m->day_list, &m->day);
+   productivity_conf->month_list =
+      eina_list_append(productivity_conf->month_list, m);
+   return m;
+}
+
+static Day 
+_e_mod_main_day_conf_item_get()
+{
+   Day d;
+   char buf[16];
+   time_t tt;
+   struct tm *tm;
+
+   time(&tt);
+   tm = localtime(&tt);
+   strftime(buf, 16, "%A", tm);
+
+   //d = E_NEW(Day, 1);
+   d.name = eina_stringshare_add(buf);
+   d.mday = tm->tm_mday;
+   d.iv = _e_mod_main_intervals_get();
+   d.iv_list = eina_list_append(d.iv_list,&d.iv);
+   return d;
+}
+
+static Intervals *
+_e_mod_main_intervals_get()
+{
+   Intervals *iv;
+
+   iv = E_NEW(Intervals, 1);
+   iv->id = 0;
+   iv->lock = EINA_FALSE;
+   iv->break_min = 10;
+   iv->start.hour = 8;
+   iv->start.min = 0;
+   iv->start.sec = 0;
+   iv->stop.hour = 16;
+   iv->stop.min = 0;
+   iv->stop.sec = 0;
+   return iv;
+}
+
 
 /* Pants On */
 static void 
@@ -512,3 +637,57 @@ _productivity_mod_menu_add(void *data __UNUSED__, E_Menu *m)
    e_util_menu_item_theme_icon_set(mi, "preferences-desktop-shelf");
    e_menu_item_callback_set(mi, _productivity_mod_run_cb, NULL);
 }
+
+static void
+_config_init()
+{
+#undef T
+#undef D
+#define T Intervals
+#define D intervals_edd
+   intervals_edd = E_CONFIG_DD_NEW("Intervals", Intervals);
+   E_CONFIG_VAL(D, T, id, INT);
+   E_CONFIG_VAL(D, T, lock, INT);
+   E_CONFIG_VAL(D, T, break_min, INT);
+   E_CONFIG_VAL(D, T, start.hour, INT);
+   E_CONFIG_VAL(D, T, start.min, INT);
+   E_CONFIG_VAL(D, T, start.sec, INT);
+   E_CONFIG_VAL(D, T, stop.hour, INT);
+   E_CONFIG_VAL(D, T, stop.min, INT);
+   E_CONFIG_VAL(D, T, stop.sec, INT);
+
+#undef T
+#undef D
+#define T Day
+#define D day_edd
+   day_edd = E_CONFIG_DD_NEW("Day", Day);
+   E_CONFIG_VAL(D, T, name, STR);
+   E_CONFIG_VAL(D, T, mday, INT);
+   E_CONFIG_VAL(D, T, total_time_worked, DOUBLE); 
+   E_CONFIG_LIST(D, T, iv_list, intervals_edd);
+
+#undef T
+#undef D
+#define T Month
+#define D month_edd
+   month_edd = E_CONFIG_DD_NEW("Month", Month);
+   E_CONFIG_VAL(D, T, name, STR);
+   E_CONFIG_VAL(D, T, mon, INT);
+   E_CONFIG_LIST(D, T, day_list, day_edd);
+
+#undef T
+#undef D
+#define T Config
+#define D conf_edd
+   conf_edd = E_CONFIG_DD_NEW("Config", Config);
+   E_CONFIG_VAL(D, T, version, INT);
+   E_CONFIG_VAL(D, T, timestamp, LL);
+   E_CONFIG_LIST(D, T, month_list, month_edd);
+   E_CONFIG_LIST(D, T, day_list, day_edd);
+   E_CONFIG_LIST(D, T, iv_list, intervals_edd);
+}
+
+ 
+
+
+   

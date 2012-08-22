@@ -12,11 +12,12 @@ static void        _e_mod_config_worktools_del_cb(void *data, void *data2);
 
 
 Eina_List *
-e_mod_config_worktools_pre_load()
+e_mod_config_worktools_selected_get()
 {
    char buf[PATH_MAX];
    
    e_user_dir_concat_static(buf, "applications/productivity/.order");
+   if(ecore_file_exists(buf) == EINA_FALSE) return;
    return _e_mod_config_worktools_load_config(buf);
 }
 

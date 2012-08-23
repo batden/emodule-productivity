@@ -21,7 +21,7 @@ struct _E_Config_Schedule_Data
    Evas_Object *start_clk;
    Evas_Object *stop_clk;
    Evas_Object *break_slider;
-   Eina_Bool lock : 1;
+   Eina_Bool lock;
    int id;
    int break_min;
    struct
@@ -70,9 +70,6 @@ struct _E_Config_Window_List
    // e_mod_config_windows.c
    E_Config_Window_List_Data *cwldata;
 };
-
-
-
 
 
 //    e_mod_config_worktools.c

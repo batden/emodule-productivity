@@ -64,7 +64,7 @@ struct _Day
    const char *name;
    int mday;
    double total_time_worked;
-   Intervals *iv;
+   Intervals iv;
    Eina_List *iv_list;
 };
 
@@ -93,7 +93,7 @@ struct _Config
    E_Config_Dialog *cfd;
    Eina_List *conf_items;
    int version;
-   long timestamp;
+   unsigned int timestamp;
 
    /*Work application list*/
    Eina_List *apps;
@@ -104,6 +104,10 @@ struct _Config
    Intervals iv;
    Day day;
    Month month;
+   
+   Month cur_month;
+   Day cur_day;
+   Intervals cur_iv;
 };
 
 /* This struct used to hold config for individual items from above list */

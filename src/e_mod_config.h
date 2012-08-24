@@ -81,7 +81,8 @@ Eina_Bool    e_mod_config_windows_create_data(void *data);
 Eina_List   *e_mod_config_worktools_selected_get();
 
 //    e_mod_config_windows.c
-long         e_mod_timestamp_get();
+unsigned int e_mod_timestamp_get();
+void e_mod_config_windows_hide_unselected_apps(Config *cfg, E_Config_Window_List *cwl, E_Border *bd);
 
 //    e_mod_config_schedule.c
 Eina_Bool    e_mod_config_schedule_create_data(E_Config_Dialog_Data *cfdata);

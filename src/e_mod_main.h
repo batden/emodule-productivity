@@ -145,7 +145,8 @@ E_Config_Dialog *e_int_config_productivity_module(E_Container *con, const char *
 void e_mod_log_cb(const Eina_Log_Domain *d, Eina_Log_Level level, const char *file, const char *fnc, int line, const char *fmt, void *data, va_list args);
 
 extern Config *productivity_conf;
-
+void e_mod_main_reload_config();
+Eina_Bool e_mod_main_is_it_time_to_work();
 //          e_mod_config_windows.c
 Eina_Bool tasks_cb_window_focus_in(void *data, int type, void *event);
 

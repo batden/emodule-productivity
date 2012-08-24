@@ -154,7 +154,7 @@ e_modapi_init(E_Module *m)
    if (!productivity_conf) _productivity_conf_new();
 
    _e_mod_main_get_current_config(productivity_conf);
-   
+
    //After the config is loaded from the .cfg file, it's all in eina_lists
    //this function should assign what is in the list into our structures
    //but only for the current setting.
@@ -172,7 +172,6 @@ e_modapi_init(E_Module *m)
    productivity_conf->apps = e_mod_config_worktools_selected_get();
    //Creates data, and adds callbacks
    e_mod_config_windows_create_data(NULL);
-   
 
    /* Tell any gadget containers (shelves, etc) that we provide a module
     * for the user to enjoy */
@@ -246,7 +245,7 @@ e_modapi_shutdown(E_Module *m)
 EAPI int 
 e_modapi_save(E_Module *m) 
 {
-   ERR("SAVING!!!!!!!!!!!!");
+   //ERR("SAVING!!!!!!!!!!!!");
    productivity_conf->timestamp = e_mod_timestamp_get();
    e_config_domain_save("module.productivity", conf_edd, productivity_conf);
    return 1;
@@ -375,11 +374,11 @@ _productivity_conf_new(void)
 #define IFMODCFGEND }
 
    /* setup defaults */
-  // IFMODCFG(0x008d);
+   // IFMODCFG(0x008d);
    // _productivity_conf_item_get(NULL);
    CRI("CREATING NEW CONFIG!!!");
    _e_mod_main_month_conf_item_get();
-  // IFMODCFGEND;
+   // IFMODCFGEND;
 
    /* update the version */
    productivity_conf->version = MOD_CONFIG_FILE_VERSION;
@@ -625,10 +624,15 @@ _config_init()
    E_CONFIG_VAL(D, T, version, INT);
    E_CONFIG_VAL(D, T, timestamp, UINT);
    E_CONFIG_LIST(D, T, month_list, month_edd);
-  // E_CONFIG_LIST(D, T, day_list, day_edd);
-  // E_CONFIG_LIST(D, T, iv_list, intervals_edd);
+   // E_CONFIG_LIST(D, T, day_list, day_edd);
+   // E_CONFIG_LIST(D, T, iv_list, intervals_edd);
 }
 
+void
+e_mod_main_reload_config()
+{
+   _e_mod_main_get_current_config(productivity_conf);
+}
 
 static void
 _e_mod_main_get_current_config(Config *cfg)
@@ -668,8 +672,13 @@ _e_mod_main_get_current_config(Config *cfg)
 
                        EINA_LIST_FOREACH(last, lll, iv)
                          {
-                            cfg->cur_iv.lock = iv->lock;
                             cfg->cur_iv.id = iv->id;
+                            cfg->cur_iv.lock = iv->lock;
+                            /*if(iv->lock == EINA_TRUE)
+                              {
+                              cfg->cur_iv.id += 1;
+                            //cfg->cur_iv.lock = 0;
+                            }*/
                             cfg->cur_iv.break_min = iv->break_min;
                             cfg->cur_iv.start.hour = iv->start.hour;
                             cfg->cur_iv.start.min = iv->start.min;
@@ -688,5 +697,65 @@ _e_mod_main_get_current_config(Config *cfg)
    E_FREE(iv);
 }
 
+time_t to_seconds(const char *date)
+{
+        struct tm storage={0,0,0,0,0,0,0,0,0};
+        char *p=NULL;
+        time_t retval=0;
 
+        p=(char *)strptime(date,"%d-%b-%Y",&storage);
+        if(p==NULL)
+        {
+                retval=0;
+        }
+        else
+        {
+                retval=mktime(&storage);
+        }
+        return retval;
+}
+
+Eina_Bool
+e_mod_main_is_it_time_to_work()
+{
+   Intervals *iv;
+
+   if(!(iv = &productivity_conf->cur_iv)) return EINA_FALSE;
+
+   time_t tt, start_t, stop_t, cur_t;
+   struct tm *tm;
+   struct tm stm;
+
+   time(&tt);
+   tm = localtime(&tt);
+
+   if(iv->lock == EINA_FALSE)
+     return EINA_FALSE;
+   
+   stm.tm_hour = iv->start.hour;
+   stm.tm_min = iv->start.min;
+   stm.tm_sec = iv->start.sec;
+   stm.tm_year = tm->tm_year;
+   stm.tm_mon = productivity_conf->cur_month.mon;
+   stm.tm_mday = productivity_conf->cur_day.mday;
+   start_t = mktime(&stm);
+
+   stm.tm_hour = iv->stop.hour;
+   stm.tm_min = iv->stop.min;
+   stm.tm_sec = iv->stop.sec;
+   stm.tm_year = tm->tm_year;
+   stm.tm_mon = productivity_conf->cur_month.mon;
+   stm.tm_mday = productivity_conf->cur_day.mday;
+   stop_t = mktime(&stm);
+   cur_t = mktime(tm);
+
+   DBG("StartT:%d", start_t);
+   DBG("Cur_T:%d", cur_t);
+   DBG("StopT:%d", stop_t);
+  
+  if((cur_t > start_t) && (cur_t < stop_t))
+   return EINA_TRUE;
+
+   return EINA_FALSE;
+}
 

@@ -18,7 +18,14 @@ static void _e_mod_config_schedule_stop_working_cb(void *data, void *data2);
 static void _e_mod_config_schedule_break_time_cb(void *data, Evas_Object *obj,
                                                  void *event_info);
 static void _e_mod_config_schedule_clock_fill_delay(E_Config_Schedule_Data *csd);
+static void _e_mod_config_schedule_lock_update(E_Config_Schedule_Data *csd);
+static void _e_mod_config_schedule_productivity_conf_update(Config *cfg,
+                                                            E_Config_Dialog_Data *cfdata);
+
 static Eina_Bool e_mod_config_schedule_clock_fill_delay(void *data);
+static Intervals _e_mod_config_schedule_intervals_conf_get(E_Config_Dialog_Data *cfdata);
+
+
 
 Eina_Bool
 e_mod_config_schedule_create_data(E_Config_Dialog_Data *cfdata)
@@ -83,7 +90,7 @@ e_mod_config_schedule_new(Evas_Object *otb, Evas *evas, E_Config_Dialog_Data *cf
    evas_object_show(cfdata->schedule.stop_clk);
 
    label = elm_label_add(bx);
-   elm_object_text_set(label, "Minutes of break per Hour");
+   elm_object_text_set(label, "Minutes of Break");
    evas_object_resize(label, 200, 25);
    elm_box_pack_end(bx, label);
    evas_object_show(label);
@@ -97,37 +104,23 @@ e_mod_config_schedule_new(Evas_Object *otb, Evas *evas, E_Config_Dialog_Data *cf
    elm_box_pack_end(bx, cfdata->schedule.break_slider);
    evas_object_show(cfdata->schedule.break_slider);
    evas_object_smart_callback_add(cfdata->schedule.break_slider,
-                                  "delay,changed", _e_mod_config_schedule_break_time_cb,
+                                  "changed", _e_mod_config_schedule_break_time_cb,
                                   &cfdata->schedule);
 
    cfdata->schedule.start_btn = e_widget_button_add(evas, _("Start Working"), "list-add",
                                                     _e_mod_config_schedule_start_working_cb,
-                                                    &cfdata->schedule, NULL);
+                                                    &cfdata->schedule, cfdata);
 
    e_widget_table_object_append(ot, cfdata->schedule.start_btn, 0, 1, 1, 1, 1, 1, 1, 0);
 
    cfdata->schedule.stop_btn = e_widget_button_add(evas, _("Stop Working"), "list-remove",
                                                    _e_mod_config_schedule_stop_working_cb,
-                                                   &cfdata->schedule, NULL);
+                                                   &cfdata->schedule, cfdata);
    e_widget_table_object_append(ot, cfdata->schedule.stop_btn, 1, 1, 1, 1, 1, 1, 1, 0);
 
    e_widget_toolbook_page_append(otb, NULL, _("Schedule"), ot, 1, 1, 1, 1, 0.5, 0.0);
 
-   if(cfdata->schedule.lock == EINA_TRUE)
-     {
-        e_widget_disabled_set(cfdata->schedule.start_btn, EINA_TRUE);
-        e_widget_disabled_set(cfdata->schedule.stop_btn, EINA_FALSE);
-     }
-   else if(cfdata->schedule.lock == EINA_FALSE)
-     {
-        e_widget_disabled_set(cfdata->schedule.start_btn, EINA_FALSE);
-        e_widget_disabled_set(cfdata->schedule.stop_btn, EINA_TRUE);
-     }
-   /*
-      if (cfdata->clock_delay) ecore_timer_del(cfdata->clock_delay);
-      cfdata->clock_delay = ecore_timer_add(0.1, e_mod_config_schedule_clock_fill_delay
-      , cfdata);
-      */
+   _e_mod_config_schedule_lock_update(&cfdata->schedule);
 }
 
 Eina_Bool
@@ -135,9 +128,10 @@ e_mod_config_schedule_save_config(E_Config_Dialog_Data *cfdata)
 {
    Month *m, mm;
    Day *d;
-   Intervals *iv;
+   Intervals *iv, new_iv;
    Eina_List *l, *ll, *lll;
-   Eina_Bool set = EINA_FALSE;
+   Eina_List *iv_list;
+   Eina_Bool dm = EINA_FALSE;
 
    time_t tt;
    struct tm *tm;
@@ -145,148 +139,80 @@ e_mod_config_schedule_save_config(E_Config_Dialog_Data *cfdata)
    time(&tt);
    tm = localtime(&tt);
 
+   //Get start clock time
    elm_clock_time_get(cfdata->schedule.start_clk,
                       &cfdata->schedule.start_time.hour,
                       &cfdata->schedule.start_time.min,
                       &cfdata->schedule.start_time.sec);
 
+   //Get stop clock time
    elm_clock_time_get(cfdata->schedule.stop_clk,
                       &cfdata->schedule.stop_time.hour,
                       &cfdata->schedule.stop_time.min,
                       &cfdata->schedule.stop_time.sec);
 
+   //Get break min time
    cfdata->schedule.break_min = 
       round(elm_slider_value_get(cfdata->schedule.break_slider));
 
 
-   if((productivity_conf->cur_iv.lock == EINA_TRUE) &&
-      (cfdata->schedule.lock == EINA_FALSE))
-     {
-        CRI("Incrementing ID");
-        cfdata->schedule.id += 1;
-     }
    CRI("PRO_LK:%d, CFD_LK:%d",productivity_conf->cur_iv.lock, cfdata->schedule.lock);
-   productivity_conf->cur_iv.lock = cfdata->schedule.lock;
+   /*if((productivity_conf->cur_iv.lock == EINA_TRUE) &&
+     (cfdata->schedule.lock == EINA_FALSE))
+     {
+     CRI("Incrementing ID");
+     cfdata->schedule.id += 1;
+     }*/
+   //if(cfdata->schedule.lock == EINA_TRUE)
+   //  cfdata->schedule.id += 1;
 
-   INF("Saving Config");
    productivity_conf->timestamp = e_mod_timestamp_get();
-   INF("TimeStamp:%d\n",productivity_conf->timestamp);
 
    EINA_LIST_FOREACH(productivity_conf->month_list, l, m)
      {
         if (tm->tm_mon == m->mon)
           {
              INF("FOUND CURRENT Month:%s",m->name);
-             //productivity_conf->cur_month.name = eina_stringshare_add(m->name);
-             //productivity_conf->cur_month.mon = m->mon;
 
              EINA_LIST_FOREACH(m->day_list, ll, d)
                {
                   if (d->mday == tm->tm_mday)
                     {
-                       EINA_LIST_FOREACH(eina_list_last(d->iv_list), lll, iv)
+                       EINA_LIST_FOREACH(d->iv_list, lll, iv)
                          {
-                            /*if(iv->id < cfdata->schedule.id)
-                              {
-                                 CRI("NEW_ID_DETECTED");
-                                 //Add new data.
-                                 d->iv.id          = cfdata->schedule.id;
-                                 d->iv.lock        = cfdata->schedule.lock;
-                                 d->iv.break_min   = cfdata->schedule.break_min;
-
-                                 d->iv.start.hour  = cfdata->schedule.start_time.hour;
-                                 d->iv.start.min   = cfdata->schedule.start_time.min;
-                                 d->iv.start.sec   = cfdata->schedule.start_time.sec;
-
-                                 d->iv.stop.hour   = cfdata->schedule.stop_time.hour;
-                                 d->iv.stop.min    = cfdata->schedule.stop_time.min;
-                                 d->iv.stop.sec    = cfdata->schedule.stop_time.sec;
-                                 //Create new list.
-                                 d->iv_list = eina_list_append(d->iv_list, iv);
-                                 //productivity_conf->cur_iv = *iv;
-
-                                 set = EINA_TRUE;
-                                 break;
-                              }*/
-                            
-                            if ((iv->id == cfdata->schedule.id) && (set == EINA_FALSE))
+                            if (iv->id == cfdata->schedule.id)
                               {
                                  //Remove old list.
                                  CRI("Removing old list.");
+                                 INF("iv->lock:%d, cfdata->schedule.lock:%d",
+                                     iv->lock, cfdata->schedule.lock);
+
                                  d->iv_list = eina_list_remove(d->iv_list, iv);
-
-                                 //Add new data.
-                                 d->iv.id          = cfdata->schedule.id;
-                                 d->iv.lock        = cfdata->schedule.lock;
-                                 d->iv.break_min   = cfdata->schedule.break_min;
-
-                                 d->iv.start.hour  = cfdata->schedule.start_time.hour;
-                                 d->iv.start.min   = cfdata->schedule.start_time.min;
-                                 d->iv.start.sec   = cfdata->schedule.start_time.sec;
-
-                                 d->iv.stop.hour   = cfdata->schedule.stop_time.hour;
-                                 d->iv.stop.min    = cfdata->schedule.stop_time.min;
-                                 d->iv.stop.sec    = cfdata->schedule.stop_time.sec;
-                                 //Create new list.
-                                 d->iv_list = eina_list_append(d->iv_list, iv);
                               }
                          }
 
-
-
-                       /*
-                          EINA_LIST_FOREACH(eina_list_last(d->iv_list), lll, iv)
-                          {
-
-                          if (cfdata->schedule.id > iv->id)
-                          {
-                          DBG("newer than older");
-                          d->iv.id          = cfdata->schedule.id;
-                          d->iv.lock        = cfdata->schedule.lock;
-                          d->iv.break_min   = cfdata->schedule.break_min;
-
-                          d->iv.start.hour  = cfdata->schedule.start_time.hour;
-                          d->iv.start.min   = cfdata->schedule.start_time.min;
-                          d->iv.start.sec   = cfdata->schedule.start_time.sec;
-
-                          d->iv.stop.hour   = cfdata->schedule.stop_time.hour;
-                          d->iv.stop.min    = cfdata->schedule.stop_time.min;
-                          d->iv.stop.sec    = cfdata->schedule.stop_time.sec;
-
-                       //Create new list.
-                       d->iv_list = eina_list_append(d->iv_list, iv);
-                       break;
-                       }
-                       }*/
+                       m->day.iv = _e_mod_config_schedule_intervals_conf_get(cfdata);
+                       d->iv_list = eina_list_append(d->iv_list, 
+                                                     &m->day.iv);
+                       dm = EINA_TRUE;
                     }
+               }
+             if(dm == EINA_FALSE)
+               {
+                  char buf[16];
+
+                  CRI("UNABLE TO FIND DAY");
+                  strftime(buf, 16, "%A", tm);
+                  m->day.name = eina_stringshare_add(buf);
+                  m->day.mday = tm->tm_mday;
+                  m->day_list = eina_list_append(m->day_list, &m->day);
+                  m->day.iv = _e_mod_config_schedule_intervals_conf_get(cfdata);
+                  m->day.iv_list = eina_list_append(m->day.iv_list, &m->day.iv);
                }
           }
      }
-
-  /*  
-      productivity_conf->cur_iv.id = cfdata->schedule.id;
-      productivity_conf->cur_iv.lock = cfdata->schedule.lock;
-      productivity_conf->cur_iv.break_min = cfdata->schedule.break_min;
-
-      productivity_conf->cur_iv.start.hour = cfdata->schedule.start_time.hour;
-      productivity_conf->cur_iv.start.min = cfdata->schedule.start_time.min;
-      productivity_conf->cur_iv.start.sec = cfdata->schedule.start_time.sec;
-
-      productivity_conf->cur_iv.stop.hour = cfdata->schedule.start_time.hour;
-      productivity_conf->cur_iv.stop.min = cfdata->schedule.start_time.min;
-      productivity_conf->cur_iv.stop.sec = cfdata->schedule.start_time.sec;
-*/
-      /*productivity_conf->cur_day.iv_list = eina_list_append(
-      productivity_conf->cur_day.iv_list,
-      &productivity_conf->cur_iv); 
-
-      productivity_conf->cur_month.day_list = eina_list_append(
-      productivity_conf->cur_month.day_list,
-      &productivity_conf->cur_day);
-
-      productivity_conf->month_list = eina_list_append(
-      productivity_conf->month_list,
-      &productivity_conf->cur_month);*/
+   _e_mod_config_schedule_productivity_conf_update(productivity_conf, cfdata);
+   e_mod_main_reload_config();
 } 
 
 
@@ -310,7 +236,8 @@ _start_clock_cb(void *data, Evas_Object *obj, void *event_info)
    CRI("START_SELE:%d:%d:%d",csd->start_time.hour, csd->start_time.min,
        csd->start_time.sec);
 
-   /* while(csd->start_time.hour < tm->tm_hour)
+   /*
+      while(csd->start_time.hour < tm->tm_hour)
       {
       csd->start_time.hour++;
       }
@@ -345,6 +272,7 @@ _stop_clock_cb(void *data, Evas_Object *obj, void *event_info)
    CRI("STOP_REAL:%d:%d:%d",tm->tm_hour, tm->tm_min, tm->tm_sec);
    CRI("STOP_SELE:%d:%d:%d",csd->stop_time.hour, csd->stop_time.min,
        csd->stop_time.sec);
+
    /*
       while(csd->stop_time.hour < tm->tm_hour)
       {
@@ -360,8 +288,8 @@ _stop_clock_cb(void *data, Evas_Object *obj, void *event_info)
       while(csd->stop_time.sec < tm->tm_sec)
       {
       csd->stop_time.sec++;
-      }
-      */
+      }*/
+
    elm_clock_time_set(obj, csd->stop_time.hour, csd->stop_time.min,
                       csd->stop_time.sec);
 
@@ -377,16 +305,17 @@ _e_mod_config_schedule_start_working_cb(void *data, void *data2)
 
    if(e_widget_disabled_get(csd->stop_btn) == EINA_TRUE)
      {
-        e_widget_disabled_set(csd->stop_btn, EINA_FALSE);
-        e_widget_disabled_set(csd->start_btn, EINA_TRUE);
         digedit = ELM_CLOCK_EDIT_SEC_UNIT;
         elm_clock_edit_mode_set(csd->start_clk, digedit);
         elm_clock_edit_mode_set(csd->stop_clk, digedit);
         elm_object_disabled_set(csd->break_slider, EINA_TRUE);
-        csd->lock = EINA_TRUE;
-        ERR("LOCK??:%d",csd->lock);
+        if(csd->lock == EINA_FALSE)
+          {
+             csd->lock = EINA_TRUE;
+          }
         INF("Start Working");
      }
+   _e_mod_config_schedule_lock_update(csd);
 }
 
 static void
@@ -399,19 +328,20 @@ _e_mod_config_schedule_stop_working_cb(void *data, void *data2)
 
    if(e_widget_disabled_get(csd->start_btn) == EINA_TRUE)
      {
-        e_widget_disabled_set(csd->start_btn, EINA_FALSE);
-        e_widget_disabled_set(csd->stop_btn, EINA_TRUE);
         digedit = ELM_CLOCK_EDIT_HOUR_UNIT |
            ELM_CLOCK_EDIT_MIN_UNIT | ELM_CLOCK_EDIT_SEC_UNIT;
         elm_clock_edit_mode_set(csd->start_clk, digedit);
         elm_clock_edit_mode_set(csd->stop_clk, digedit);
         elm_object_disabled_set(csd->break_slider, EINA_FALSE);
-        csd->lock = EINA_FALSE;
-        //csd->id += 1; //increment id everytime we stop working
-        ERR("LOCK??:%d", csd->lock);
+
+        if(csd->lock == EINA_TRUE)
+          {
+             csd->lock = EINA_FALSE;
+          }
 
         INF("Stop Working");
      }
+   _e_mod_config_schedule_lock_update(csd);
 }
 
 static void
@@ -448,6 +378,8 @@ _e_mod_config_schedule_clock_fill_delay(E_Config_Schedule_Data *csd)
 
    csd->id = productivity_conf->cur_iv.id;
    csd->lock = productivity_conf->cur_iv.lock;
+   CRI("LOCK??:%d", productivity_conf->cur_iv.lock);
+
    csd->break_min = productivity_conf->cur_iv.break_min;
 
    csd->start_time.hour = productivity_conf->cur_iv.start.hour;
@@ -462,23 +394,23 @@ _e_mod_config_schedule_clock_fill_delay(E_Config_Schedule_Data *csd)
        StartS:%d, StopH:%d, StopM:%d, StopS:%d",csd->id, csd->lock, csd->break_min,
        csd->start_time.hour, csd->start_time.min, csd->start_time.sec,
        csd->stop_time.hour, csd->stop_time.min, csd->stop_time.sec);
-   /*
-      csd->start_time.hour = tm->tm_hour;
-      csd->start_time.min  = tm->tm_min;
-      csd->start_time.sec  = tm->tm_sec;
+
+   csd->start_time.hour = tm->tm_hour;
+   csd->start_time.min  = tm->tm_min;
+   csd->start_time.sec  = tm->tm_sec;
 
    // Start Working initial time.
    if((tm->tm_min + DELAY_START_MIN) < 59)
-   {
-   csd->start_time.min += DELAY_START_MIN;
-   }
+     {
+        csd->start_time.min += DELAY_START_MIN;
+     }
    else
-   {
-   INF("Before:%d",csd->start_time.min);
-   csd->start_time.min += DELAY_START_MIN - 59;
-   INF("After:%d", csd->start_time.min);
-   csd->start_time.hour += 1;
-   }
+     {
+        INF("Before:%d",csd->start_time.min);
+        csd->start_time.min += DELAY_START_MIN - 59;
+        INF("After:%d", csd->start_time.min);
+        csd->start_time.hour += 1;
+     }
 
    csd->stop_time.hour = tm->tm_hour;
    csd->stop_time.min  = tm->tm_min;
@@ -487,14 +419,76 @@ _e_mod_config_schedule_clock_fill_delay(E_Config_Schedule_Data *csd)
    // Stop Working time, here we calculate the time we need to end work
    // using DEFAULT_WORK_HOURS
    if((tm->tm_hour + DEFAULT_WORK_HOURS) < 23)
-   {
-   csd->stop_time.hour += DEFAULT_WORK_HOURS;
-   }
+     {
+        csd->stop_time.hour += DEFAULT_WORK_HOURS;
+     }
    else
-   {
-   csd->stop_time.hour = 23;
-   csd->stop_time.min = 59;
-   csd->stop_time.sec = 59;
-   }*/
+     {
+        csd->stop_time.hour = 23;
+        csd->stop_time.min = 59;
+        csd->stop_time.sec = 59;
+     }
 }
+
+static void
+_e_mod_config_schedule_lock_update(E_Config_Schedule_Data *csd)
+{
+   //If lock = EINA_TRUE, stop button is enabled!
+   if(csd->lock == EINA_TRUE)
+     {
+        e_widget_disabled_set(csd->stop_btn, EINA_FALSE);
+
+        if(e_widget_disabled_get(csd->start_btn) == EINA_FALSE)
+          e_widget_disabled_set(csd->start_btn, EINA_TRUE);
+     }
+   else if (csd->lock == EINA_FALSE)
+     {
+        e_widget_disabled_set(csd->stop_btn, EINA_TRUE);
+
+        if(e_widget_disabled_get(csd->start_btn) == EINA_TRUE)
+          e_widget_disabled_set(csd->start_btn, EINA_FALSE);
+     }
+
+   if(csd->lock == EINA_FALSE)
+     DBG("Lock: EINA_FALSE");
+   else if(csd->lock == EINA_TRUE)
+     DBG("LOCK: EINA_TRUE");
+}
+
+static void
+_e_mod_config_schedule_productivity_conf_update(Config *cfg, E_Config_Dialog_Data *cfdata)
+{
+   cfg->iv.id = cfdata->schedule.id;
+   cfg->iv.lock = cfdata->schedule.lock;
+   cfg->iv.break_min = cfdata->schedule.break_min;
+
+   cfg->iv.start.hour   = cfdata->schedule.start_time.hour;
+   cfg->iv.start.min    = cfdata->schedule.start_time.min;
+   cfg->iv.start.sec    = cfdata->schedule.start_time.sec;
+
+   cfg->iv.stop.hour    = cfdata->schedule.start_time.hour;
+   cfg->iv.stop.min     = cfdata->schedule.start_time.min;
+   cfg->iv.stop.sec     = cfdata->schedule.start_time.sec;
+   DBG("Updated Productivity Config *cfg");
+}
+
+static Intervals
+_e_mod_config_schedule_intervals_conf_get(E_Config_Dialog_Data *cfdata)
+{
+   Intervals iv;
+
+   iv.id          = cfdata->schedule.id;
+   iv.lock        = cfdata->schedule.lock;
+   iv.break_min   = cfdata->schedule.break_min;
+
+   iv.start.hour  = cfdata->schedule.start_time.hour;
+   iv.start.min   = cfdata->schedule.start_time.min;
+   iv.start.sec   = cfdata->schedule.start_time.sec;
+
+   iv.stop.hour   = cfdata->schedule.stop_time.hour;
+   iv.stop.min    = cfdata->schedule.stop_time.min;
+   iv.stop.sec    = cfdata->schedule.stop_time.sec;
+   return iv;
+}
+
 

@@ -313,9 +313,9 @@ _e_mod_config_worktools_load_config(const char *path)
      {
         efreet_desktop_ref(desk);
         apps = eina_list_append(apps, desk);
-        INF(desk->name);
-        INF(desk->exec);
-        INF(ecore_file_file_get(desk->orig_path));
+        //INF(desk->name);
+        //INF(desk->exec);
+        //INF(ecore_file_file_get(desk->orig_path));
      }
    e_object_del(E_OBJECT(order));
    return apps;

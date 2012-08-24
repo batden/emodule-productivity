@@ -163,19 +163,30 @@ _e_mod_config_window_event_border_add_cb(void *data, int type __UNUSED__, void *
    cwl = data;
    ev = event;
 
-
    cwldata->name = eina_stringshare_add(ev->border->client.icccm.name);
-   cwldata->command = eina_stringshare_add(ev->border->client.icccm.command.argv[0]);
+   
+   if(ev->border->client.icccm.command.argv)
+      cwldata->command = eina_stringshare_add(ev->border->client.icccm.command.argv[0]);
    cwldata->pid = ev->border->client.netwm.pid;
    cwldata->seconds = _e_mod_config_windows_current_time_get();
 
    cwl->cwldata_list = eina_list_append(cwl->cwldata_list, cwldata);
    cwl->borders = eina_list_append(cwl->borders, ev->border);
 
+   if(ev->border->client.icccm.command.argv)
+     {
    INF("NAME:%s CLASS:%s COMMAND:%s PID:%d",ev->border->client.icccm.name,
        ev->border->client.icccm.class,
        ev->border->client.icccm.command.argv[0],
        ev->border->client.netwm.pid);
+     }
+   else
+     {
+   INF("NAME:%s CLASS:%s COMMAND:(---) PID:%d",ev->border->client.icccm.name,
+         ev->border->client.icccm.class,
+         ev->border->client.netwm.pid);
+     }
+
    e_mod_config_windows_hide_unselected_apps(productivity_conf, cwl, ev->border);
    return EINA_TRUE;
 }
@@ -214,7 +225,7 @@ _e_mod_config_window_event_border_remove_cb(void *data, int type __UNUSED__, voi
         if(ev->border->client.netwm.pid)
           if(cwldata->pid == ev->border->client.netwm.pid)
             {
-               CRI(":%s ran for %d seconds",cwldata->command, (seconds - cwldata->seconds));
+               CRI(":%s ran for %d seconds",cwldata->name, (seconds - cwldata->seconds));
                cwl->cwldata_list = eina_list_remove(cwl->cwldata_list, cwldata);
             }
      }
@@ -315,6 +326,6 @@ _e_mod_config_windows_current_time_get()
    time_t seconds;
 
    seconds = time(NULL);
-   return (long) seconds;
+   return (unsigned int) seconds;
 }
 

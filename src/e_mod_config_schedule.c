@@ -433,10 +433,14 @@ _e_mod_config_schedule_clock_fill_delay(E_Config_Schedule_Data *csd)
 static void
 _e_mod_config_schedule_lock_update(E_Config_Schedule_Data *csd)
 {
+   unsigned int digedit;
    //If lock = EINA_TRUE, stop button is enabled!
    if(csd->lock == EINA_TRUE)
      {
         e_widget_disabled_set(csd->stop_btn, EINA_FALSE);
+        digedit = ELM_CLOCK_EDIT_SEC_UNIT;
+        elm_clock_edit_mode_set(csd->start_clk, digedit);
+        elm_clock_edit_mode_set(csd->stop_clk, digedit);
 
         if(e_widget_disabled_get(csd->start_btn) == EINA_FALSE)
           e_widget_disabled_set(csd->start_btn, EINA_TRUE);
@@ -444,6 +448,10 @@ _e_mod_config_schedule_lock_update(E_Config_Schedule_Data *csd)
    else if (csd->lock == EINA_FALSE)
      {
         e_widget_disabled_set(csd->stop_btn, EINA_TRUE);
+        digedit = ELM_CLOCK_EDIT_HOUR_UNIT |
+           ELM_CLOCK_EDIT_MIN_UNIT | ELM_CLOCK_EDIT_SEC_UNIT;
+        elm_clock_edit_mode_set(csd->start_clk, digedit);
+        elm_clock_edit_mode_set(csd->stop_clk, digedit);
 
         if(e_widget_disabled_get(csd->start_btn) == EINA_TRUE)
           e_widget_disabled_set(csd->start_btn, EINA_FALSE);

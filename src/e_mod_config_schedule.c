@@ -107,13 +107,13 @@ e_mod_config_schedule_new(Evas_Object *otb, Evas *evas, E_Config_Dialog_Data *cf
                                   "changed", _e_mod_config_schedule_break_time_cb,
                                   &cfdata->schedule);
 
-   cfdata->schedule.start_btn = e_widget_button_add(evas, _("Start Working"), "list-add",
+   cfdata->schedule.start_btn = e_widget_button_add(evas, _("Test Start Working"), "list-add",
                                                     _e_mod_config_schedule_start_working_cb,
                                                     &cfdata->schedule, cfdata);
 
    e_widget_table_object_append(ot, cfdata->schedule.start_btn, 0, 1, 1, 1, 1, 1, 1, 0);
 
-   cfdata->schedule.stop_btn = e_widget_button_add(evas, _("Stop Working"), "list-remove",
+   cfdata->schedule.stop_btn = e_widget_button_add(evas, _("Test Stop Working"), "list-remove",
                                                    _e_mod_config_schedule_stop_working_cb,
                                                    &cfdata->schedule, cfdata);
    e_widget_table_object_append(ot, cfdata->schedule.stop_btn, 1, 1, 1, 1, 1, 1, 1, 0);

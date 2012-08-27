@@ -29,29 +29,43 @@ e_mod_config_windows_create_data(void *data __UNUSED__)
 
    cwl->handlers = eina_list_append
       (cwl->handlers, ecore_event_handler_add
-       (E_EVENT_BORDER_ADD, _e_mod_config_window_event_border_add_cb, cwl));
+       (E_EVENT_BORDER_ADD, 
+        _e_mod_config_window_event_border_add_cb, cwl));
+
    cwl->handlers = eina_list_append
       (cwl->handlers, ecore_event_handler_add
-       (E_EVENT_BORDER_REMOVE, _e_mod_config_window_event_border_remove_cb, cwl));
+       (E_EVENT_BORDER_REMOVE, 
+        _e_mod_config_window_event_border_remove_cb, cwl));
+
    cwl->handlers = eina_list_append
       (cwl->handlers, ecore_event_handler_add
-       (E_EVENT_BORDER_ICONIFY, _e_mod_config_window_event_border_iconify_cb, cwl));
+       (E_EVENT_BORDER_ICONIFY, 
+        _e_mod_config_window_event_border_iconify_cb, cwl));
+
    cwl->handlers = eina_list_append
       (cwl->handlers, ecore_event_handler_add
-       (E_EVENT_BORDER_UNICONIFY, _e_mod_config_window_event_border_uniconify_cb, cwl));
+       (E_EVENT_BORDER_UNICONIFY, 
+        _e_mod_config_window_event_border_uniconify_cb, cwl));
+
    cwl->handlers = eina_list_append
       (cwl->handlers, ecore_event_handler_add
-       (E_EVENT_BORDER_FOCUS_IN, _e_mod_config_window_event_border_focus_in_cb, cwl));
+       (E_EVENT_BORDER_FOCUS_IN, 
+        _e_mod_config_window_event_border_focus_in_cb, cwl));
+
    cwl->handlers = eina_list_append
       (cwl->handlers, ecore_event_handler_add
-       (E_EVENT_BORDER_FOCUS_OUT, _e_mod_config_window_event_border_focus_out_cb, cwl));
+       (E_EVENT_BORDER_FOCUS_OUT, 
+        _e_mod_config_window_event_border_focus_out_cb, cwl));
+
    cwl->handlers = eina_list_append
       (cwl->handlers, ecore_event_handler_add
-       (E_EVENT_BORDER_PROPERTY, _e_mod_config_window_event_border_property_cb, cwl));
+       (E_EVENT_BORDER_PROPERTY, 
+        _e_mod_config_window_event_border_property_cb, cwl));
 
    cwl->borders = eina_list_clone(e_border_client_list());
 
-   e_mod_config_windows_hide_unselected_apps(productivity_conf, cwl, NULL);
+   //Here we start to manage worktools and non-worktools
+   e_mod_config_window_manager(cwl);
    if(cwl->borders) return EINA_TRUE;
 
    return EINA_FALSE;
@@ -63,48 +77,114 @@ e_mod_timestamp_get()
 }
 
 void
-e_mod_config_windows_hide_unselected_apps(Config *cfg,
-                                          E_Config_Window_List *cwl, E_Border *bd)
+e_mod_config_window_manager(E_Config_Window_List *cwl)
 {
    Eina_List *l, *ll;
-   Efreet_Desktop *desk, *desk2;
-   E_Border *borders;
+   Config *cfg;
+   Efreet_Desktop *desk;
+   E_Border *bd;
    Eina_Bool m = EINA_FALSE;
 
+   //If we cant find config return;
+   if(!(cfg = productivity_conf)) return;
+
+   // If the current time[NOW] is not more than [Start_time] and less than [Stop_time]
+   // return;
    if(e_mod_main_is_it_time_to_work() == EINA_FALSE)
-        return;
-
-   EINA_LIST_FOREACH(cwl->borders, ll, borders)
      {
-        if(borders->client.icccm.name)
-          if(strncmp(borders->client.icccm.name, "E", sizeof("E")) == 0)
-               continue;
-
-        if(borders->client.icccm.class)
-          if(strncmp(borders->client.icccm.class, "_config::", 8) == 0)
-            {
-               CRI("I AM E! Leave me alone");
-               continue;
-            }
-
-        if(borders->desktop)
+        EINA_LIST_FOREACH(cwl->borders, l, bd)
           {
-             EINA_LIST_FOREACH(cfg->apps, l, desk)
+             _e_mod_config_window_unhide(bd);
+          }
+        return;
+     }
+
+   EINA_LIST_FOREACH(cwl->borders, l, bd)
+     {
+        DBG("NAME:%s", bd->client.icccm.name);
+        //If application name is E [Enlightenment] we skip to the next app.
+        if(bd->client.icccm.name)
+          if(strncmp(bd->client.icccm.name, "E", sizeof("E")) == 0)
+            continue;
+
+        //If application class is _config:: [Enlightenment Config Dialog] we skip to the next app.
+        if(bd->client.icccm.class)
+          if(strncmp(bd->client.icccm.class, "_config::", 8) == 0)
+            continue;
+
+        //If the user opens an application from the terminal and e17 CAN NOT find the matching 
+        //.desktop file for this application OR such .desktop file does not exists the bd->desktop
+        //will return NULL;
+        if (!bd->desktop)
+          {
+             //First attempt to find the .desktop file by searching icccm.name
+             bd->desktop = efreet_util_desktop_exec_find(bd->client.icccm.name);
+
+             //Second attempt to find the .desktop file by search icccm.name in lowercase
+             //this happens e.g with Pidgin, it seems to think it's command is Pidgin but in 
+             //real life it's pidgin [lowercase]
+             if(!bd->desktop)
+               {
+                  int i = 0;
+                  char buf[PATH_MAX];
+                  snprintf(buf, sizeof(buf), "%s",bd->client.icccm.name);
+
+                  while(buf[i] < (sizeof(buf) -1))
+                    {
+                       buf[i] = tolower(buf[i]);
+                       i++;
+                    }
+                  bd->desktop = efreet_util_desktop_exec_find(buf);
+               }
+
+             CRI("!Name:%s , Class:%s", bd->client.icccm.name, bd->client.icccm.class);
+             if(bd->client.icccm.command.argv)
+               {
+                  //CRI("Command:%s",bd->client.icccm.command.argv[0]);
+                  EINA_LIST_FOREACH(cfg->apps, ll, desk)
+                    {
+                       if(desk->exec)
+                         {
+                            //WRN("cmd:%s ? exec: %s", bd->client.icccm.command.argv[0], desk->exec);
+                         }
+                    }
+               }
+
+             //If we are still unable to get the .desktop just hide the window, user should always use .desktop
+             //file to launch worktools :) 
+             if(!bd->desktop)
+               {
+                  ERR("Unable to get a .desktop, giving up, will just hide this app");
+                  //_e_mod_config_window_hide(bd);
+                  e_border_act_close_begin(bd);
+               }
+
+          }
+
+        // If the border has the correct .desktop file, we will do comparison to our worktools application
+        // list [cfg->apps], if we find a match [m] = EINA_TRUE.
+        if(bd->desktop)
+          {
+             CRI("Name:%s , Class:%s", bd->client.icccm.name, bd->client.icccm.class);
+             EINA_LIST_FOREACH(cfg->apps, ll, desk)
                {
                   if(desk->name)
                     {
-                       if (strncmp(desk->name,borders->desktop->name, 
-                                   sizeof(desk->name)) == 0)
+                       //DBG("Name:%s , Orig_Path:%s", desk->name, desk->orig_path);
+                       if ((strncmp(desk->name,bd->desktop->name, sizeof(desk->name)) == 0 ) &&
+                           (strncmp(desk->orig_path,bd->desktop->orig_path, sizeof(desk->orig_path)) == 0 ))
                          m = EINA_TRUE;
                     }
                }
 
+             // if [m] is false , this means the application IS NOT in our worktools list, so we hide it!
              if (m == EINA_FALSE)
                {
-                  DBG("HIDING APPLICATON:%s", borders->desktop->name);
-                  _e_mod_config_window_hide(borders);
+                  DBG("HIDING APPLICATON:%s", bd->desktop->name);
+                  if(bd) _e_mod_config_window_hide(bd);
                }
           }
+
         m = EINA_FALSE;
      }
 } 
@@ -116,7 +196,7 @@ e_mod_config_windows_hide_unselected_apps(Config *cfg,
 static void
 _e_mod_config_window_hide(E_Border *bd)
 {
-   if(!bd) return;
+   E_Remember *rem;
 
    if(!bd->iconic)
      {
@@ -130,6 +210,26 @@ _e_mod_config_window_hide(E_Border *bd)
      }
 
    e_border_lower(bd);
+
+   /* if(!bd->remember)
+      {
+      rem = e_remember_new();
+      bd->remember = rem;
+      }
+
+      e_remember_default_match_set(rem, bd);
+      */
+   /*  
+       rem->match = 0;
+       rem->apply_first_only = bd->remember->apply_first_only;
+       rem->match |= E_REMEMBER_MATCH_NAME | E_REMEMBER_MATCH_CLASS | E_REMEMBER_MATCH_TITLE;
+       */
+   /* if(bd->desktop)
+      {
+      rem->prop.desktop_file = eina_stringshare_add(bd->desktop->orig_path);
+      }
+      */
+
    //e_border_act_close_begin(bd);
    return;
 }
@@ -147,7 +247,7 @@ _e_mod_config_window_unhide(E_Border *bd)
         bd->client.netwm.update.state = 0;
         bd->lock_user_iconify = 0;
      }
-   e_border_rise(bd);
+   e_border_raise(bd);
    return;
 }
 
@@ -164,9 +264,9 @@ _e_mod_config_window_event_border_add_cb(void *data, int type __UNUSED__, void *
    ev = event;
 
    cwldata->name = eina_stringshare_add(ev->border->client.icccm.name);
-   
+
    if(ev->border->client.icccm.command.argv)
-      cwldata->command = eina_stringshare_add(ev->border->client.icccm.command.argv[0]);
+     cwldata->command = eina_stringshare_add(ev->border->client.icccm.command.argv[0]);
    cwldata->pid = ev->border->client.netwm.pid;
    cwldata->seconds = _e_mod_config_windows_current_time_get();
 
@@ -175,19 +275,19 @@ _e_mod_config_window_event_border_add_cb(void *data, int type __UNUSED__, void *
 
    if(ev->border->client.icccm.command.argv)
      {
-   INF("NAME:%s CLASS:%s COMMAND:%s PID:%d",ev->border->client.icccm.name,
-       ev->border->client.icccm.class,
-       ev->border->client.icccm.command.argv[0],
-       ev->border->client.netwm.pid);
+        INF("NAME:%s CLASS:%s COMMAND:%s PID:%d",ev->border->client.icccm.name,
+            ev->border->client.icccm.class,
+            ev->border->client.icccm.command.argv[0],
+            ev->border->client.netwm.pid);
      }
    else
      {
-   INF("NAME:%s CLASS:%s COMMAND:(---) PID:%d",ev->border->client.icccm.name,
-         ev->border->client.icccm.class,
-         ev->border->client.netwm.pid);
+        INF("NAME:%s CLASS:%s COMMAND:(---) PID:%d",ev->border->client.icccm.name,
+            ev->border->client.icccm.class,
+            ev->border->client.netwm.pid);
      }
 
-   e_mod_config_windows_hide_unselected_apps(productivity_conf, cwl, ev->border);
+   e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
 
@@ -229,8 +329,8 @@ _e_mod_config_window_event_border_remove_cb(void *data, int type __UNUSED__, voi
                cwl->cwldata_list = eina_list_remove(cwl->cwldata_list, cwldata);
             }
      }
-   
-   e_mod_config_windows_hide_unselected_apps(productivity_conf, cwl, ev->border);
+
+   e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
 
@@ -245,7 +345,7 @@ _e_mod_config_window_event_border_iconify_cb(void *data __UNUSED__, int type __U
    ev = event;
    INF(ev->border->client.icccm.name);
    INF(ev->border->client.icccm.class);  
-   e_mod_config_windows_hide_unselected_apps(productivity_conf, cwl, ev->border);
+   e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
 
@@ -259,7 +359,7 @@ _e_mod_config_window_event_border_uniconify_cb(void *data __UNUSED__, int type _
    ev = event;
    INF(ev->border->client.icccm.name);
    INF(ev->border->client.icccm.class);  
-   e_mod_config_windows_hide_unselected_apps(productivity_conf, cwl, ev->border);
+   e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
 
@@ -279,7 +379,7 @@ _e_mod_config_window_event_border_focus_in_cb(void *data __UNUSED__, int type __
    INF("NAME:%s CLASS:%s PID:%d",ev->border->client.icccm.name,
        ev->border->client.icccm.class,
        ev->border->client.netwm.pid);
-   e_mod_config_windows_hide_unselected_apps(productivity_conf, cwl, ev->border);
+   e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
 
@@ -294,7 +394,7 @@ _e_mod_config_window_event_border_focus_out_cb(void *data __UNUSED__, int type _
    INF("NAME:%s CLASS:%s PID:%d",ev->border->client.icccm.name,
        ev->border->client.icccm.class,
        ev->border->client.netwm.pid);
-   e_mod_config_windows_hide_unselected_apps(productivity_conf, cwl, ev->border);
+   e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
 
@@ -311,7 +411,7 @@ _e_mod_config_window_event_border_property_cb(void *data __UNUSED__, int type __
    //if (border) _tasks_refill_border(border);
    //INF(border->client.icccm.name);
    //INF(border->client.icccm.class);
-   //e_mod_config_windows_hide_unselected_apps(productivity_conf, cwl, ev->border);
+   //e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
 

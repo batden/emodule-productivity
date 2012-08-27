@@ -440,7 +440,8 @@ _e_mod_config_schedule_lock_update(E_Config_Schedule_Data *csd)
 }
 
 static void
-_e_mod_config_schedule_productivity_conf_update(Config *cfg, E_Config_Dialog_Data *cfdata)
+_e_mod_config_schedule_productivity_conf_update(Config *cfg,
+                                                E_Config_Dialog_Data *cfdata)
 {
    cfg->iv.id = cfdata->schedule.id;
    cfg->iv.lock = cfdata->schedule.lock;

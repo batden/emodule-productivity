@@ -1,9 +1,10 @@
 #include <e.h>
 #include "e_mod_config.h"
 
-#define EVENT_DBG() \
+#define EVENT_INF_()
+#define EVENT_INF() \
 { \
-    if((ev->border->client.icccm.name) && \
+   if((ev->border->client.icccm.name) && \
       (ev->border->client.icccm.class)) \
      { \
         INF("Name:%s :: Class:%s", ev->border->client.icccm.name, \
@@ -122,7 +123,7 @@ e_mod_config_window_manager(E_Config_Window_List *cwl)
 
    EINA_LIST_FOREACH(cwl->borders, l, bd)
      {
-        DBG("NAME:%s", bd->client.icccm.name);
+        //DBG("NAME:%s", bd->client.icccm.name);
         //If application name is E [Enlightenment] we skip to the next app.
         if(bd->client.icccm.name)
           if(strncmp(bd->client.icccm.name, "E", sizeof("E")) == 0)
@@ -158,7 +159,7 @@ e_mod_config_window_manager(E_Config_Window_List *cwl)
                   bd->desktop = efreet_util_desktop_exec_find(buf);
                }
 
-             CRI("!Name:%s , Class:%s", bd->client.icccm.name, bd->client.icccm.class);
+             //CRI("!Name:%s , Class:%s", bd->client.icccm.name, bd->client.icccm.class);
              if(bd->client.icccm.command.argv)
                {
                   //CRI("Command:%s",bd->client.icccm.command.argv[0]);
@@ -175,7 +176,7 @@ e_mod_config_window_manager(E_Config_Window_List *cwl)
              //file to launch worktools :) 
              if(!bd->desktop)
                {
-                  ERR("Unable to get a .desktop, giving up, will just hide this app");
+                  //ERR("Unable to get a .desktop, giving up, will just hide this app");
                   //_e_mod_config_window_hide(bd);
                   e_border_act_close_begin(bd);
                }
@@ -185,7 +186,7 @@ e_mod_config_window_manager(E_Config_Window_List *cwl)
         // list [cfg->apps], if we find a match [m] = EINA_TRUE.
         if(bd->desktop)
           {
-             CRI("Name:%s , Class:%s", bd->client.icccm.name, bd->client.icccm.class);
+             //CRI("Name:%s , Class:%s", bd->client.icccm.name, bd->client.icccm.class);
              EINA_LIST_FOREACH(cfg->apps, ll, desk)
                {
                   if(desk->name)
@@ -200,7 +201,7 @@ e_mod_config_window_manager(E_Config_Window_List *cwl)
              // if [m] is false , this means the application IS NOT in our worktools list, so we hide it!
              if (m == EINA_FALSE)
                {
-                  DBG("HIDING APPLICATON:%s", bd->desktop->name);
+                  //DBG("HIDING APPLICATON:%s", bd->desktop->name);
                   if(bd) _e_mod_config_window_remember_set(bd); 
                   if(bd) _e_mod_config_window_hide(bd);
                }
@@ -269,7 +270,7 @@ _e_mod_config_window_event_border_add_cb(void *data, int type __UNUSED__, void *
    cwl->cwldata_list = eina_list_append(cwl->cwldata_list, cwldata);
    cwl->borders = eina_list_append(cwl->borders, ev->border);
 
-   EVENT_DBG(); 
+   EVENT_INF(); 
    e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
@@ -311,7 +312,7 @@ _e_mod_config_window_event_border_remove_cb(void *data, int type __UNUSED__, voi
                cwl->cwldata_list = eina_list_remove(cwl->cwldata_list, cwldata);
             }
      }
-   EVENT_DBG();
+   EVENT_INF();
    e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
@@ -324,7 +325,8 @@ _e_mod_config_window_event_border_iconify_cb(void *data __UNUSED__, int type __U
 
    if(!(cwl = data)) return;
 
-   EVENT_DBG();
+   //Using EVENT_INF here causes segf
+   //EVENT_INF();
    e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
@@ -338,7 +340,7 @@ _e_mod_config_window_event_border_uniconify_cb(void *data __UNUSED__, int type _
    if(!(cwl = data)) return;
    ev = event;
 
-   EVENT_DBG();
+   EVENT_INF();
    e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
@@ -352,7 +354,7 @@ _e_mod_config_window_event_border_focus_in_cb(void *data __UNUSED__, int type __
    if(!(cwl = data)) return;
    ev = event;
 
-   EVENT_DBG();
+   EVENT_INF();
    e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
@@ -365,8 +367,8 @@ _e_mod_config_window_event_border_focus_out_cb(void *data __UNUSED__, int type _
 
    if(!(cwl = data)) return;
    ev = event;
-   
-   EVENT_DBG();
+
+   EVENT_INF();
    e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
@@ -381,7 +383,7 @@ _e_mod_config_window_event_border_property_cb(void *data __UNUSED__, int type __
    if(!(cwl = data)) return;
    ev = event;
 
-   //EVENT_DBG();
+   //EVENT_INF();
    return EINA_TRUE;
 }
 
@@ -463,6 +465,8 @@ _e_mod_config_window_remember_set(E_Border *bd)
 
    productivity_conf->remember_list = eina_list_append(
       productivity_conf->remember_list, rem);
+
+   _e_mod_config_window_remember_cleanup();
 }
 
 static void
@@ -499,8 +503,8 @@ _e_mod_config_window_remember_get(E_Border *bd)
                }
           }
      }
-   _e_mod_config_window_remember_cleanup();
 }
+
 
 static void
 _e_mod_config_window_remember_cleanup()
@@ -509,13 +513,23 @@ _e_mod_config_window_remember_cleanup()
    Eina_List *bdl;
    Remember *rem;
    E_Border *bd;
-   Eina_Bool exists = EINA_FALSE;
+   Eina_Bool pass = EINA_FALSE;
 
    bdl = eina_list_clone(e_border_client_list());
 
    EINA_LIST_FOREACH(productivity_conf->remember_list, l, rem)
      {     
-        //TODO: if pid does not exist remove entry from list
+        EINA_LIST_FOREACH(bdl, ll, bd)
+          {
+             if(bd->client.netwm.pid > 0)
+                  if(bd->client.netwm.pid == rem->pid)
+                       pass = EINA_TRUE;
+          }
+
+        if(pass == EINA_FALSE)
+             productivity_conf->remember_list = eina_list_remove(
+                productivity_conf->remember_list, rem);
      }
+   eina_list_free(bdl);
 }
 

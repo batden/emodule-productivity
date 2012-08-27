@@ -45,6 +45,7 @@ typedef struct _Config_Schedule_Start Config_Schedule_Start;
 typedef struct _Month Month;
 typedef struct _Day   Day;
 typedef struct _Intervals Intervals;
+typedef struct _Remember Remember;
 
 struct _Intervals
 {
@@ -77,6 +78,17 @@ struct _Month
    Eina_List *day_list;
 };
 
+struct _Remember
+{
+   const char *name;
+   const char *command;
+   const char *desktop_file;
+   int pid;
+   int zone;
+   int desk_x;
+   int desk_y;
+};
+
 /* Base config struct. Store Item Count, etc
  * 
  * *module (not written to disk) (E Interaction)
@@ -101,6 +113,7 @@ struct _Config
    Eina_List *iv_list;
    Eina_List *day_list;
    Eina_List *month_list;
+   Eina_List *remember_list;
    Intervals iv;
    Day day;
    Month month;

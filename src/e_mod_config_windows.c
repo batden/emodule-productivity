@@ -19,7 +19,9 @@ static Eina_Bool     _e_mod_config_window_event_border_focus_out_cb(void *data,
 static unsigned int  _e_mod_config_windows_current_time_get();
 static void          _e_mod_config_window_hide(E_Border *bd);
 static void          _e_mod_config_window_unhide(E_Border *bd);
-
+static void          _e_mod_config_window_remember_set(E_Border *bd);
+static void          _e_mod_config_window_remember_get(E_Border *bd);
+static void          _e_mod_config_window_remember_cleanup(E_Config_Window_List *cwl);
 Eina_Bool
 e_mod_config_windows_create_data(void *data __UNUSED__)
 {
@@ -94,6 +96,7 @@ e_mod_config_window_manager(E_Config_Window_List *cwl)
      {
         EINA_LIST_FOREACH(cwl->borders, l, bd)
           {
+             _e_mod_config_window_remember_get(bd);
              _e_mod_config_window_unhide(bd);
           }
         return;
@@ -181,6 +184,7 @@ e_mod_config_window_manager(E_Config_Window_List *cwl)
              if (m == EINA_FALSE)
                {
                   DBG("HIDING APPLICATON:%s", bd->desktop->name);
+                  if(bd) _e_mod_config_window_remember_set(bd); 
                   if(bd) _e_mod_config_window_hide(bd);
                }
           }
@@ -196,7 +200,9 @@ e_mod_config_window_manager(E_Config_Window_List *cwl)
 static void
 _e_mod_config_window_hide(E_Border *bd)
 {
-   E_Remember *rem;
+   Remember *rem;
+
+   rem = E_NEW(Remember, 1);
 
    if(!bd->iconic)
      {
@@ -209,34 +215,17 @@ _e_mod_config_window_hide(E_Border *bd)
         bd->lock_user_iconify = 1;
      }
 
-   e_border_lower(bd);
-
-   /* if(!bd->remember)
-      {
-      rem = e_remember_new();
-      bd->remember = rem;
-      }
-
-      e_remember_default_match_set(rem, bd);
-      */
-   /*  
-       rem->match = 0;
-       rem->apply_first_only = bd->remember->apply_first_only;
-       rem->match |= E_REMEMBER_MATCH_NAME | E_REMEMBER_MATCH_CLASS | E_REMEMBER_MATCH_TITLE;
-       */
-   /* if(bd->desktop)
-      {
-      rem->prop.desktop_file = eina_stringshare_add(bd->desktop->orig_path);
-      }
-      */
-
-   //e_border_act_close_begin(bd);
+   //e_border_lower(bd);
    return;
 }
 
 static void
 _e_mod_config_window_unhide(E_Border *bd)
 {
+   E_Desk *desk;
+   E_Zone *zone;
+   E_Container *con;
+
    if(bd->iconic)
      {
         e_border_uniconify(bd);
@@ -244,10 +233,10 @@ _e_mod_config_window_unhide(E_Border *bd)
         bd->client.netwm.state.skip_taskbar = 0;
         bd->client.netwm.state.skip_pager = 0;
         bd->client.netwm.state.hidden = 0;
-        bd->client.netwm.update.state = 0;
+        bd->client.netwm.update.state = 1;
         bd->lock_user_iconify = 0;
      }
-   e_border_raise(bd);
+   //e_border_raise(bd);
    return;
 }
 
@@ -288,6 +277,7 @@ _e_mod_config_window_event_border_add_cb(void *data, int type __UNUSED__, void *
      }
 
    e_mod_config_window_manager(cwl);
+   _e_mod_config_window_remember_cleanup(cwl);
    return EINA_TRUE;
 }
 
@@ -331,6 +321,7 @@ _e_mod_config_window_event_border_remove_cb(void *data, int type __UNUSED__, voi
      }
 
    e_mod_config_window_manager(cwl);
+   _e_mod_config_window_remember_cleanup(cwl);
    return EINA_TRUE;
 }
 
@@ -394,6 +385,7 @@ _e_mod_config_window_event_border_focus_out_cb(void *data __UNUSED__, int type _
    INF("NAME:%s CLASS:%s PID:%d",ev->border->client.icccm.name,
        ev->border->client.icccm.class,
        ev->border->client.netwm.pid);
+
    e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
@@ -427,5 +419,137 @@ _e_mod_config_windows_current_time_get()
 
    seconds = time(NULL);
    return (unsigned int) seconds;
+}
+
+static void
+_e_mod_config_window_remember_set(E_Border *bd)
+{
+   Remember *rem;
+   Eina_List *l;
+   Eina_Bool exists = EINA_FALSE;
+
+   EINA_LIST_FOREACH(productivity_conf->remember_list, l, rem)
+     {
+        if(strncmp(rem->name, "", sizeof("")) == 0)
+          {
+             productivity_conf->remember_list =
+                eina_list_remove(productivity_conf->remember_list,
+                                 rem);
+          }
+        if(rem->pid == 0)
+          {
+             productivity_conf->remember_list =
+                eina_list_remove(productivity_conf->remember_list,
+                                 rem);
+          }
+        if((bd->client.netwm.pid > 0) && 
+           (bd->client.netwm.pid == rem->pid))
+          {
+             exists = EINA_TRUE;
+          }
+     }
+
+   if(exists == EINA_TRUE) return;
+
+   if(rem)
+     {
+        if(rem->name)
+          eina_stringshare_del(rem->name);
+        if(rem->command)
+          eina_stringshare_del(rem->command);
+        if(rem->desktop_file)
+          eina_stringshare_del(rem->desktop_file);
+
+        rem = NULL;
+     }
+   else if(!rem)
+     {
+        rem = E_NEW(Remember, 1);
+     }
+
+   rem->name = eina_stringshare_add(bd->client.icccm.name);
+
+   if((bd->client.icccm.command.argc > 0) &&
+      (bd->client.icccm.command.argv))
+     {
+        rem->command = eina_stringshare_add(bd->client.icccm.command.argv[0]);
+     }
+
+   if(bd->client.netwm.pid > 0)
+     {
+        rem->pid = bd->client.netwm.pid;
+     }
+   rem->zone   = bd->zone->num;
+   rem->desk_x = bd->desk->x;
+   rem->desk_y = bd->desk->y;
+
+   productivity_conf->remember_list = eina_list_append(
+      productivity_conf->remember_list, rem);
+}
+
+static void
+_e_mod_config_window_remember_get(E_Border *bd)
+{
+   Remember *rem;
+   Eina_List *l , *ll;
+   Eina_List *bdl;
+
+   if(bd->client.netwm.pid <= 0) return;
+   if(bd->client.icccm.command.argc <= 0) return;
+   // if(!bd->iconic) return;
+
+   EINA_LIST_FOREACH(productivity_conf->remember_list, l, rem)
+     {
+        if(bd->client.netwm.pid == rem->pid)
+          {
+             E_Zone *zone;
+             E_Desk *desk;
+
+             zone = e_container_zone_number_get(bd->zone->container,
+                                                rem->zone);
+             if(zone)
+               {
+                  e_border_zone_set(bd, zone);
+               }
+
+             desk = e_desk_at_xy_get(bd->zone, rem->desk_x, rem->desk_y);
+
+             if(desk)
+               {
+                  e_border_desk_set(bd, desk);
+               }
+             /*productivity_conf->remember_list = eina_list_remove(
+                productivity_conf->remember_list, rem);*/
+          }
+     }
+}
+
+static void
+_e_mod_config_window_remember_cleanup(E_Config_Window_List *cwl)
+{
+   Eina_List *l, *ll;
+   Remember *rem;
+   E_Border *bd;
+   Eina_Bool exists = EINA_FALSE;
+
+   EINA_LIST_FOREACH(productivity_conf->remember_list, l, rem)
+     {
+        /*
+        if(cwl->borders)
+          {
+             EINA_LIST_FOREACH(cwl->borders, ll, bd);
+               {
+                  if(bd->client.netwm.pid > 0)
+                    {
+                       if(bd->client.netwm.pid == rem->pid)
+                         {
+                           exists = EINA_TRUE;
+                           continue;
+                         }
+                    }
+               }
+          }*/
+         //TODO: if pid does not exist remove entry from list
+     }
 }
 

@@ -20,9 +20,11 @@ static void _productivity_cb_menu_configure(void *data, E_Menu *mn, E_Menu_Item 
 static void _productivity_mod_menu_add(void *data, E_Menu *m);
 static void _productivity_mod_run_cb(void *data, E_Menu *m, E_Menu_Item *mi);
 
-static Month * _e_mod_main_month_conf_item_get();
-static Day  _e_mod_main_day_conf_item_get();
-static Intervals _e_mod_main_intervals_get();
+static Month      *_e_mod_main_month_conf_item_get();
+static Day         _e_mod_main_day_conf_item_get();
+static Intervals   _e_mod_main_intervals_get();
+static Remember   *_e_mod_main_remember_get();
+
 static void _config_init();
 static void _e_mod_main_get_current_config(Config *cfg);
 
@@ -54,6 +56,7 @@ static E_Config_DD *conf_item_edd = NULL;
 static E_Config_DD *month_edd = NULL;
 static E_Config_DD *day_edd = NULL;
 static E_Config_DD *intervals_edd = NULL;
+static E_Config_DD *remember_edd = NULL;
 
 Config *productivity_conf = NULL;
 
@@ -378,6 +381,8 @@ _productivity_conf_new(void)
    // _productivity_conf_item_get(NULL);
    CRI("CREATING NEW CONFIG!!!");
    _e_mod_main_month_conf_item_get();
+   productivity_conf->remember_list = eina_list_append(
+      productivity_conf->remember_list, _e_mod_main_remember_get());
    // IFMODCFGEND;
 
    /* update the version */
@@ -495,6 +500,20 @@ _e_mod_main_intervals_get()
    return iv;
 }
 
+static Remember * 
+_e_mod_main_remember_get()
+{
+   Remember *rem;
+
+   rem = E_NEW(Remember, 1);
+
+   rem->name = eina_stringshare_add("");
+   rem->command = eina_stringshare_add("");
+   rem->desktop_file = eina_stringshare_add("");
+   rem->desk_x = 0;
+   rem->desk_y = 0;
+   return rem;
+}
 
 /* Pants On */
 static void 
@@ -618,14 +637,26 @@ _config_init()
 
 #undef T
 #undef D
+#define T Remember
+#define D remember_edd
+   remember_edd = E_CONFIG_DD_NEW("Remember", Remember);
+   E_CONFIG_VAL(D, T, name, STR);
+   E_CONFIG_VAL(D, T, command, STR);
+   E_CONFIG_VAL(D, T, desktop_file, STR);
+   E_CONFIG_VAL(D, T, pid, INT);
+   E_CONFIG_VAL(D, T, zone, INT);
+   E_CONFIG_VAL(D, T, desk_x, INT);
+   E_CONFIG_VAL(D, T, desk_y, INT);
+
+#undef T
+#undef D
 #define T Config
 #define D conf_edd
    conf_edd = E_CONFIG_DD_NEW("Config", Config);
    E_CONFIG_VAL(D, T, version, INT);
    E_CONFIG_VAL(D, T, timestamp, UINT);
    E_CONFIG_LIST(D, T, month_list, month_edd);
-   // E_CONFIG_LIST(D, T, day_list, day_edd);
-   // E_CONFIG_LIST(D, T, iv_list, intervals_edd);
+   E_CONFIG_LIST(D, T, remember_list, remember_edd);
 }
 
 void
@@ -637,11 +668,12 @@ e_mod_main_reload_config()
 static void
 _e_mod_main_get_current_config(Config *cfg)
 {
-   Eina_List *l, *ll, *lll;
+   Eina_List *l, *ll, *lll, *llll;
    Eina_List *last;
    Month *m;
    Day *d;
    Intervals *iv;
+   Remember *rem;
 
    time_t tt;
    struct tm *tm;
@@ -691,10 +723,14 @@ _e_mod_main_get_current_config(Config *cfg)
                }
           }
      }
+
+   //EINA_LIST_FOREACH(cfg->remember_list, llll, rem);
+
    //eina_list_free(last);
    E_FREE(m);
    E_FREE(d);
    E_FREE(iv);
+   //E_FREE(rem);
 }
 
 time_t to_seconds(const char *date)

@@ -1,6 +1,24 @@
 #include <e.h>
 #include "e_mod_config.h"
 
+#define EVENT_DBG() \
+{ \
+    if((ev->border->client.icccm.name) && \
+      (ev->border->client.icccm.class)) \
+     { \
+        INF("Name:%s :: Class:%s", ev->border->client.icccm.name, \
+            ev->border->client.icccm.class); \
+        if((ev->border->client.netwm.pid > 0) && \
+           (ev->border->client.icccm.command.argc > 0) && \
+           (ev->border->client.icccm.command.argv)) \
+          { \
+             INF(" ::CMD:%s :: PID:%d ", ev->border->client.icccm.command.argv[0], \
+                 ev->border->client.netwm.pid); \
+          } \
+     } \
+}
+
+
 static Eina_Bool     _e_mod_config_window_event_border_add_cb(void *data,
                                                               int type, void *event);
 static Eina_Bool     _e_mod_config_window_event_border_remove_cb(void *data,
@@ -161,7 +179,6 @@ e_mod_config_window_manager(E_Config_Window_List *cwl)
                   //_e_mod_config_window_hide(bd);
                   e_border_act_close_begin(bd);
                }
-
           }
 
         // If the border has the correct .desktop file, we will do comparison to our worktools application
@@ -224,6 +241,9 @@ _e_mod_config_window_unhide(E_Border *bd)
    if(bd->user_skip_winlist)
      bd->user_skip_winlist = 0;
 
+   if(bd->lock_user_iconify)
+     bd->lock_user_iconify = 0;
+
    return;
 }
 
@@ -249,20 +269,7 @@ _e_mod_config_window_event_border_add_cb(void *data, int type __UNUSED__, void *
    cwl->cwldata_list = eina_list_append(cwl->cwldata_list, cwldata);
    cwl->borders = eina_list_append(cwl->borders, ev->border);
 
-   if(ev->border->client.icccm.command.argv)
-     {
-        INF("NAME:%s CLASS:%s COMMAND:%s PID:%d",ev->border->client.icccm.name,
-            ev->border->client.icccm.class,
-            ev->border->client.icccm.command.argv[0],
-            ev->border->client.netwm.pid);
-     }
-   else
-     {
-        INF("NAME:%s CLASS:%s COMMAND:(---) PID:%d",ev->border->client.icccm.name,
-            ev->border->client.icccm.class,
-            ev->border->client.netwm.pid);
-     }
-
+   EVENT_DBG(); 
    e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
@@ -291,7 +298,6 @@ _e_mod_config_window_event_border_remove_cb(void *data, int type __UNUSED__, voi
       DBG("LIST:%s",bd->client.icccm.name);
       }*/
    cwl->borders = eina_list_remove(cwl->borders, ev->border);
-   // eina_list_free(l);
 
    EINA_LIST_FOREACH(cwl->cwldata_list, l, cwldata)
      {
@@ -305,7 +311,7 @@ _e_mod_config_window_event_border_remove_cb(void *data, int type __UNUSED__, voi
                cwl->cwldata_list = eina_list_remove(cwl->cwldata_list, cwldata);
             }
      }
-
+   EVENT_DBG();
    e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
@@ -318,9 +324,7 @@ _e_mod_config_window_event_border_iconify_cb(void *data __UNUSED__, int type __U
 
    if(!(cwl = data)) return;
 
-   ev = event;
-   INF(ev->border->client.icccm.name);
-   INF(ev->border->client.icccm.class);  
+   EVENT_DBG();
    e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
@@ -333,8 +337,8 @@ _e_mod_config_window_event_border_uniconify_cb(void *data __UNUSED__, int type _
 
    if(!(cwl = data)) return;
    ev = event;
-   INF(ev->border->client.icccm.name);
-   INF(ev->border->client.icccm.class);  
+
+   EVENT_DBG();
    e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
@@ -347,14 +351,8 @@ _e_mod_config_window_event_border_focus_in_cb(void *data __UNUSED__, int type __
 
    if(!(cwl = data)) return;
    ev = event;
-   //if(ev->border->client.icccm.command.argv[0])
-   //   INF("Command:%s",ev->border->client.icccm.command.argv[0]);
-   //else
-   //  CRI("Unable to get command");
 
-   INF("NAME:%s CLASS:%s PID:%d",ev->border->client.icccm.name,
-       ev->border->client.icccm.class,
-       ev->border->client.netwm.pid);
+   EVENT_DBG();
    e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
@@ -367,10 +365,8 @@ _e_mod_config_window_event_border_focus_out_cb(void *data __UNUSED__, int type _
 
    if(!(cwl = data)) return;
    ev = event;
-   INF("NAME:%s CLASS:%s PID:%d",ev->border->client.icccm.name,
-       ev->border->client.icccm.class,
-       ev->border->client.netwm.pid);
-
+   
+   EVENT_DBG();
    e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
@@ -384,11 +380,8 @@ _e_mod_config_window_event_border_property_cb(void *data __UNUSED__, int type __
 
    if(!(cwl = data)) return;
    ev = event;
-   border = ev->border;
-   //if (border) _tasks_refill_border(border);
-   //INF(border->client.icccm.name);
-   //INF(border->client.icccm.class);
-   //e_mod_config_window_manager(cwl);
+
+   //EVENT_DBG();
    return EINA_TRUE;
 }
 

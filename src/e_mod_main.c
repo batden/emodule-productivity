@@ -685,7 +685,7 @@ _e_mod_main_get_current_config(Config *cfg)
      {
         if (tm->tm_mon == m->mon)
           {
-             INF("FOUND CURRENT Month:%s",m->name);
+             //INF("FOUND CURRENT Month:%s",m->name);
              cfg->cur_month.name = eina_stringshare_add(m->name);
              cfg->cur_month.mon = m->mon;
 
@@ -699,7 +699,7 @@ _e_mod_main_get_current_config(Config *cfg)
                        /*cfg->cur_day.iv_list = eina_list_clone(
                          eina_list_last(d->iv_list));*/
 
-                       INF("FOUND CURRENT Day:%s",d->name);
+                       //INF("FOUND CURRENT Day:%s",d->name);
                        last = eina_list_last(d->iv_list);
 
                        EINA_LIST_FOREACH(last, lll, iv)

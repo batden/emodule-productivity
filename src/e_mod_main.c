@@ -723,14 +723,9 @@ _e_mod_main_get_current_config(Config *cfg)
                }
           }
      }
-
-   //EINA_LIST_FOREACH(cfg->remember_list, llll, rem);
-
-   //eina_list_free(last);
    E_FREE(m);
    E_FREE(d);
    E_FREE(iv);
-   //E_FREE(rem);
 }
 
 time_t to_seconds(const char *date)
@@ -785,10 +780,6 @@ e_mod_main_is_it_time_to_work()
    stop_t = mktime(&stm);
    cur_t = mktime(tm);
 
-   DBG("StartT:%d", start_t);
-   DBG("Cur_T:%d", cur_t);
-   DBG("StopT:%d", stop_t);
-  
   if((cur_t > start_t) && (cur_t < stop_t))
    return EINA_TRUE;
 

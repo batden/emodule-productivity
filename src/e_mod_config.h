@@ -67,7 +67,6 @@ struct _E_Config_Window_List
    Eina_List *borders;
    Eina_List *cwldata_list;
    Eina_List *items;
-   Eina_List *handlers;
 
    // e_mod_config_windows.c
    E_Config_Window_List_Data *cwldata;

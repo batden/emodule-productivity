@@ -113,14 +113,15 @@ struct _Config
 
    /*Work application list*/
    Eina_List *apps;
-
-   Eina_List *iv_list;
-   Eina_List *day_list;
+   //Eina_List *iv_list;
+   //Eina_List *day_list;
    Eina_List *month_list;
    Eina_List *remember_list;
+   Eina_List *handlers;
+
    Intervals iv;
-   Day day;
-   Month month;
+   //Day day;
+   //Month month;
    
    Month cur_month;
    Day cur_day;

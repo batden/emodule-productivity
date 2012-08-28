@@ -64,10 +64,15 @@ e_mod_config_worktools_free(E_Config_Dialog_Data *cfdata)
    if (cfdata->filename)
      eina_stringshare_del(cfdata->filename);
 
-   EINA_LIST_FREE(cfdata->apps, desk)
-      efreet_desktop_free(desk);
+   evas_object_del(cfdata->apps_user.o_list);
+   evas_object_del(cfdata->apps_user.o_add);
+   evas_object_del(cfdata->apps_user.o_del);
+   evas_object_del(cfdata->apps_user.o_desc);
 
    EINA_LIST_FREE(cfdata->apps_user.desks, desk)
+      efreet_desktop_free(desk);
+
+   EINA_LIST_FREE(cfdata->apps, desk)
       efreet_desktop_free(desk);
 }
 

@@ -43,47 +43,49 @@ static void          _e_mod_config_window_remember_set(E_Border *bd);
 static void          _e_mod_config_window_remember_get(E_Border *bd);
 static void          _e_mod_config_window_remember_cleanup();
 
-
-
 Eina_Bool
-e_mod_config_windows_create_data(void *data __UNUSED__)
+e_mod_config_windows_create_data(void *data)
 {
+   Config *cfg;
+
+   if(!(cfg = data)) return EINA_FALSE;
+
    E_Config_Window_List  *cwl;
 
    cwl = E_NEW(E_Config_Window_List, 1);
 
-   cwl->handlers = eina_list_append
-      (cwl->handlers, ecore_event_handler_add
+   cfg->handlers = eina_list_append
+      (cfg->handlers, ecore_event_handler_add
        (E_EVENT_BORDER_ADD, 
         _e_mod_config_window_event_border_add_cb, cwl));
 
-   cwl->handlers = eina_list_append
-      (cwl->handlers, ecore_event_handler_add
+   cfg->handlers = eina_list_append
+      (cfg->handlers, ecore_event_handler_add
        (E_EVENT_BORDER_REMOVE, 
         _e_mod_config_window_event_border_remove_cb, cwl));
 
-   cwl->handlers = eina_list_append
-      (cwl->handlers, ecore_event_handler_add
+   cfg->handlers = eina_list_append
+      (cfg->handlers, ecore_event_handler_add
        (E_EVENT_BORDER_ICONIFY, 
         _e_mod_config_window_event_border_iconify_cb, cwl));
 
-   cwl->handlers = eina_list_append
-      (cwl->handlers, ecore_event_handler_add
+   cfg->handlers = eina_list_append
+      (cfg->handlers, ecore_event_handler_add
        (E_EVENT_BORDER_UNICONIFY, 
         _e_mod_config_window_event_border_uniconify_cb, cwl));
 
-   cwl->handlers = eina_list_append
-      (cwl->handlers, ecore_event_handler_add
+   cfg->handlers = eina_list_append
+      (cfg->handlers, ecore_event_handler_add
        (E_EVENT_BORDER_FOCUS_IN, 
         _e_mod_config_window_event_border_focus_in_cb, cwl));
 
-   cwl->handlers = eina_list_append
-      (cwl->handlers, ecore_event_handler_add
+   cfg->handlers = eina_list_append
+      (cfg->handlers, ecore_event_handler_add
        (E_EVENT_BORDER_FOCUS_OUT, 
         _e_mod_config_window_event_border_focus_out_cb, cwl));
 
-   cwl->handlers = eina_list_append
-      (cwl->handlers, ecore_event_handler_add
+   cfg->handlers = eina_list_append
+      (cfg->handlers, ecore_event_handler_add
        (E_EVENT_BORDER_PROPERTY, 
         _e_mod_config_window_event_border_property_cb, cwl));
 
@@ -91,8 +93,8 @@ e_mod_config_windows_create_data(void *data __UNUSED__)
 
    //Here we start to manage worktools and non-worktools
    e_mod_config_window_manager(cwl);
-   productivity_conf->timer = ecore_timer_loop_add(1.00, 
-                                                   _e_mod_config_window_break_timer, cwl);
+   productivity_conf->timer = 
+      ecore_timer_loop_add(1.00, _e_mod_config_window_break_timer, cwl);
 
    if(cwl->borders) return EINA_TRUE;
 
@@ -472,7 +474,7 @@ _e_mod_config_window_remember_set(E_Border *bd)
 
    productivity_conf->remember_list = eina_list_append(
       productivity_conf->remember_list, rem);
-
+   
    _e_mod_config_window_remember_cleanup();
 }
 
@@ -598,3 +600,4 @@ break_time:
         e_mod_config_window_manager(cwl);
      }
 }
+

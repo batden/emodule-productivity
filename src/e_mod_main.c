@@ -52,7 +52,6 @@ int _productivity_log;
 /* Local Variables */
 static Eina_List *instances = NULL;
 static E_Config_DD *conf_edd = NULL;
-static E_Config_DD *conf_item_edd = NULL;
 static E_Config_DD *month_edd = NULL;
 static E_Config_DD *day_edd = NULL;
 static E_Config_DD *intervals_edd = NULL;
@@ -174,7 +173,7 @@ e_modapi_init(E_Module *m)
    //Load all work applications into productivity_conf->apps.
    productivity_conf->apps = e_mod_config_worktools_selected_get();
    //Creates data, and adds callbacks
-   e_mod_config_windows_create_data(NULL);
+   e_mod_config_windows_create_data(productivity_conf);
 
    /* Tell any gadget containers (shelves, etc) that we provide a module
     * for the user to enjoy */
@@ -229,11 +228,61 @@ e_modapi_shutdown(E_Module *m)
         E_FREE(ci);
      }
 
+   //    E_Mod_Config_Windows -- FREE
+   Ecore_Event_Handler *eh;
+
+   EINA_LIST_FREE(productivity_conf->handlers, eh)
+     {
+        ecore_event_handler_del(eh);
+     }
+
+   Remember *rem;
+   EINA_LIST_FREE(productivity_conf->remember_list, rem)
+     {
+        if(rem->name)
+          eina_stringshare_del(rem->name);
+
+        if(rem->command)
+          eina_stringshare_del(rem->command);
+
+        if(rem->desktop_file)
+          eina_stringshare_del(rem->command);
+     }
+   
+   Month *mon;
+   Day *d;
+   EINA_LIST_FREE(productivity_conf->month_list, mon)
+     {
+        if(mon->name)
+          eina_stringshare_del(mon->name);
+
+        EINA_LIST_FREE(mon->day_list, d)
+          {
+             if(d->name)
+               eina_stringshare_del(d->name);
+
+             d->iv_list = eina_list_remove_list(
+                d->iv_list, d->iv_list);
+          }
+        mon->day_list = eina_list_remove_list(
+           mon->day_list, mon->day_list);
+     }
+        
+   if(productivity_conf->cur_month.name)
+     eina_stringshare_del(productivity_conf->cur_month.name);
+
+   if(productivity_conf->cur_day.name)
+     eina_stringshare_del(productivity_conf->cur_day.name);
+
+   //    E_Mod_Config_Windows -- FREE -- END
    /* Cleanup the main config structure */
    E_FREE(productivity_conf);
 
    /* Clean EET */
-   E_CONFIG_DD_FREE(conf_item_edd);
+   E_CONFIG_DD_FREE(month_edd);
+   E_CONFIG_DD_FREE(day_edd);
+   E_CONFIG_DD_FREE(intervals_edd);
+   E_CONFIG_DD_FREE(remember_edd);
    E_CONFIG_DD_FREE(conf_edd);
 
    INF("Shutting down Productivity");
@@ -377,13 +426,12 @@ _productivity_conf_new(void)
 #define IFMODCFGEND }
 
    /* setup defaults */
-   // IFMODCFG(0x008d);
-   // _productivity_conf_item_get(NULL);
+    IFMODCFG(0x008d);
    CRI("CREATING NEW CONFIG!!!");
    _e_mod_main_month_conf_item_get();
    productivity_conf->remember_list = eina_list_append(
       productivity_conf->remember_list, _e_mod_main_remember_get());
-   // IFMODCFGEND;
+    IFMODCFGEND;
 
    /* update the version */
    productivity_conf->version = MOD_CONFIG_FILE_VERSION;

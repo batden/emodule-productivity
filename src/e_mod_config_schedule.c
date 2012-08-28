@@ -15,7 +15,9 @@ static void _start_clock_cb(void *data, Evas_Object *obj, void *event_info);
 static void _stop_clock_cb(void *data, Evas_Object *obj, void *event_info);
 static void _e_mod_config_schedule_start_working_cb(void *data, void *data2);
 static void _e_mod_config_schedule_stop_working_cb(void *data, void *data2);
-static void _e_mod_config_schedule_break_time_cb(void *data, Evas_Object *obj,
+static void _e_mod_config_schedule_break_x_time_cb(void *data, Evas_Object *obj,
+                                                 void *event_info);
+static void _e_mod_config_schedule_break_y_time_cb(void *data, Evas_Object *obj,
                                                  void *event_info);
 static void _e_mod_config_schedule_clock_fill_delay(E_Config_Schedule_Data *csd);
 static void _e_mod_config_schedule_lock_update(E_Config_Schedule_Data *csd);
@@ -37,7 +39,7 @@ Evas_Object *
 e_mod_config_schedule_new(Evas_Object *otb, Evas *evas, E_Config_Dialog_Data *cfdata)
 {
    Evas_Object *ot;
-   Evas_Object *bx, *label;
+   Evas_Object *bx, *label, *hbx;
    unsigned int digedit;
 
    ot = e_widget_table_add(evas, EINA_FALSE);
@@ -90,19 +92,36 @@ e_mod_config_schedule_new(Evas_Object *otb, Evas *evas, E_Config_Dialog_Data *cf
    evas_object_show(cfdata->schedule.stop_clk);
 
    label = elm_label_add(bx);
-   elm_object_text_set(label, "Minutes of Break");
+   elm_object_text_set(label, "Minutes of Break for Minutes of Work");
    evas_object_resize(label, 200, 25);
    elm_box_pack_end(bx, label);
    evas_object_show(label);
-
-   cfdata->schedule.break_slider = elm_slider_add(bx);
-   elm_slider_unit_format_set(cfdata->schedule.break_slider, "%1.0f Minutes");
-   elm_slider_min_max_set(cfdata->schedule.break_slider, 0, 15);
-   elm_slider_value_set(cfdata->schedule.break_slider,cfdata->schedule.break_min);
-   elm_box_pack_end(bx, cfdata->schedule.break_slider);
-   evas_object_show(cfdata->schedule.break_slider);
-   evas_object_smart_callback_add(cfdata->schedule.break_slider,
-                                  "changed", _e_mod_config_schedule_break_time_cb,
+  
+   hbx = elm_box_add(bx);
+   elm_box_horizontal_set(hbx, EINA_TRUE);
+   evas_object_size_hint_weight_set(bx, EVAS_HINT_FILL, EVAS_HINT_EXPAND);
+   evas_object_size_hint_align_set(bx, EVAS_HINT_FILL, EVAS_HINT_FILL);
+   elm_box_pack_end(bx, hbx);
+   evas_object_show(hbx);
+   
+   cfdata->schedule.break_x = elm_slider_add(hbx);
+   elm_slider_unit_format_set(cfdata->schedule.break_x, "%1.0f Minutes");
+   elm_slider_min_max_set(cfdata->schedule.break_x, 0, 15);
+   elm_slider_value_set(cfdata->schedule.break_x,cfdata->schedule.break_min_x);
+   elm_box_pack_end(hbx, cfdata->schedule.break_x);
+   evas_object_show(cfdata->schedule.break_x);
+   evas_object_smart_callback_add(cfdata->schedule.break_x,
+                                  "changed", _e_mod_config_schedule_break_x_time_cb,
+                                  &cfdata->schedule);
+ 
+   cfdata->schedule.break_y = elm_slider_add(hbx);
+   elm_slider_unit_format_set(cfdata->schedule.break_y, "%1.0f Minutes");
+   elm_slider_min_max_set(cfdata->schedule.break_y, 0, 10);
+   elm_slider_value_set(cfdata->schedule.break_y,cfdata->schedule.break_min_y);
+   elm_box_pack_end(hbx, cfdata->schedule.break_y);
+   evas_object_show(cfdata->schedule.break_y);
+   evas_object_smart_callback_add(cfdata->schedule.break_y,
+                                  "changed", _e_mod_config_schedule_break_y_time_cb,
                                   &cfdata->schedule);
 
    cfdata->schedule.start_btn = e_widget_button_add(evas, _("Test Start Working"), "list-add",
@@ -150,9 +169,11 @@ e_mod_config_schedule_save_config(E_Config_Dialog_Data *cfdata)
                       &cfdata->schedule.stop_time.sec);
 
    //Get break min time
-   cfdata->schedule.break_min = 
-      round(elm_slider_value_get(cfdata->schedule.break_slider));
-   
+   cfdata->schedule.break_min_x = 
+      round(elm_slider_value_get(cfdata->schedule.break_x));
+    cfdata->schedule.break_min_y = 
+      round(elm_slider_value_get(cfdata->schedule.break_y));
+
    productivity_conf->timestamp = e_mod_timestamp_get();
 
    EINA_LIST_FOREACH(productivity_conf->month_list, l, m)
@@ -292,11 +313,14 @@ _e_mod_config_schedule_start_working_cb(void *data, void *data2)
         digedit = ELM_CLOCK_EDIT_SEC_UNIT;
         elm_clock_edit_mode_set(csd->start_clk, digedit);
         elm_clock_edit_mode_set(csd->stop_clk, digedit);
-        elm_object_disabled_set(csd->break_slider, EINA_TRUE);
+        elm_object_disabled_set(csd->break_x, EINA_TRUE);
+        elm_object_disabled_set(csd->break_y, EINA_TRUE);
         if(csd->lock == EINA_FALSE)
           {
              csd->lock = EINA_TRUE;
           }
+        if(productivity_conf->secs_to_break)
+          productivity_conf->secs_to_break = 0;
      }
    _e_mod_config_schedule_lock_update(csd);
 }
@@ -315,7 +339,8 @@ _e_mod_config_schedule_stop_working_cb(void *data, void *data2)
            ELM_CLOCK_EDIT_MIN_UNIT | ELM_CLOCK_EDIT_SEC_UNIT;
         elm_clock_edit_mode_set(csd->start_clk, digedit);
         elm_clock_edit_mode_set(csd->stop_clk, digedit);
-        elm_object_disabled_set(csd->break_slider, EINA_FALSE);
+        elm_object_disabled_set(csd->break_x, EINA_FALSE);
+        elm_object_disabled_set(csd->break_y, EINA_FALSE);
 
         if(csd->lock == EINA_TRUE)
           {
@@ -326,14 +351,25 @@ _e_mod_config_schedule_stop_working_cb(void *data, void *data2)
 }
 
 static void
-_e_mod_config_schedule_break_time_cb(void *data, Evas_Object *obj, void *event_info)
+_e_mod_config_schedule_break_x_time_cb(void *data, Evas_Object *obj, void *event_info)
 {
    E_Config_Schedule_Data *csd;
 
    if(!(csd = data)) return;
 
-   csd->break_min = round(elm_slider_value_get(obj));    
-   INF("Break Time:%d",csd->break_min);
+   csd->break_min_x = round(elm_slider_value_get(obj));    
+   INF("Break Time:%d",csd->break_min_x);
+}
+
+static void
+_e_mod_config_schedule_break_y_time_cb(void *data, Evas_Object *obj, void *event_info)
+{
+   E_Config_Schedule_Data *csd;
+
+   if(!(csd = data)) return;
+
+   csd->break_min_y = round(elm_slider_value_get(obj));    
+   INF("Break Time:%d",csd->break_min_y);
 }
 
 static Eina_Bool
@@ -359,7 +395,8 @@ _e_mod_config_schedule_clock_fill_delay(E_Config_Schedule_Data *csd)
 
    csd->id = productivity_conf->cur_iv.id;
    csd->lock = productivity_conf->cur_iv.lock;
-   csd->break_min = productivity_conf->cur_iv.break_min;
+   csd->break_min_x = productivity_conf->cur_iv.break_min_x;
+   csd->break_min_y = productivity_conf->cur_iv.break_min_y;
 
    csd->start_time.hour = productivity_conf->cur_iv.start.hour;
    csd->start_time.min = productivity_conf->cur_iv.start.min;
@@ -371,9 +408,9 @@ _e_mod_config_schedule_clock_fill_delay(E_Config_Schedule_Data *csd)
 
    if(csd->lock == 1) return;
 
-   DBG("\nID:%d, LOCK:%d, BREAK:%d, StartH:%d, StartM:%d, \
-       StartS:%d, StopH:%d, StopM:%d, StopS:%d",csd->id, csd->lock, csd->break_min,
-       csd->start_time.hour, csd->start_time.min, csd->start_time.sec,
+   DBG("\nID:%d, LOCK:%d, Break_X:%d, Break_Y:%d StartH:%d, StartM:%d, \
+       StartS:%d, StopH:%d, StopM:%d, StopS:%d",csd->id, csd->lock, csd->break_min_x,
+       csd->break_min_y,csd->start_time.hour, csd->start_time.min, csd->start_time.sec,
        csd->stop_time.hour, csd->stop_time.min, csd->stop_time.sec);
 
    csd->start_time.hour = tm->tm_hour;
@@ -420,7 +457,7 @@ _e_mod_config_schedule_lock_update(E_Config_Schedule_Data *csd)
         digedit = ELM_CLOCK_EDIT_SEC_UNIT;
         elm_clock_edit_mode_set(csd->start_clk, digedit);
         elm_clock_edit_mode_set(csd->stop_clk, digedit);
-        elm_object_disabled_set(csd->break_slider, EINA_TRUE);
+        elm_object_disabled_set(csd->break_x, EINA_TRUE);
 
         if(e_widget_disabled_get(csd->start_btn) == EINA_FALSE)
           e_widget_disabled_set(csd->start_btn, EINA_TRUE);
@@ -432,7 +469,7 @@ _e_mod_config_schedule_lock_update(E_Config_Schedule_Data *csd)
            ELM_CLOCK_EDIT_MIN_UNIT | ELM_CLOCK_EDIT_SEC_UNIT;
         elm_clock_edit_mode_set(csd->start_clk, digedit);
         elm_clock_edit_mode_set(csd->stop_clk, digedit);
-        elm_object_disabled_set(csd->break_slider, EINA_FALSE);
+        elm_object_disabled_set(csd->break_x, EINA_FALSE);
 
         if(e_widget_disabled_get(csd->start_btn) == EINA_TRUE)
           e_widget_disabled_set(csd->start_btn, EINA_FALSE);
@@ -443,9 +480,10 @@ static void
 _e_mod_config_schedule_productivity_conf_update(Config *cfg,
                                                 E_Config_Dialog_Data *cfdata)
 {
-   cfg->iv.id = cfdata->schedule.id;
-   cfg->iv.lock = cfdata->schedule.lock;
-   cfg->iv.break_min = cfdata->schedule.break_min;
+   cfg->iv.id           = cfdata->schedule.id;
+   cfg->iv.lock         = cfdata->schedule.lock;
+   cfg->iv.break_min_x  = cfdata->schedule.break_min_x;
+   cfg->iv.break_min_y  = cfdata->schedule.break_min_y;
 
    cfg->iv.start.hour   = cfdata->schedule.start_time.hour;
    cfg->iv.start.min    = cfdata->schedule.start_time.min;
@@ -463,7 +501,8 @@ _e_mod_config_schedule_intervals_conf_get(E_Config_Dialog_Data *cfdata)
 
    iv.id          = cfdata->schedule.id;
    iv.lock        = cfdata->schedule.lock;
-   iv.break_min   = cfdata->schedule.break_min;
+   iv.break_min_x = cfdata->schedule.break_min_x;
+   iv.break_min_y = cfdata->schedule.break_min_y;
 
    iv.start.hour  = cfdata->schedule.start_time.hour;
    iv.start.min   = cfdata->schedule.start_time.min;

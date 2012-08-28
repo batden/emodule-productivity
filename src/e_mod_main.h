@@ -51,7 +51,8 @@ struct _Intervals
 {
    int lock;
    int id;
-   int break_min;
+   int break_min_x;
+   int break_min_y;
    struct
      {
         int hour;
@@ -106,6 +107,9 @@ struct _Config
    Eina_List *conf_items;
    int version;
    unsigned int timestamp;
+   Ecore_Timer *timer;
+   int secs_to_break;
+   Eina_Bool go_to_break;
 
    /*Work application list*/
    Eina_List *apps;

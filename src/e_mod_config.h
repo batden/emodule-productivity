@@ -20,10 +20,12 @@ struct _E_Config_Schedule_Data
    Evas_Object *stop_btn;
    Evas_Object *start_clk;
    Evas_Object *stop_clk;
-   Evas_Object *break_slider;
+   Evas_Object *break_x;
+   Evas_Object *break_y;
    Eina_Bool lock;
    int id;
-   int break_min;
+   int break_min_x;
+   int break_min_y;
    struct
    {
        int hour;

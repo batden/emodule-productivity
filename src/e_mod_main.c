@@ -490,7 +490,8 @@ _e_mod_main_intervals_get()
 
    iv.id = 0;
    iv.lock = 0;
-   iv.break_min = 10;
+   iv.break_min_x = 10;
+   iv.break_min_y = 50;
    iv.start.hour = 8;
    iv.start.min = 0;
    iv.start.sec = 0;
@@ -608,7 +609,8 @@ _config_init()
    intervals_edd = E_CONFIG_DD_NEW("Intervals", Intervals);
    E_CONFIG_VAL(D, T, id, INT);
    E_CONFIG_VAL(D, T, lock, INT);
-   E_CONFIG_VAL(D, T, break_min, INT);
+   E_CONFIG_VAL(D, T, break_min_x, INT);
+   E_CONFIG_VAL(D, T, break_min_y, INT);
    E_CONFIG_VAL(D, T, start.hour, INT);
    E_CONFIG_VAL(D, T, start.min, INT);
    E_CONFIG_VAL(D, T, start.sec, INT);
@@ -711,7 +713,8 @@ _e_mod_main_get_current_config(Config *cfg)
                               cfg->cur_iv.id += 1;
                             //cfg->cur_iv.lock = 0;
                             }*/
-                            cfg->cur_iv.break_min = iv->break_min;
+                            cfg->cur_iv.break_min_x = iv->break_min_x;
+                            cfg->cur_iv.break_min_y = iv->break_min_y;
                             cfg->cur_iv.start.hour = iv->start.hour;
                             cfg->cur_iv.start.min = iv->start.min;
                             cfg->cur_iv.start.sec = iv->start.sec;
@@ -780,7 +783,8 @@ e_mod_main_is_it_time_to_work()
    stop_t = mktime(&stm);
    cur_t = mktime(tm);
 
-  if((cur_t > start_t) && (cur_t < stop_t))
+  if((cur_t > start_t) && (cur_t < stop_t) &&
+     (productivity_conf->go_to_break == EINA_FALSE))
    return EINA_TRUE;
 
    return EINA_FALSE;

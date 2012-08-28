@@ -34,6 +34,7 @@ static Eina_Bool     _e_mod_config_window_event_border_focus_in_cb(void *data,
                                                                    int type, void *event);
 static Eina_Bool     _e_mod_config_window_event_border_focus_out_cb(void *data,
                                                                     int type, void *event);
+static Eina_Bool     _e_mod_config_window_break_timer(void *data);
 
 static unsigned int  _e_mod_config_windows_current_time_get();
 static void          _e_mod_config_window_hide(E_Border *bd);
@@ -41,6 +42,9 @@ static void          _e_mod_config_window_unhide(E_Border *bd);
 static void          _e_mod_config_window_remember_set(E_Border *bd);
 static void          _e_mod_config_window_remember_get(E_Border *bd);
 static void          _e_mod_config_window_remember_cleanup();
+
+
+
 Eina_Bool
 e_mod_config_windows_create_data(void *data __UNUSED__)
 {
@@ -87,6 +91,9 @@ e_mod_config_windows_create_data(void *data __UNUSED__)
 
    //Here we start to manage worktools and non-worktools
    e_mod_config_window_manager(cwl);
+   productivity_conf->timer = ecore_timer_loop_add(1.00, 
+                                                   _e_mod_config_window_break_timer, cwl);
+
    if(cwl->borders) return EINA_TRUE;
 
    return EINA_FALSE;
@@ -505,7 +512,6 @@ _e_mod_config_window_remember_get(E_Border *bd)
      }
 }
 
-
 static void
 _e_mod_config_window_remember_cleanup()
 {
@@ -522,14 +528,73 @@ _e_mod_config_window_remember_cleanup()
         EINA_LIST_FOREACH(bdl, ll, bd)
           {
              if(bd->client.netwm.pid > 0)
-                  if(bd->client.netwm.pid == rem->pid)
-                       pass = EINA_TRUE;
+               if(bd->client.netwm.pid == rem->pid)
+                 pass = EINA_TRUE;
           }
 
         if(pass == EINA_FALSE)
-             productivity_conf->remember_list = eina_list_remove(
-                productivity_conf->remember_list, rem);
+          productivity_conf->remember_list = eina_list_remove(
+             productivity_conf->remember_list, rem);
      }
    eina_list_free(bdl);
 }
 
+static Eina_Bool
+_e_mod_config_window_break_timer(void *data)
+{
+   E_Config_Window_List *cwl;
+   Config *cfg;
+   int sbx, sby; //sb = seconds to break, x= break_min_x, y= break_min_y
+
+   if(!(cfg = productivity_conf)) return EINA_FALSE;
+   if(!(cwl = data)) return EINA_FALSE;
+
+   if(!cfg->cur_iv.lock) return EINA_TRUE;
+
+   if(cfg->go_to_break == EINA_TRUE)
+     goto break_time;
+
+   if(!cfg->cur_iv.break_min_y) return EINA_TRUE;
+   sby = cfg->cur_iv.break_min_y * 59;
+
+   if(!cfg->secs_to_break)
+     cfg->secs_to_break = sby;
+   else
+     cfg->secs_to_break--;
+   
+   if(cfg->secs_to_break < 10)
+      DBG("Next Break in %d sec",cfg->secs_to_break);
+
+   if(cfg->secs_to_break)
+     return EINA_TRUE;
+
+   if(!cfg->secs_to_break)
+     {
+        CRI("GO TO BREAK!");
+        cfg->go_to_break = EINA_TRUE;
+        e_mod_config_window_manager(cwl);
+     }
+
+break_time:
+
+   if(!cfg->cur_iv.break_min_x) return EINA_TRUE;
+   sbx = cfg->cur_iv.break_min_x * 59;
+
+   if(!cfg->secs_to_break)
+     cfg->secs_to_break = sbx;
+   else
+     cfg->secs_to_break--;
+
+   if(cfg->secs_to_break < 10)
+      WRN("Break will be over in %dsec", cfg->secs_to_break);
+
+   if(cfg->secs_to_break)
+     return EINA_TRUE;
+
+   if(!cfg->secs_to_break)
+     {
+        CRI("GO TO WORK!");
+        cfg->go_to_break = EINA_FALSE;
+        e_mod_config_window_manager(cwl);
+     }
+}

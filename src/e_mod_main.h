@@ -107,6 +107,8 @@ struct _E_Config_Window_List
 {
    Eina_List *borders;
    Eina_List *cwldata_list;
+   Eina_List *urgent;
+   Eina_Bool urgent_bool;
 
    // e_mod_config_windows.c
    E_Config_Window_List_Data *cwldata;
@@ -126,8 +128,6 @@ struct _Config
 
    /*Work application list*/
    Eina_List *apps_list;
-   //Eina_List *iv_list;
-   //Eina_List *day_list;
    Eina_List *month_list;
    Eina_List *remember_list;
    Eina_List *handlers;

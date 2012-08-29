@@ -2,21 +2,21 @@
 #include "e_mod_config.h"
 
 #define EVENT_DBG_()
-#define EVENT_DBG() \
-{ \
-   if((ev->border->client.icccm.name) && \
-      (ev->border->client.icccm.class)) \
-     { \
-        DBG("Name:%s :: Class:%s", ev->border->client.icccm.name, \
-            ev->border->client.icccm.class); \
-        if((ev->border->client.netwm.pid > 0) && \
-           (ev->border->client.icccm.command.argc > 0) && \
-           (ev->border->client.icccm.command.argv)) \
-          { \
-             DBG(" ::CMD:%s :: PID:%d ", ev->border->client.icccm.command.argv[0], \
-                 ev->border->client.netwm.pid); \
-          } \
-     } \
+#define EVENT_DBG()                                                                 \
+{                                                                                   \
+   if((ev->border->client.icccm.name) &&                                            \
+      (ev->border->client.icccm.class))                                             \
+     {                                                                              \
+        DBG("Name:%s :: Class:%s", ev->border->client.icccm.name,                   \
+            ev->border->client.icccm.class);                                        \
+        if((ev->border->client.netwm.pid > 0) &&                                    \
+           (ev->border->client.icccm.command.argc > 0) &&                           \
+           (ev->border->client.icccm.command.argv))                                 \
+          {                                                                         \
+             DBG(" ::CMD:%s :: PID:%d ", ev->border->client.icccm.command.argv[0],  \
+                 ev->border->client.netwm.pid);                                     \
+          }                                                                         \
+     }                                                                              \
 }
 
 
@@ -34,6 +34,8 @@ static Eina_Bool     _e_mod_config_window_event_border_focus_in_cb(void *data,
                                                                    int type, void *event);
 static Eina_Bool     _e_mod_config_window_event_border_focus_out_cb(void *data,
                                                                     int type, void *event);
+static Eina_Bool     _e_mod_config_window_event_border_urgent_change_cb(void *data,
+                                                                        int type, void *event);
 static Eina_Bool     _e_mod_config_window_break_timer(void *data);
 
 static unsigned int  _e_mod_config_windows_current_time_get();
@@ -87,6 +89,11 @@ e_mod_config_windows_create_data(void *data)
        (E_EVENT_BORDER_PROPERTY, 
         _e_mod_config_window_event_border_property_cb, cfg->cwl));
 
+   cfg->handlers = eina_list_append
+      (cfg->handlers, ecore_event_handler_add
+       (E_EVENT_BORDER_URGENT_CHANGE, 
+        _e_mod_config_window_event_border_urgent_change_cb, cfg->cwl));
+
    cfg->cwl->borders = eina_list_clone(e_border_client_list());
 
    //Here we start to manage worktools and non-worktools
@@ -107,7 +114,7 @@ e_mod_timestamp_get()
 void
 e_mod_config_window_manager(E_Config_Window_List *cwl)
 {
-   Eina_List *l, *ll, *lll;
+   Eina_List *l, *ll, *lll, *ul;
    Config *cfg;
    Remember *rem;
    Efreet_Desktop *desk;
@@ -127,6 +134,20 @@ e_mod_config_window_manager(E_Config_Window_List *cwl)
              _e_mod_config_window_unhide(bd);
           }
         return;
+     }
+
+   if(cwl->urgent_bool == EINA_TRUE)
+     {
+        EINA_LIST_FOREACH(cwl->urgent, ul, bd)
+          {
+             if(bd)
+               {
+                  INF("window manager found urgent window:%s",bd->client.icccm.name);
+                  _e_mod_config_window_remember_get(bd);
+                  _e_mod_config_window_unhide(bd);
+                  return;
+               }
+          }
      }
 
    EINA_LIST_FOREACH(cwl->borders, l, bd)
@@ -176,6 +197,7 @@ e_mod_config_window_manager(E_Config_Window_List *cwl)
                                                                bd->client.icccm.class);
           }
 
+
         /*//CRI("!Name:%s , Class:%s", bd->client.icccm.name, bd->client.icccm.class);
           if(bd->client.icccm.command.argv)
           {
@@ -198,46 +220,46 @@ e_mod_config_window_manager(E_Config_Window_List *cwl)
              e_border_act_close_begin(bd);
           }
 
-   // If the border has the correct .desktop file, we will do comparison to our worktools application
-   // list [cfg->apps], if we find a match [m] = EINA_TRUE.
-   if(bd->desktop)
-     {
-        //CRI("Name:%s , Class:%s", bd->client.icccm.name, bd->client.icccm.class);
-        EINA_LIST_FOREACH(cfg->apps_list, ll, desk)
+        // If the border has the correct .desktop file, we will do comparison to our worktools application
+        // list [cfg->apps], if we find a match [m] = EINA_TRUE.
+        if(bd->desktop)
           {
-             if(desk->name)
+             //CRI("Name:%s , Class:%s", bd->client.icccm.name, bd->client.icccm.class);
+             EINA_LIST_FOREACH(cfg->apps_list, ll, desk)
                {
-                  if ((strncmp(desk->name,bd->desktop->name, sizeof(desk->name)) == 0 ) &&
-                      (strncmp(desk->orig_path,bd->desktop->orig_path, sizeof(desk->orig_path)) == 0 ))
+                  if(desk->name)
                     {
-                        //DBG("Name:%s , Orig_Path:%s", desk->name, desk->orig_path);
-                        m = EINA_TRUE;
-                        EINA_LIST_FOREACH(productivity_conf->remember_list, lll, rem)
-                          {
-                             if(!rem) continue;
-                             
-                             if(rem->pid == bd->client.netwm.pid)
-                               {
-                                  _e_mod_config_window_unhide(bd);
-                                  productivity_conf->remember_list = 
-                                     eina_list_remove(productivity_conf->remember_list, rem);
-                               }
-                          }
+                       if ((strncmp(desk->name,bd->desktop->name, sizeof(desk->name)) == 0 ) &&
+                           (strncmp(desk->orig_path,bd->desktop->orig_path, sizeof(desk->orig_path)) == 0 ))
+                         {
+                            //DBG("Name:%s , Orig_Path:%s", desk->name, desk->orig_path);
+                            m = EINA_TRUE;
+                            EINA_LIST_FOREACH(productivity_conf->remember_list, lll, rem)
+                              {
+                                 if(!rem) continue;
+
+                                 if(rem->pid == bd->client.netwm.pid)
+                                   {
+                                      _e_mod_config_window_unhide(bd);
+                                      productivity_conf->remember_list = 
+                                         eina_list_remove(productivity_conf->remember_list, rem);
+                                   }
+                              }
+                         }
                     }
+               }
+
+             // if [m] is false , this means the application IS NOT in our worktools list, so we hide it!
+             if (m == EINA_FALSE)
+               {
+                  //DBG("HIDING APPLICATON:%s", bd->desktop->name);
+                  if(bd) _e_mod_config_window_remember_set(bd); 
+                  if(bd) _e_mod_config_window_hide(bd);
                }
           }
 
-        // if [m] is false , this means the application IS NOT in our worktools list, so we hide it!
-        if (m == EINA_FALSE)
-          {
-             //DBG("HIDING APPLICATON:%s", bd->desktop->name);
-             if(bd) _e_mod_config_window_remember_set(bd); 
-             if(bd) _e_mod_config_window_hide(bd);
-          }
+        m = EINA_FALSE;
      }
-
-   m = EINA_FALSE;
-}
 } 
 
 /***********************************************************************************
@@ -270,7 +292,7 @@ _e_mod_config_window_unhide(E_Border *bd)
 
    if(bd->lock_user_iconify)
      bd->lock_user_iconify = 0;
-   
+
    if(bd->iconic)
      e_border_uniconify(bd);
    return;
@@ -346,7 +368,7 @@ _e_mod_config_window_event_border_remove_cb(void *data, int type __UNUSED__, voi
 }
 
 static Eina_Bool
-_e_mod_config_window_event_border_iconify_cb(void *data __UNUSED__, int type __UNUSED__, void *event)
+_e_mod_config_window_event_border_iconify_cb(void *data, int type __UNUSED__, void *event)
 {
    E_Event_Border_Iconify *ev;
    E_Config_Window_List *cwl;
@@ -360,7 +382,7 @@ _e_mod_config_window_event_border_iconify_cb(void *data __UNUSED__, int type __U
 }
 
 static Eina_Bool
-_e_mod_config_window_event_border_uniconify_cb(void *data __UNUSED__, int type __UNUSED__, void *event)
+_e_mod_config_window_event_border_uniconify_cb(void *data, int type __UNUSED__, void *event)
 {
    E_Event_Border_Uniconify *ev;
    E_Config_Window_List *cwl;
@@ -374,35 +396,49 @@ _e_mod_config_window_event_border_uniconify_cb(void *data __UNUSED__, int type _
 }
 
 static Eina_Bool
-_e_mod_config_window_event_border_focus_in_cb(void *data __UNUSED__, int type __UNUSED__, void *event)
+_e_mod_config_window_event_border_focus_in_cb(void *data, int type __UNUSED__, void *event)
 {
    E_Event_Border_Focus_In *ev;
    E_Config_Window_List *cwl;
 
    if(!(cwl = data)) return;
    ev = event;
-
    EVENT_DBG();
+
    e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
 
 static Eina_Bool
-_e_mod_config_window_event_border_focus_out_cb(void *data __UNUSED__, int type __UNUSED__, void *event)
+_e_mod_config_window_event_border_focus_out_cb(void *data, int type __UNUSED__, void *event)
 {
    E_Event_Border_Focus_Out *ev;
    E_Config_Window_List *cwl;
+   E_Border *bd;
+   Eina_List *l;
 
    if(!(cwl = data)) return;
    ev = event;
 
    EVENT_DBG();
+   
+   if(cwl->urgent_bool == EINA_TRUE)
+     {
+        EINA_LIST_FOREACH(cwl->urgent, l, bd)
+             if(bd == ev->border)
+               {
+                  CRI("i am now focused on the urgent window");
+                  cwl->urgent = eina_list_remove(cwl->urgent, bd);
+                  cwl->urgent_bool = EINA_FALSE;
+               }
+     }
+
    e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
 
 static Eina_Bool
-_e_mod_config_window_event_border_property_cb(void *data __UNUSED__, int type __UNUSED__, void *event)
+_e_mod_config_window_event_border_property_cb(void *data, int type __UNUSED__, void *event)
 {
    E_Event_Border_Property *ev;
    E_Border *border;
@@ -415,6 +451,24 @@ _e_mod_config_window_event_border_property_cb(void *data __UNUSED__, int type __
    return EINA_TRUE;
 }
 
+static Eina_Bool
+_e_mod_config_window_event_border_urgent_change_cb(void *data, int type __UNUSED__, void *event)
+{
+   E_Event_Border_Urgent_Change *ev;
+   E_Border *border;
+   E_Config_Window_List *cwl;
+
+   if(!(cwl = data)) return;
+   ev = event;
+
+   EVENT_DBG();
+   cwl->urgent = eina_list_append(cwl->urgent, ev->border);
+
+   cwl->urgent_bool = EINA_TRUE;
+
+   e_mod_config_window_manager(cwl);
+   return EINA_TRUE;
+}
 /*
  * Gets the current time in seconds, it's used to calculate, the time an application opens
  * and the time the application is closed, this allows us to track how long the application was

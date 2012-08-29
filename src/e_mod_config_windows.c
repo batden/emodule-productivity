@@ -1,19 +1,19 @@
 #include <e.h>
 #include "e_mod_config.h"
 
-#define EVENT_INF_()
-#define EVENT_INF() \
+#define EVENT_DBG_()
+#define EVENT_DBG() \
 { \
    if((ev->border->client.icccm.name) && \
       (ev->border->client.icccm.class)) \
      { \
-        INF("Name:%s :: Class:%s", ev->border->client.icccm.name, \
+        DBG("Name:%s :: Class:%s", ev->border->client.icccm.name, \
             ev->border->client.icccm.class); \
         if((ev->border->client.netwm.pid > 0) && \
            (ev->border->client.icccm.command.argc > 0) && \
            (ev->border->client.icccm.command.argv)) \
           { \
-             INF(" ::CMD:%s :: PID:%d ", ev->border->client.icccm.command.argv[0], \
+             DBG(" ::CMD:%s :: PID:%d ", ev->border->client.icccm.command.argv[0], \
                  ev->border->client.netwm.pid); \
           } \
      } \
@@ -279,7 +279,7 @@ _e_mod_config_window_event_border_add_cb(void *data, int type __UNUSED__, void *
    cwl->cwldata_list = eina_list_append(cwl->cwldata_list, cwldata);
    cwl->borders = eina_list_append(cwl->borders, ev->border);
 
-   EVENT_INF(); 
+   EVENT_DBG(); 
    e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
@@ -321,7 +321,7 @@ _e_mod_config_window_event_border_remove_cb(void *data, int type __UNUSED__, voi
                cwl->cwldata_list = eina_list_remove(cwl->cwldata_list, cwldata);
             }
      }
-   EVENT_INF();
+   EVENT_DBG();
    e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
@@ -334,8 +334,8 @@ _e_mod_config_window_event_border_iconify_cb(void *data __UNUSED__, int type __U
 
    if(!(cwl = data)) return;
 
-   //Using EVENT_INF here causes segf
-   //EVENT_INF();
+   //Using EVENT_DBG here causes segf
+   //EVENT_DBG();
    e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
@@ -349,7 +349,7 @@ _e_mod_config_window_event_border_uniconify_cb(void *data __UNUSED__, int type _
    if(!(cwl = data)) return;
    ev = event;
 
-   EVENT_INF();
+   EVENT_DBG();
    e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
@@ -363,7 +363,7 @@ _e_mod_config_window_event_border_focus_in_cb(void *data __UNUSED__, int type __
    if(!(cwl = data)) return;
    ev = event;
 
-   EVENT_INF();
+   EVENT_DBG();
    e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
@@ -377,7 +377,7 @@ _e_mod_config_window_event_border_focus_out_cb(void *data __UNUSED__, int type _
    if(!(cwl = data)) return;
    ev = event;
 
-   EVENT_INF();
+   EVENT_DBG();
    e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
@@ -392,7 +392,7 @@ _e_mod_config_window_event_border_property_cb(void *data __UNUSED__, int type __
    if(!(cwl = data)) return;
    ev = event;
 
-   //EVENT_INF();
+   //EVENT_DBG();
    return EINA_TRUE;
 }
 

@@ -99,8 +99,6 @@ e_mod_config_schedule_new(Evas_Object *otb, Evas *evas, E_Config_Dialog_Data *cf
   
    hbx = elm_box_add(bx);
    elm_box_horizontal_set(hbx, EINA_TRUE);
-   evas_object_size_hint_weight_set(bx, EVAS_HINT_FILL, EVAS_HINT_EXPAND);
-   evas_object_size_hint_align_set(bx, EVAS_HINT_FILL, EVAS_HINT_FILL);
    elm_box_pack_end(bx, hbx);
    evas_object_show(hbx);
    

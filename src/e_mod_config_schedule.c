@@ -457,10 +457,10 @@ csd->start_time.sec  = tm->tm_sec;
    csd->start_time.min += DELAY_START_MIN - 59;
    csd->start_time.hour += 1;
    }
-
+*/
    csd->stop_time.hour = tm->tm_hour;
    csd->stop_time.min  = tm->tm_min;
-   csd->stop_time.sec  = tm->tm_sec;*/
+   csd->stop_time.sec  = tm->tm_sec;
 
    // Stop Working time, here we calculate the time we need to end work
    // using DEFAULT_WORK_HOURS

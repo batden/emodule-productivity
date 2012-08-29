@@ -23,6 +23,7 @@ static void _e_mod_config_schedule_clock_fill_delay(E_Config_Schedule_Data *csd)
 static void _e_mod_config_schedule_lock_update(E_Config_Schedule_Data *csd);
 static void _e_mod_config_schedule_productivity_conf_update(Config *cfg,
                                                             E_Config_Dialog_Data *cfdata);
+static void _e_mod_config_schedule_break_time_label_update(E_Config_Schedule_Data *csd);
 
 static Eina_Bool e_mod_config_schedule_clock_fill_delay(void *data);
 static Intervals _e_mod_config_schedule_intervals_conf_get(E_Config_Dialog_Data *cfdata);
@@ -91,11 +92,12 @@ e_mod_config_schedule_new(Evas_Object *otb, Evas *evas, E_Config_Dialog_Data *cf
    elm_box_pack_end(bx, cfdata->schedule.stop_clk);
    evas_object_show(cfdata->schedule.stop_clk);
 
-   label = elm_label_add(bx);
-   elm_object_text_set(label, "Minutes of Break for Minutes of Work");
-   evas_object_resize(label, 200, 25);
-   elm_box_pack_end(bx, label);
-   evas_object_show(label);
+   cfdata->schedule.label = elm_label_add(bx);
+   //elm_object_text_set(label, "Minutes of Break for Minutes of Work");
+   _e_mod_config_schedule_break_time_label_update(&cfdata->schedule);
+   evas_object_resize(cfdata->schedule.label, 200, 25);
+   elm_box_pack_end(bx, cfdata->schedule.label);
+   evas_object_show(cfdata->schedule.label);
 
    hbx = elm_box_add(bx);
    elm_box_horizontal_set(hbx, EINA_TRUE);
@@ -361,6 +363,7 @@ _e_mod_config_schedule_break_x_time_cb(void *data, Evas_Object *obj, void *event
    if(!(csd = data)) return;
 
    csd->break_min_x = round(elm_slider_value_get(obj));    
+   _e_mod_config_schedule_break_time_label_update(csd);
 }
 
 static void
@@ -370,7 +373,19 @@ _e_mod_config_schedule_break_y_time_cb(void *data, Evas_Object *obj, void *event
 
    if(!(csd = data)) return;
 
-   csd->break_min_y = round(elm_slider_value_get(obj));    
+   csd->break_min_y = round(elm_slider_value_get(obj));
+   _e_mod_config_schedule_break_time_label_update(csd);
+}
+
+static void
+_e_mod_config_schedule_break_time_label_update(E_Config_Schedule_Data *csd)
+{
+   char buf[1024];
+   
+   snprintf(buf, sizeof(buf), "%d Minutes of Break for %d Minutes of Work",
+            csd->break_min_x, csd->break_min_y);
+   
+   elm_object_text_set(csd->label, buf);
 }
 
 static Eina_Bool

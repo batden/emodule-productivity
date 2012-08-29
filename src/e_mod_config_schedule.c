@@ -114,7 +114,7 @@ e_mod_config_schedule_new(Evas_Object *otb, Evas *evas, E_Config_Dialog_Data *cf
  
    cfdata->schedule.break_y = elm_slider_add(hbx);
    elm_slider_unit_format_set(cfdata->schedule.break_y, "%1.0f Minutes");
-   elm_slider_min_max_set(cfdata->schedule.break_y, 0, 360);
+   elm_slider_min_max_set(cfdata->schedule.break_y, 0, 40);
    elm_slider_value_set(cfdata->schedule.break_y,cfdata->schedule.break_min_y);
    elm_box_pack_end(hbx, cfdata->schedule.break_y);
    evas_object_show(cfdata->schedule.break_y);

@@ -16,9 +16,9 @@ static void _stop_clock_cb(void *data, Evas_Object *obj, void *event_info);
 static void _e_mod_config_schedule_start_working_cb(void *data, void *data2);
 static void _e_mod_config_schedule_stop_working_cb(void *data, void *data2);
 static void _e_mod_config_schedule_break_x_time_cb(void *data, Evas_Object *obj,
-                                                 void *event_info);
+                                                   void *event_info);
 static void _e_mod_config_schedule_break_y_time_cb(void *data, Evas_Object *obj,
-                                                 void *event_info);
+                                                   void *event_info);
 static void _e_mod_config_schedule_clock_fill_delay(E_Config_Schedule_Data *csd);
 static void _e_mod_config_schedule_lock_update(E_Config_Schedule_Data *csd);
 static void _e_mod_config_schedule_productivity_conf_update(Config *cfg,
@@ -96,12 +96,12 @@ e_mod_config_schedule_new(Evas_Object *otb, Evas *evas, E_Config_Dialog_Data *cf
    evas_object_resize(label, 200, 25);
    elm_box_pack_end(bx, label);
    evas_object_show(label);
-  
+
    hbx = elm_box_add(bx);
    elm_box_horizontal_set(hbx, EINA_TRUE);
    elm_box_pack_end(bx, hbx);
    evas_object_show(hbx);
-   
+
    cfdata->schedule.break_x = elm_slider_add(hbx);
    elm_slider_unit_format_set(cfdata->schedule.break_x, "%1.0f Minutes");
    elm_slider_min_max_set(cfdata->schedule.break_x, 0, 30);
@@ -111,7 +111,7 @@ e_mod_config_schedule_new(Evas_Object *otb, Evas *evas, E_Config_Dialog_Data *cf
    evas_object_smart_callback_add(cfdata->schedule.break_x,
                                   "changed", _e_mod_config_schedule_break_x_time_cb,
                                   &cfdata->schedule);
- 
+
    cfdata->schedule.break_y = elm_slider_add(hbx);
    elm_slider_unit_format_set(cfdata->schedule.break_y, "%1.0f Minutes");
    elm_slider_min_max_set(cfdata->schedule.break_y, 0, 40);
@@ -169,7 +169,7 @@ e_mod_config_schedule_save_config(E_Config_Dialog_Data *cfdata)
    //Get break min time
    cfdata->schedule.break_min_x = 
       round(elm_slider_value_get(cfdata->schedule.break_x));
-    cfdata->schedule.break_min_y = 
+   cfdata->schedule.break_min_y = 
       round(elm_slider_value_get(cfdata->schedule.break_y));
 
    productivity_conf->timestamp = e_mod_timestamp_get();
@@ -188,7 +188,7 @@ e_mod_config_schedule_save_config(E_Config_Dialog_Data *cfdata)
                               {
                                  //Remove old list.
                                  /*INF("iv->lock:%d, cfdata->schedule.lock:%d",
-                                     iv->lock, cfdata->schedule.lock);*/
+                                   iv->lock, cfdata->schedule.lock);*/
 
                                  d->iv_list = eina_list_remove(d->iv_list, iv);
                               }
@@ -234,11 +234,11 @@ _start_clock_cb(void *data, Evas_Object *obj, void *event_info)
    elm_clock_time_get(obj, &csd->start_time.hour,
                       &csd->start_time.min,
                       &csd->start_time.sec);
-/*
-   CRI("START_REAL:%d:%d:%d",tm->tm_hour, tm->tm_min, tm->tm_sec);
-   CRI("START_SELE:%d:%d:%d",csd->start_time.hour, csd->start_time.min,
-       csd->start_time.sec);
-*/
+   /*
+      CRI("START_REAL:%d:%d:%d",tm->tm_hour, tm->tm_min, tm->tm_sec);
+      CRI("START_SELE:%d:%d:%d",csd->start_time.hour, csd->start_time.min,
+      csd->start_time.sec);
+      */
    /*
       while(csd->start_time.hour < tm->tm_hour)
       {
@@ -271,11 +271,11 @@ _stop_clock_cb(void *data, Evas_Object *obj, void *event_info)
    elm_clock_time_get(obj, &csd->stop_time.hour,
                       &csd->stop_time.min,
                       &csd->stop_time.sec);
-/*
-   CRI("STOP_REAL:%d:%d:%d",tm->tm_hour, tm->tm_min, tm->tm_sec);
-   CRI("STOP_SELE:%d:%d:%d",csd->stop_time.hour, csd->stop_time.min,
-       csd->stop_time.sec);
-*/
+   /*
+      CRI("STOP_REAL:%d:%d:%d",tm->tm_hour, tm->tm_min, tm->tm_sec);
+      CRI("STOP_SELE:%d:%d:%d",csd->stop_time.hour, csd->stop_time.min,
+      csd->stop_time.sec);
+      */
    /*
       while(csd->stop_time.hour < tm->tm_hour)
       {
@@ -405,30 +405,30 @@ _e_mod_config_schedule_clock_fill_delay(E_Config_Schedule_Data *csd)
    csd->stop_time.sec = productivity_conf->cur_iv.stop.sec;
 
    if(csd->lock == 1) return;
+   /*
+      DBG("\nID:%d, LOCK:%d, Break_X:%d, Break_Y:%d StartH:%d, StartM:%d, 
+StartS:%d, StopH:%d, StopM:%d, StopS:%d",csd->id, csd->lock, csd->break_min_x,
+csd->break_min_y,csd->start_time.hour, csd->start_time.min, csd->start_time.sec,
+csd->stop_time.hour, csd->stop_time.min, csd->stop_time.sec);
 
-   DBG("\nID:%d, LOCK:%d, Break_X:%d, Break_Y:%d StartH:%d, StartM:%d, \
-       StartS:%d, StopH:%d, StopM:%d, StopS:%d",csd->id, csd->lock, csd->break_min_x,
-       csd->break_min_y,csd->start_time.hour, csd->start_time.min, csd->start_time.sec,
-       csd->stop_time.hour, csd->stop_time.min, csd->stop_time.sec);
-
-   csd->start_time.hour = tm->tm_hour;
-   csd->start_time.min  = tm->tm_min;
-   csd->start_time.sec  = tm->tm_sec;
+csd->start_time.hour = tm->tm_hour;
+csd->start_time.min  = tm->tm_min;
+csd->start_time.sec  = tm->tm_sec;
 
    // Start Working initial time.
    if((tm->tm_min + DELAY_START_MIN) < 59)
-     {
-        csd->start_time.min += DELAY_START_MIN;
-     }
+   {
+   csd->start_time.min += DELAY_START_MIN;
+   }
    else
-     {
-        csd->start_time.min += DELAY_START_MIN - 59;
-        csd->start_time.hour += 1;
-     }
+   {
+   csd->start_time.min += DELAY_START_MIN - 59;
+   csd->start_time.hour += 1;
+   }
 
    csd->stop_time.hour = tm->tm_hour;
    csd->stop_time.min  = tm->tm_min;
-   csd->stop_time.sec  = tm->tm_sec;
+   csd->stop_time.sec  = tm->tm_sec;*/
 
    // Stop Working time, here we calculate the time we need to end work
    // using DEFAULT_WORK_HOURS

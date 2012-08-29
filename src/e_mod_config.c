@@ -37,7 +37,7 @@ e_int_config_productivity_module(E_Container *con, const char *params)
                              "advanced/productivity", buf, 0, v, NULL);
 
    e_dialog_resizable_set(cfd->dia, 1);
-   e_win_size_min_set(cfd->dia->win, 333, 400);
+   e_win_size_min_set(cfd->dia->win, 400, 400);
    e_win_resize(cfd->dia->win, 400, 400);
    productivity_conf->cfd = cfd;
    return cfd;

@@ -84,6 +84,7 @@ Eina_List   *e_mod_config_worktools_selected_get();
 //    e_mod_config_windows.c
 unsigned int e_mod_timestamp_get();
 void         e_mod_config_window_manager(E_Config_Window_List *cwl);
+void         e_mod_config_window_remember_cleanup();
 
 //    e_mod_config_schedule.c
 Eina_Bool    e_mod_config_schedule_create_data(E_Config_Dialog_Data *cfdata);

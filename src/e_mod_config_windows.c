@@ -41,7 +41,6 @@ static void          _e_mod_config_window_hide(E_Border *bd);
 static void          _e_mod_config_window_unhide(E_Border *bd);
 static void          _e_mod_config_window_remember_set(E_Border *bd);
 static void          _e_mod_config_window_remember_get(E_Border *bd);
-static void          _e_mod_config_window_remember_cleanup();
 
 Eina_Bool
 e_mod_config_windows_create_data(void *data)
@@ -109,8 +108,9 @@ e_mod_timestamp_get()
 void
 e_mod_config_window_manager(E_Config_Window_List *cwl)
 {
-   Eina_List *l, *ll;
+   Eina_List *l, *ll, *lll;
    Config *cfg;
+   Remember *rem;
    Efreet_Desktop *desk;
    E_Border *bd;
    Eina_Bool m = EINA_FALSE;
@@ -132,20 +132,14 @@ e_mod_config_window_manager(E_Config_Window_List *cwl)
 
    EINA_LIST_FOREACH(cwl->borders, l, bd)
      {
-        //DBG("NAME:%s", bd->client.icccm.name);
-        //If application name is E [Enlightenment] we skip to the next app.
         if(bd->client.icccm.name)
           if(strncmp(bd->client.icccm.name, "E", sizeof("E")) == 0)
             continue;
 
-        //If application class is _config:: [Enlightenment Config Dialog] we skip to the next app.
         if(bd->client.icccm.class)
           if(strncmp(bd->client.icccm.class, "_config::", 8) == 0)
             continue;
 
-        //If the user opens an application from the terminal and e17 CAN NOT find the matching 
-        //.desktop file for this application OR such .desktop file does not exists the bd->desktop
-        //will return NULL;
         if (!bd->desktop)
           {
              bd->desktop = efreet_util_desktop_exec_find(bd->client.icccm.name);
@@ -214,10 +208,23 @@ e_mod_config_window_manager(E_Config_Window_List *cwl)
           {
              if(desk->name)
                {
-                  //DBG("Name:%s , Orig_Path:%s", desk->name, desk->orig_path);
                   if ((strncmp(desk->name,bd->desktop->name, sizeof(desk->name)) == 0 ) &&
                       (strncmp(desk->orig_path,bd->desktop->orig_path, sizeof(desk->orig_path)) == 0 ))
-                    m = EINA_TRUE;
+                    {
+                        //DBG("Name:%s , Orig_Path:%s", desk->name, desk->orig_path);
+                        m = EINA_TRUE;
+                        EINA_LIST_FOREACH(productivity_conf->remember_list, lll, rem)
+                          {
+                             if(!rem) continue;
+                             
+                             if(rem->pid == bd->client.netwm.pid)
+                               {
+                                  _e_mod_config_window_unhide(bd);
+                                  productivity_conf->remember_list = 
+                                     eina_list_remove(productivity_conf->remember_list, rem);
+                               }
+                          }
+                    }
                }
           }
 
@@ -256,9 +263,6 @@ _e_mod_config_window_hide(E_Border *bd)
 static void
 _e_mod_config_window_unhide(E_Border *bd)
 {
-   if(bd->iconic)
-     e_border_uniconify(bd);
-
    if(bd->client.netwm.state.skip_pager)
      bd->client.netwm.state.skip_pager = 0;
 
@@ -267,7 +271,9 @@ _e_mod_config_window_unhide(E_Border *bd)
 
    if(bd->lock_user_iconify)
      bd->lock_user_iconify = 0;
-
+   
+   if(bd->iconic)
+     e_border_uniconify(bd);
    return;
 }
 
@@ -454,6 +460,7 @@ _e_mod_config_window_remember_set(E_Border *bd)
 
    if(exists == EINA_TRUE) return;
 
+   e_mod_config_window_remember_cleanup();
    if(rem)
      {
         if(rem->name)
@@ -488,8 +495,6 @@ _e_mod_config_window_remember_set(E_Border *bd)
 
    productivity_conf->remember_list = eina_list_append(
       productivity_conf->remember_list, rem);
-
-   _e_mod_config_window_remember_cleanup();
 }
 
 static void
@@ -526,10 +531,11 @@ _e_mod_config_window_remember_get(E_Border *bd)
                }
           }
      }
+   e_mod_config_window_remember_cleanup();
 }
 
-static void
-_e_mod_config_window_remember_cleanup()
+void
+e_mod_config_window_remember_cleanup()
 {
    Eina_List *l, *ll;
    Eina_List *bdl;

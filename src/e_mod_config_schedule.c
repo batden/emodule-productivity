@@ -488,6 +488,7 @@ _e_mod_config_schedule_lock_update(E_Config_Schedule_Data *csd)
         elm_clock_edit_mode_set(csd->start_clk, digedit);
         elm_clock_edit_mode_set(csd->stop_clk, digedit);
         elm_object_disabled_set(csd->break_x, EINA_TRUE);
+        elm_object_disabled_set(csd->break_y, EINA_TRUE);
 
         if(e_widget_disabled_get(csd->start_btn) == EINA_FALSE)
           e_widget_disabled_set(csd->start_btn, EINA_TRUE);
@@ -500,6 +501,7 @@ _e_mod_config_schedule_lock_update(E_Config_Schedule_Data *csd)
         elm_clock_edit_mode_set(csd->start_clk, digedit);
         elm_clock_edit_mode_set(csd->stop_clk, digedit);
         elm_object_disabled_set(csd->break_x, EINA_FALSE);
+        elm_object_disabled_set(csd->break_y, EINA_FALSE);
 
         if(e_widget_disabled_get(csd->start_btn) == EINA_TRUE)
           e_widget_disabled_set(csd->start_btn, EINA_FALSE);

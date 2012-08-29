@@ -104,22 +104,26 @@ e_mod_config_schedule_new(Evas_Object *otb, Evas *evas, E_Config_Dialog_Data *cf
 
    cfdata->schedule.break_x = elm_slider_add(hbx);
    elm_slider_unit_format_set(cfdata->schedule.break_x, "%1.0f Minutes");
+   elm_slider_indicator_format_set(cfdata->schedule.break_x, "%1.0f");
    elm_slider_min_max_set(cfdata->schedule.break_x, 0, 30);
    elm_slider_value_set(cfdata->schedule.break_x,cfdata->schedule.break_min_x);
+   elm_slider_span_size_set(cfdata->schedule.break_x, 60);
    elm_box_pack_end(hbx, cfdata->schedule.break_x);
    evas_object_show(cfdata->schedule.break_x);
    evas_object_smart_callback_add(cfdata->schedule.break_x,
-                                  "changed", _e_mod_config_schedule_break_x_time_cb,
+                                  "delay,changed", _e_mod_config_schedule_break_x_time_cb,
                                   &cfdata->schedule);
 
    cfdata->schedule.break_y = elm_slider_add(hbx);
    elm_slider_unit_format_set(cfdata->schedule.break_y, "%1.0f Minutes");
-   elm_slider_min_max_set(cfdata->schedule.break_y, 0, 40);
+   elm_slider_indicator_format_set(cfdata->schedule.break_y, "%1.0f");
+   elm_slider_min_max_set(cfdata->schedule.break_y, 0, 180);
    elm_slider_value_set(cfdata->schedule.break_y,cfdata->schedule.break_min_y);
+   elm_slider_span_size_set(cfdata->schedule.break_y, 160);
    elm_box_pack_end(hbx, cfdata->schedule.break_y);
    evas_object_show(cfdata->schedule.break_y);
    evas_object_smart_callback_add(cfdata->schedule.break_y,
-                                  "changed", _e_mod_config_schedule_break_y_time_cb,
+                                  "delay,changed", _e_mod_config_schedule_break_y_time_cb,
                                   &cfdata->schedule);
 
    cfdata->schedule.start_btn = e_widget_button_add(evas, _("Test Start Working"), "list-add",
@@ -137,6 +141,7 @@ e_mod_config_schedule_new(Evas_Object *otb, Evas *evas, E_Config_Dialog_Data *cf
 
    _e_mod_config_schedule_lock_update(&cfdata->schedule);
 }
+
 
 Eina_Bool
 e_mod_config_schedule_save_config(E_Config_Dialog_Data *cfdata)
@@ -356,7 +361,6 @@ _e_mod_config_schedule_break_x_time_cb(void *data, Evas_Object *obj, void *event
    if(!(csd = data)) return;
 
    csd->break_min_x = round(elm_slider_value_get(obj));    
-   INF("Break Time:%d",csd->break_min_x);
 }
 
 static void
@@ -367,7 +371,6 @@ _e_mod_config_schedule_break_y_time_cb(void *data, Evas_Object *obj, void *event
    if(!(csd = data)) return;
 
    csd->break_min_y = round(elm_slider_value_get(obj));    
-   INF("Break Time:%d",csd->break_min_y);
 }
 
 static Eina_Bool

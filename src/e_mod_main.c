@@ -248,7 +248,7 @@ e_modapi_shutdown(E_Module *m)
         if(rem->desktop_file)
           eina_stringshare_del(rem->command);
      }
-   
+
    Month *mon;
    Day *d;
    EINA_LIST_FREE(productivity_conf->month_list, mon)
@@ -267,7 +267,7 @@ e_modapi_shutdown(E_Module *m)
         mon->day_list = eina_list_remove_list(
            mon->day_list, mon->day_list);
      }
-        
+
    if(productivity_conf->cur_month.name)
      eina_stringshare_del(productivity_conf->cur_month.name);
 
@@ -426,12 +426,12 @@ _productivity_conf_new(void)
 #define IFMODCFGEND }
 
    /* setup defaults */
-    IFMODCFG(0x008d);
+   IFMODCFG(0x008d);
    CRI("CREATING NEW CONFIG!!!");
    _e_mod_main_month_conf_item_get();
    productivity_conf->remember_list = eina_list_append(
       productivity_conf->remember_list, _e_mod_main_remember_get());
-    IFMODCFGEND;
+   IFMODCFGEND;
 
    /* update the version */
    productivity_conf->version = MOD_CONFIG_FILE_VERSION;
@@ -781,20 +781,20 @@ _e_mod_main_get_current_config(Config *cfg)
 
 time_t to_seconds(const char *date)
 {
-        struct tm storage={0,0,0,0,0,0,0,0,0};
-        char *p=NULL;
-        time_t retval=0;
+   struct tm storage={0,0,0,0,0,0,0,0,0};
+   char *p=NULL;
+   time_t retval=0;
 
-        p=(char *)strptime(date,"%d-%b-%Y",&storage);
-        if(p==NULL)
-        {
-                retval=0;
-        }
-        else
-        {
-                retval=mktime(&storage);
-        }
-        return retval;
+   p=(char *)strptime(date,"%d-%b-%Y",&storage);
+   if(p==NULL)
+     {
+        retval=0;
+     }
+   else
+     {
+        retval=mktime(&storage);
+     }
+   return retval;
 }
 
 Eina_Bool
@@ -813,7 +813,7 @@ e_mod_main_is_it_time_to_work()
 
    if(iv->lock == EINA_FALSE)
      return EINA_FALSE;
-   
+
    stm.tm_hour = iv->start.hour;
    stm.tm_min = iv->start.min;
    stm.tm_sec = iv->start.sec;
@@ -831,9 +831,9 @@ e_mod_main_is_it_time_to_work()
    stop_t = mktime(&stm);
    cur_t = mktime(tm);
 
-  if((cur_t > start_t) && (cur_t < stop_t) &&
-     (productivity_conf->go_to_break == EINA_FALSE))
-   return EINA_TRUE;
+   if((cur_t > start_t) && (cur_t < stop_t) &&
+      (productivity_conf->go_to_break == EINA_FALSE))
+     return EINA_TRUE;
 
    return EINA_FALSE;
 }

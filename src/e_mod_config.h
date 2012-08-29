@@ -2,8 +2,7 @@
 
 typedef struct _E_Config_Schedule_Data E_Config_Schedule_Data;
 typedef struct _E_Config_App_List E_Config_App_List;
-typedef struct _E_Config_Window_List_Data E_Config_Window_List_Data;
-typedef struct _E_Config_Window_List E_Config_Window_List;
+
 
 //    e_mod_config_worktools.c
 struct _E_Config_App_List
@@ -46,33 +45,8 @@ struct _E_Config_Dialog_Data
 
    // e_mod_config_schedule.c
    E_Config_Schedule_Data   schedule;
-
-   // e_mod_config_windows.c
-   E_Border                *border;
    Ecore_Timer             *clock_delay;
 };
-
-//    e_mod_config_windows.c
-struct _E_Config_Window_List_Data
-{
-   const char *name;
-   const char *command;
-   int pid;
-   long seconds;
-};
-
-//    e_mod_config_windows.c
-struct _E_Config_Window_List
-{
-   Eina_List *tasks;
-   Eina_List *borders;
-   Eina_List *cwldata_list;
-   Eina_List *items;
-
-   // e_mod_config_windows.c
-   E_Config_Window_List_Data *cwldata;
-};
-
 
 //    e_mod_config_worktools.c
 Evas_Object *e_mod_config_worktools_new(Evas_Object *otb, Evas *evas,
@@ -82,10 +56,7 @@ Eina_Bool    e_mod_config_worktools_save(E_Config_Dialog_Data *cfdata);
 Eina_Bool    e_mod_config_windows_create_data(void *data);
 Eina_List   *e_mod_config_worktools_selected_get();
 
-//    e_mod_config_windows.c
-unsigned int e_mod_timestamp_get();
-void         e_mod_config_window_manager(E_Config_Window_List *cwl);
-void         e_mod_config_window_remember_cleanup();
+
 
 //    e_mod_config_schedule.c
 Eina_Bool    e_mod_config_schedule_create_data(E_Config_Dialog_Data *cfdata);

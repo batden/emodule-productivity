@@ -303,6 +303,7 @@ _e_mod_config_worktools_add_cb(void *data, void *data2)
    e_widget_disabled_set(apps->o_del, EINA_TRUE);
 
    e_mod_config_worktools_save(cfdata);
+   e_config_save_queue();
 }
 
 /*
@@ -391,6 +392,7 @@ _e_mod_config_worktools_del_cb(void *data, void *data2)
    e_widget_disabled_set(apps->o_del, EINA_TRUE);
 
    e_mod_config_worktools_save(cfdata);
+   e_config_save_queue();
 }
 
 

@@ -172,6 +172,7 @@ e_modapi_init(E_Module *m)
    e_module_delayed_set(m, 3);
    //Load all work applications into productivity_conf->apps.
    productivity_conf->apps_list = e_mod_config_worktools_selected_get();
+   
    //Creates data, and adds callbacks
    e_mod_config_windows_create_data(productivity_conf);
 

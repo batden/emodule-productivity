@@ -49,53 +49,52 @@ e_mod_config_windows_create_data(void *data)
 
    if(!(cfg = data)) return EINA_FALSE;
 
-   E_Config_Window_List  *cwl;
 
-   cwl = E_NEW(E_Config_Window_List, 1);
+   cfg->cwl = E_NEW(E_Config_Window_List, 1);
 
    cfg->handlers = eina_list_append
       (cfg->handlers, ecore_event_handler_add
        (E_EVENT_BORDER_ADD, 
-        _e_mod_config_window_event_border_add_cb, cwl));
+        _e_mod_config_window_event_border_add_cb, cfg->cwl));
 
    cfg->handlers = eina_list_append
       (cfg->handlers, ecore_event_handler_add
        (E_EVENT_BORDER_REMOVE, 
-        _e_mod_config_window_event_border_remove_cb, cwl));
+        _e_mod_config_window_event_border_remove_cb, cfg->cwl));
 
    cfg->handlers = eina_list_append
       (cfg->handlers, ecore_event_handler_add
        (E_EVENT_BORDER_ICONIFY, 
-        _e_mod_config_window_event_border_iconify_cb, cwl));
+        _e_mod_config_window_event_border_iconify_cb, cfg->cwl));
 
    cfg->handlers = eina_list_append
       (cfg->handlers, ecore_event_handler_add
        (E_EVENT_BORDER_UNICONIFY, 
-        _e_mod_config_window_event_border_uniconify_cb, cwl));
+        _e_mod_config_window_event_border_uniconify_cb, cfg->cwl));
 
    cfg->handlers = eina_list_append
       (cfg->handlers, ecore_event_handler_add
        (E_EVENT_BORDER_FOCUS_IN, 
-        _e_mod_config_window_event_border_focus_in_cb, cwl));
+        _e_mod_config_window_event_border_focus_in_cb, cfg->cwl));
 
    cfg->handlers = eina_list_append
       (cfg->handlers, ecore_event_handler_add
        (E_EVENT_BORDER_FOCUS_OUT, 
-        _e_mod_config_window_event_border_focus_out_cb, cwl));
+        _e_mod_config_window_event_border_focus_out_cb, cfg->cwl));
 
    cfg->handlers = eina_list_append
       (cfg->handlers, ecore_event_handler_add
        (E_EVENT_BORDER_PROPERTY, 
-        _e_mod_config_window_event_border_property_cb, cwl));
+        _e_mod_config_window_event_border_property_cb, cfg->cwl));
 
-   cwl->borders = eina_list_clone(e_border_client_list());
+   cfg->cwl->borders = eina_list_clone(e_border_client_list());
 
    //Here we start to manage worktools and non-worktools
-   e_mod_config_window_manager(cwl);
+   e_mod_config_window_manager(cfg->cwl);
    productivity_conf->timer = 
-      ecore_timer_loop_add(1.00, _e_mod_config_window_break_timer, cwl);
+      ecore_timer_loop_add(1.00, _e_mod_config_window_break_timer, cfg->cwl);
 
-   if(cwl->borders) return EINA_TRUE;
+   if(cfg->cwl->borders) return EINA_TRUE;
 
    return EINA_FALSE;
 }

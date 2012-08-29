@@ -333,6 +333,8 @@ _e_mod_config_schedule_start_working_cb(void *data, void *data2)
    
    e_mod_config_schedule_save_config(cfdata);
    e_mod_config_worktools_save(cfdata);
+   e_mod_config_window_manager(productivity_conf->cwl);
+   e_config_save_queue();
 }
 
 static void
@@ -363,6 +365,8 @@ _e_mod_config_schedule_stop_working_cb(void *data, void *data2)
    
    e_mod_config_schedule_save_config(cfdata);
    e_mod_config_worktools_save(cfdata);
+   e_mod_config_window_manager(productivity_conf->cwl);
+   e_config_save_queue();
 }
 
 static void

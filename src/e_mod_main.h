@@ -40,7 +40,10 @@ extern int _productivity_log;
 
 typedef struct _Config Config;
 typedef struct _Config_Item Config_Item;
-typedef struct _Config_Schedule_Start Config_Schedule_Start;
+//typedef struct _Config_Schedule_Start Config_Schedule_Start;
+
+typedef struct _E_Config_Window_List_Data E_Config_Window_List_Data;
+typedef struct _E_Config_Window_List E_Config_Window_List;
 
 typedef struct _Month Month;
 typedef struct _Day   Day;
@@ -90,15 +93,27 @@ struct _Remember
    int desk_y;
 };
 
-/* Base config struct. Store Item Count, etc
- * 
- * *module (not written to disk) (E Interaction)
- * *cfd (not written to disk) (config dialog)
- * 
- * Store list of your items that you want to keep. (sorting)
- * Can define per-module config properties here.
- * 
- * Version used to know when user config too old */
+//    e_mod_config_windows.c
+struct _E_Config_Window_List_Data
+{
+   const char *name;
+   const char *command;
+   int pid;
+   long seconds;
+};
+
+//    e_mod_config_windows.c
+struct _E_Config_Window_List
+{
+   Eina_List *tasks;
+   Eina_List *borders;
+   Eina_List *cwldata_list;
+   Eina_List *items;
+
+   // e_mod_config_windows.c
+   E_Config_Window_List_Data *cwldata;
+};
+
 struct _Config 
 {
    E_Module *module;
@@ -126,6 +141,9 @@ struct _Config
    Month cur_month;
    Day cur_day;
    Intervals cur_iv;
+
+   // e_mod_config_windows.c
+   E_Config_Window_List *cwl;
 };
 
 /* This struct used to hold config for individual items from above list */
@@ -165,8 +183,10 @@ void e_mod_log_cb(const Eina_Log_Domain *d, Eina_Log_Level level, const char *fi
 extern Config *productivity_conf;
 void e_mod_main_reload_config();
 Eina_Bool e_mod_main_is_it_time_to_work();
-//          e_mod_config_windows.c
-Eina_Bool tasks_cb_window_focus_in(void *data, int type, void *event);
 
+//    e_mod_config_windows.c
+unsigned int e_mod_timestamp_get();
+void         e_mod_config_window_manager(E_Config_Window_List *cwl);
+void         e_mod_config_window_remember_cleanup();
 
 #endif

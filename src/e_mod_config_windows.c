@@ -185,8 +185,8 @@ e_mod_config_window_manager(E_Config_Window_List *cwl)
              //file to launch worktools :) 
              if(!bd->desktop)
                {
-                  //ERR("Unable to get a .desktop, giving up, will just hide this app");
-                  //_e_mod_config_window_hide(bd);
+                  ERR("Unable to get a .desktop, giving up, will now close %s",
+                      bd->client.icccm.name);
                   e_border_act_close_begin(bd);
                }
           }

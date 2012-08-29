@@ -309,9 +309,11 @@ static void
 _e_mod_config_schedule_start_working_cb(void *data, void *data2)
 {
    E_Config_Schedule_Data *csd;
+   E_Config_Dialog_Data *cfdata;
    unsigned int digedit;
 
    if(!(csd = data)) return;
+   if(!(cfdata = data2)) return;
 
    if(e_widget_disabled_get(csd->stop_btn) == EINA_TRUE)
      {
@@ -328,15 +330,20 @@ _e_mod_config_schedule_start_working_cb(void *data, void *data2)
           productivity_conf->secs_to_break = 0;
      }
    _e_mod_config_schedule_lock_update(csd);
+   
+   e_mod_config_schedule_save_config(cfdata);
+   e_mod_config_worktools_save(cfdata);
 }
 
 static void
 _e_mod_config_schedule_stop_working_cb(void *data, void *data2)
 {
    E_Config_Schedule_Data *csd;
+   E_Config_Dialog_Data *cfdata;
    unsigned int digedit;
 
    if(!(csd = data)) return;
+   if(!(cfdata = data2)) return;
 
    if(e_widget_disabled_get(csd->start_btn) == EINA_TRUE)
      {
@@ -353,6 +360,9 @@ _e_mod_config_schedule_stop_working_cb(void *data, void *data2)
           }
      }
    _e_mod_config_schedule_lock_update(csd);
+   
+   e_mod_config_schedule_save_config(cfdata);
+   e_mod_config_worktools_save(cfdata);
 }
 
 static void

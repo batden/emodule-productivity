@@ -91,12 +91,12 @@ e_mod_config_worktools_new(Evas_Object *otb, Evas *evas, E_Config_Dialog_Data *c
    e_widget_ilist_multi_select_set(cfdata->apps_user.o_list, EINA_TRUE);
    e_widget_table_object_append(ot, cfdata->apps_user.o_list, 0, 0, 2, 1, 1, 1, 1, 1);
    cfdata->apps_user.o_add = e_widget_button_add(evas, _("Add"), "list-add",
-            _e_mod_config_worktools_add_cb, &cfdata->apps_user, NULL);
+            _e_mod_config_worktools_add_cb, &cfdata->apps_user, cfdata);
    e_widget_disabled_set(cfdata->apps_user.o_add, EINA_TRUE);
    e_widget_table_object_append(ot, cfdata->apps_user.o_add, 0, 1, 1, 1, 1, 1, 1, 0);
    
    cfdata->apps_user.o_del = e_widget_button_add(evas, _("Remove"), "list-remove",
-            _e_mod_config_worktools_del_cb, &cfdata->apps_user, NULL);
+            _e_mod_config_worktools_del_cb, &cfdata->apps_user, cfdata);
    e_widget_disabled_set(cfdata->apps_user.o_del, EINA_TRUE);
    e_widget_table_object_append(ot, cfdata->apps_user.o_del, 1, 1, 1, 1, 1, 1, 1, 0);
    e_widget_toolbook_page_append(otb, NULL, _("Work Tools"), ot, 6, 1, 1, 1, 0.5, 0.0);
@@ -273,12 +273,14 @@ _e_mod_config_worktools_application_selected_list_cb(void *data)
 }
 
 static void
-_e_mod_config_worktools_add_cb(void *data, void *data2 __UNUSED__)
+_e_mod_config_worktools_add_cb(void *data, void *data2)
 {
+   E_Config_Dialog_Data *cfdata;
    E_Config_App_List *apps;
    const E_Ilist_Item *it;
    Eina_List *l;
 
+   if (!(cfdata = data2)) return;
    if (!(apps = data)) return;
    EINA_LIST_FOREACH(e_widget_ilist_items_get(apps->o_list), l, it)
      {
@@ -299,6 +301,8 @@ _e_mod_config_worktools_add_cb(void *data, void *data2 __UNUSED__)
    e_widget_ilist_unselect(apps->o_list);
    e_widget_disabled_set(apps->o_add, EINA_TRUE);
    e_widget_disabled_set(apps->o_del, EINA_TRUE);
+
+   e_mod_config_worktools_save(cfdata);
 }
 
 /*
@@ -357,12 +361,14 @@ _e_mod_config_worktools_save_config(E_Config_Dialog_Data *cfdata)
 }
 
 static void
-_e_mod_config_worktools_del_cb(void *data, void *data2 __UNUSED__)
+_e_mod_config_worktools_del_cb(void *data, void *data2)
 {
+   E_Config_Dialog_Data *cfdata;
    E_Config_App_List *apps;
    const E_Ilist_Item *it;
    Eina_List *l;
 
+   if (!(cfdata = data2)) return;
    if (!(apps = data)) return;
    EINA_LIST_FOREACH(e_widget_ilist_items_get(apps->o_list), l, it)
      {
@@ -383,6 +389,8 @@ _e_mod_config_worktools_del_cb(void *data, void *data2 __UNUSED__)
    e_widget_ilist_unselect(apps->o_list);
    e_widget_disabled_set(apps->o_add, EINA_TRUE);
    e_widget_disabled_set(apps->o_del, EINA_TRUE);
+
+   e_mod_config_worktools_save(cfdata);
 }
 
 

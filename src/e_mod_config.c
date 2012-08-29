@@ -27,7 +27,7 @@ e_int_config_productivity_module(E_Container *con, const char *params)
    v->create_cfdata = _create_data;
    v->free_cfdata = _free_data;
    v->basic.create_widgets = _basic_create;
-   v->basic.apply_cfdata = _basic_apply;
+   //v->basic.apply_cfdata = _basic_apply;
 
    /* Icon in the theme */
    snprintf(buf, sizeof(buf), "%s/e-module-productivity.edj", productivity_conf->module->dir);

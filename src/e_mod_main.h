@@ -112,7 +112,7 @@ struct _Config
    Eina_Bool go_to_break;
 
    /*Work application list*/
-   Eina_List *apps;
+   Eina_List *apps_list;
    //Eina_List *iv_list;
    //Eina_List *day_list;
    Eina_List *month_list;

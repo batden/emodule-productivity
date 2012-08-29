@@ -172,7 +172,7 @@ e_mod_config_window_manager(E_Config_Window_List *cwl)
              if(bd->client.icccm.command.argv)
                {
                   //CRI("Command:%s",bd->client.icccm.command.argv[0]);
-                  EINA_LIST_FOREACH(cfg->apps, ll, desk)
+                  EINA_LIST_FOREACH(cfg->apps_list, ll, desk)
                     {
                        if(desk->exec)
                          {
@@ -196,7 +196,7 @@ e_mod_config_window_manager(E_Config_Window_List *cwl)
         if(bd->desktop)
           {
              //CRI("Name:%s , Class:%s", bd->client.icccm.name, bd->client.icccm.class);
-             EINA_LIST_FOREACH(cfg->apps, ll, desk)
+             EINA_LIST_FOREACH(cfg->apps_list, ll, desk)
                {
                   if(desk->name)
                     {

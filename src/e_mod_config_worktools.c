@@ -345,6 +345,14 @@ _e_mod_config_worktools_save_config(E_Config_Dialog_Data *cfdata)
         e_order_append(order, desk);
      }
    e_object_del(E_OBJECT(order));
+
+   //Remove old list.
+   productivity_conf->apps_list = eina_list_remove_list(
+      productivity_conf->apps_list,
+      productivity_conf->apps_list);
+
+   //Update main list
+   productivity_conf->apps_list = e_mod_config_worktools_selected_get();
    return 1;
 }
 

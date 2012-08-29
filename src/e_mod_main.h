@@ -105,10 +105,8 @@ struct _E_Config_Window_List_Data
 //    e_mod_config_windows.c
 struct _E_Config_Window_List
 {
-   Eina_List *tasks;
    Eina_List *borders;
    Eina_List *cwldata_list;
-   Eina_List *items;
 
    // e_mod_config_windows.c
    E_Config_Window_List_Data *cwldata;

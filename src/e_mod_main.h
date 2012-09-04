@@ -52,8 +52,9 @@ typedef struct _Remember Remember;
 
 struct _Intervals
 {
-   int lock;
    int id;
+   int lock;
+   int urgent;
    int break_min_x;
    int break_min_y;
    struct
@@ -107,8 +108,8 @@ struct _E_Config_Window_List
 {
    Eina_List *borders;
    Eina_List *cwldata_list;
-   Eina_List *urgent;
-   Eina_Bool urgent_bool;
+   Eina_List *urgent_window;
+   Eina_Bool urgent;
 
    // e_mod_config_windows.c
    E_Config_Window_List_Data *cwldata;

@@ -22,7 +22,9 @@ struct _E_Config_Schedule_Data
    Evas_Object *break_x;
    Evas_Object *break_y;
    Evas_Object *label;
+   Evas_Object *urgent_chk;
    Eina_Bool lock;
+   int urgent;
    int id;
    int break_min_x;
    int break_min_y;

@@ -136,9 +136,10 @@ e_mod_config_window_manager(E_Config_Window_List *cwl)
         return;
      }
 
-   if(cwl->urgent_bool == EINA_TRUE)
+   if((cwl->urgent == EINA_TRUE) && 
+      (productivity_conf->cur_iv.urgent == EINA_TRUE))
      {
-        EINA_LIST_FOREACH(cwl->urgent, ul, bd)
+        EINA_LIST_FOREACH(cwl->urgent_window, ul, bd)
           {
              if(bd)
                {
@@ -422,14 +423,14 @@ _e_mod_config_window_event_border_focus_out_cb(void *data, int type __UNUSED__, 
 
    EVENT_DBG();
    
-   if(cwl->urgent_bool == EINA_TRUE)
+   if(cwl->urgent == EINA_TRUE && productivity_conf->cur_iv.urgent)
      {
-        EINA_LIST_FOREACH(cwl->urgent, l, bd)
+        EINA_LIST_FOREACH(cwl->urgent_window, l, bd)
              if(bd == ev->border)
                {
                   CRI("i am now focused on the urgent window");
-                  cwl->urgent = eina_list_remove(cwl->urgent, bd);
-                  cwl->urgent_bool = EINA_FALSE;
+                  cwl->urgent_window = eina_list_remove(cwl->urgent_window, bd);
+                  cwl->urgent = EINA_FALSE;
                }
      }
 
@@ -462,9 +463,8 @@ _e_mod_config_window_event_border_urgent_change_cb(void *data, int type __UNUSED
    ev = event;
 
    EVENT_DBG();
-   cwl->urgent = eina_list_append(cwl->urgent, ev->border);
-
-   cwl->urgent_bool = EINA_TRUE;
+   cwl->urgent_window = eina_list_append(cwl->urgent_window, ev->border);
+   cwl->urgent = EINA_TRUE;
 
    e_mod_config_window_manager(cwl);
    return EINA_TRUE;

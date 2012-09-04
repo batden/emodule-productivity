@@ -675,6 +675,7 @@ _config_init()
    intervals_edd = E_CONFIG_DD_NEW("Intervals", Intervals);
    E_CONFIG_VAL(D, T, id, INT);
    E_CONFIG_VAL(D, T, lock, INT);
+   E_CONFIG_VAL(D, T, urgent, INT);
    E_CONFIG_VAL(D, T, break_min_x, INT);
    E_CONFIG_VAL(D, T, break_min_y, INT);
    E_CONFIG_VAL(D, T, start.hour, INT);
@@ -772,21 +773,17 @@ _e_mod_main_get_current_config(Config *cfg)
 
                        EINA_LIST_FOREACH(last, lll, iv)
                          {
-                            cfg->cur_iv.id = iv->id;
-                            cfg->cur_iv.lock = iv->lock;
-                            /*if(iv->lock == EINA_TRUE)
-                              {
-                              cfg->cur_iv.id += 1;
-                            //cfg->cur_iv.lock = 0;
-                            }*/
-                            cfg->cur_iv.break_min_x = iv->break_min_x;
-                            cfg->cur_iv.break_min_y = iv->break_min_y;
-                            cfg->cur_iv.start.hour = iv->start.hour;
-                            cfg->cur_iv.start.min = iv->start.min;
-                            cfg->cur_iv.start.sec = iv->start.sec;
-                            cfg->cur_iv.stop.hour = iv->stop.hour;
-                            cfg->cur_iv.stop.min = iv->stop.min;
-                            cfg->cur_iv.stop.sec = iv->stop.sec;
+                            cfg->cur_iv.id            = iv->id;
+                            cfg->cur_iv.lock          = iv->lock;
+                            cfg->cur_iv.urgent        = iv->urgent;
+                            cfg->cur_iv.break_min_x   = iv->break_min_x;
+                            cfg->cur_iv.break_min_y   = iv->break_min_y;
+                            cfg->cur_iv.start.hour    = iv->start.hour;
+                            cfg->cur_iv.start.min     = iv->start.min;
+                            cfg->cur_iv.start.sec     = iv->start.sec;
+                            cfg->cur_iv.stop.hour     = iv->stop.hour;
+                            cfg->cur_iv.stop.min      = iv->stop.min;
+                            cfg->cur_iv.stop.sec      = iv->stop.sec;
                          }
                     }
                }

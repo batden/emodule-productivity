@@ -15,6 +15,8 @@ static void _start_clock_cb(void *data, Evas_Object *obj, void *event_info);
 static void _stop_clock_cb(void *data, Evas_Object *obj, void *event_info);
 static void _e_mod_config_schedule_start_working_cb(void *data, void *data2);
 static void _e_mod_config_schedule_stop_working_cb(void *data, void *data2);
+static void _e_mod_config_schedule_urgent_cb(void *data, Evas_Object *obj,
+                                             void *event_info);
 static void _e_mod_config_schedule_break_x_time_cb(void *data, Evas_Object *obj,
                                                    void *event_info);
 static void _e_mod_config_schedule_break_y_time_cb(void *data, Evas_Object *obj,
@@ -92,8 +94,16 @@ e_mod_config_schedule_new(Evas_Object *otb, Evas *evas, E_Config_Dialog_Data *cf
    elm_box_pack_end(bx, cfdata->schedule.stop_clk);
    evas_object_show(cfdata->schedule.stop_clk);
 
+   cfdata->schedule.urgent_chk = elm_check_add(bx);
+   elm_object_text_set(cfdata->schedule.urgent_chk, "Allow Urgent Windows");
+   elm_check_state_set(cfdata->schedule.urgent_chk, cfdata->schedule.urgent);
+   elm_box_pack_end(bx, cfdata->schedule.urgent_chk);
+   evas_object_show(cfdata->schedule.urgent_chk);
+   evas_object_smart_callback_add(cfdata->schedule.urgent_chk,
+                                  "changed", _e_mod_config_schedule_urgent_cb,
+                                  cfdata);
+
    cfdata->schedule.label = elm_label_add(bx);
-   //elm_object_text_set(label, "Minutes of Break for Minutes of Work");
    _e_mod_config_schedule_break_time_label_update(&cfdata->schedule);
    evas_object_resize(cfdata->schedule.label, 200, 25);
    elm_box_pack_end(bx, cfdata->schedule.label);
@@ -178,6 +188,8 @@ e_mod_config_schedule_save_config(E_Config_Dialog_Data *cfdata)
       round(elm_slider_value_get(cfdata->schedule.break_x));
    cfdata->schedule.break_min_y = 
       round(elm_slider_value_get(cfdata->schedule.break_y));
+
+   cfdata->schedule.urgent = elm_check_state_get(cfdata->schedule.urgent_chk);
 
    productivity_conf->timestamp = e_mod_timestamp_get();
 
@@ -330,7 +342,7 @@ _e_mod_config_schedule_start_working_cb(void *data, void *data2)
           productivity_conf->secs_to_break = 0;
      }
    _e_mod_config_schedule_lock_update(csd);
-   
+
    e_mod_config_schedule_save_config(cfdata);
    e_mod_config_worktools_save(cfdata);
    e_mod_config_window_manager(productivity_conf->cwl);
@@ -362,10 +374,24 @@ _e_mod_config_schedule_stop_working_cb(void *data, void *data2)
           }
      }
    _e_mod_config_schedule_lock_update(csd);
-   
+
    e_mod_config_schedule_save_config(cfdata);
    e_mod_config_worktools_save(cfdata);
    e_mod_config_window_manager(productivity_conf->cwl);
+   e_config_save_queue();
+}
+
+static void
+_e_mod_config_schedule_urgent_cb(void *data, Evas_Object *obj, void *event_info)
+{
+   E_Config_Dialog_Data *cfdata;
+
+   if(!(cfdata = data)) return;
+
+   cfdata->schedule.urgent = elm_check_state_get(obj);
+   productivity_conf->cur_iv.urgent = cfdata->schedule.urgent;
+   e_mod_config_schedule_save_config(cfdata);
+   e_mod_config_worktools_save(cfdata);
    e_config_save_queue();
 }
 
@@ -395,10 +421,10 @@ static void
 _e_mod_config_schedule_break_time_label_update(E_Config_Schedule_Data *csd)
 {
    char buf[1024];
-   
+
    snprintf(buf, sizeof(buf), "%d Minutes of Break for %d Minutes of Work",
             csd->break_min_x, csd->break_min_y);
-   
+
    elm_object_text_set(csd->label, buf);
 }
 
@@ -423,18 +449,19 @@ _e_mod_config_schedule_clock_fill_delay(E_Config_Schedule_Data *csd)
    time(&tt);
    tm = localtime(&tt);
 
-   csd->id = productivity_conf->cur_iv.id;
-   csd->lock = productivity_conf->cur_iv.lock;
-   csd->break_min_x = productivity_conf->cur_iv.break_min_x;
-   csd->break_min_y = productivity_conf->cur_iv.break_min_y;
+   csd->id              = productivity_conf->cur_iv.id;
+   csd->lock            = productivity_conf->cur_iv.lock;
+   csd->urgent          = productivity_conf->cur_iv.urgent;
+   csd->break_min_x     = productivity_conf->cur_iv.break_min_x;
+   csd->break_min_y     = productivity_conf->cur_iv.break_min_y;
 
    csd->start_time.hour = productivity_conf->cur_iv.start.hour;
-   csd->start_time.min = productivity_conf->cur_iv.start.min;
-   csd->start_time.sec = productivity_conf->cur_iv.start.sec;
+   csd->start_time.min  = productivity_conf->cur_iv.start.min;
+   csd->start_time.sec  = productivity_conf->cur_iv.start.sec;
 
-   csd->stop_time.hour = productivity_conf->cur_iv.stop.hour;
-   csd->stop_time.min = productivity_conf->cur_iv.stop.min;
-   csd->stop_time.sec = productivity_conf->cur_iv.stop.sec;
+   csd->stop_time.hour  = productivity_conf->cur_iv.stop.hour;
+   csd->stop_time.min   = productivity_conf->cur_iv.stop.min;
+   csd->stop_time.sec   = productivity_conf->cur_iv.stop.sec;
 
    if(csd->lock == 1) return;
    /*
@@ -457,7 +484,7 @@ csd->start_time.sec  = tm->tm_sec;
    csd->start_time.min += DELAY_START_MIN - 59;
    csd->start_time.hour += 1;
    }
-*/
+   */
    csd->stop_time.hour = tm->tm_hour;
    csd->stop_time.min  = tm->tm_min;
    csd->stop_time.sec  = tm->tm_sec;
@@ -489,6 +516,7 @@ _e_mod_config_schedule_lock_update(E_Config_Schedule_Data *csd)
         elm_clock_edit_mode_set(csd->stop_clk, digedit);
         elm_object_disabled_set(csd->break_x, EINA_TRUE);
         elm_object_disabled_set(csd->break_y, EINA_TRUE);
+        elm_object_disabled_set(csd->urgent_chk, EINA_TRUE);
 
         if(e_widget_disabled_get(csd->start_btn) == EINA_FALSE)
           e_widget_disabled_set(csd->start_btn, EINA_TRUE);
@@ -502,6 +530,7 @@ _e_mod_config_schedule_lock_update(E_Config_Schedule_Data *csd)
         elm_clock_edit_mode_set(csd->stop_clk, digedit);
         elm_object_disabled_set(csd->break_x, EINA_FALSE);
         elm_object_disabled_set(csd->break_y, EINA_FALSE);
+        elm_object_disabled_set(csd->urgent_chk, EINA_FALSE);
 
         if(e_widget_disabled_get(csd->start_btn) == EINA_TRUE)
           e_widget_disabled_set(csd->start_btn, EINA_FALSE);
@@ -514,6 +543,7 @@ _e_mod_config_schedule_productivity_conf_update(Config *cfg,
 {
    cfg->iv.id           = cfdata->schedule.id;
    cfg->iv.lock         = cfdata->schedule.lock;
+   cfg->iv.urgent       = cfdata->schedule.urgent;
    cfg->iv.break_min_x  = cfdata->schedule.break_min_x;
    cfg->iv.break_min_y  = cfdata->schedule.break_min_y;
 
@@ -533,6 +563,7 @@ _e_mod_config_schedule_intervals_conf_get(E_Config_Dialog_Data *cfdata)
 
    iv.id          = cfdata->schedule.id;
    iv.lock        = cfdata->schedule.lock;
+   iv.urgent      = cfdata->schedule.urgent;
    iv.break_min_x = cfdata->schedule.break_min_x;
    iv.break_min_y = cfdata->schedule.break_min_y;
 

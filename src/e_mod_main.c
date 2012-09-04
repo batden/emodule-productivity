@@ -444,7 +444,7 @@ _productivity_conf_new(void)
 #define IFMODCFGEND }
 
    /* setup defaults */
-   IFMODCFG(0x008d);
+   IFMODCFG(0x008e);
    CRI("CREATING NEW CONFIG!!!");
    _e_mod_main_month_conf_item_get();
    productivity_conf->remember_list = eina_list_append(

@@ -678,3 +678,40 @@ break_time:
      }
 }
 
+void e_mod_config_windows_free(void)
+{
+   E_Config_Window_List *cwl;
+   E_Config_Window_List_Data *cwldata;
+   Ecore_Event_Handler *eh;
+   E_Border *bd = NULL;
+
+   if(!(cwl = productivity_conf->cwl)) return;
+   WRN("FREEING E_Config_Window_List");
+  
+   EINA_LIST_FREE(productivity_conf->handlers, eh)
+     ecore_event_handler_del(eh);
+
+   EINA_LIST_FREE(cwl->borders, bd)
+     {
+        _e_mod_config_window_remember_get(bd);
+        _e_mod_config_window_unhide(bd);
+     }
+   
+   EINA_LIST_FREE(cwl->cwldata_list, cwldata)
+     {
+        if(cwldata->name)
+          eina_stringshare_del(cwldata->name);
+        
+        if(cwldata->command)
+          eina_stringshare_del(cwldata->command);
+     }
+   
+   eina_list_free(cwl->borders);
+   eina_list_free(cwl->urgent_window);
+   
+   E_FREE(bd);
+   E_FREE(eh); 
+   E_FREE(cwldata);
+   E_FREE(cwl->cwldata);
+   E_FREE(cwl);
+}

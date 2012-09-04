@@ -230,29 +230,7 @@ e_modapi_shutdown(E_Module *m)
      }
 
    //    E_Mod_Config_Windows -- FREE
-   Ecore_Event_Handler *eh;
-
-   EINA_LIST_FREE(productivity_conf->handlers, eh)
-     {
-        ecore_event_handler_del(eh);
-     }
-   
-   E_Config_Window_List_Data *cwldata;
-   EINA_LIST_FREE(productivity_conf->cwl->cwldata_list, cwldata)
-     {
-        if(cwldata->name)
-          eina_stringshare_del(cwldata->name);
-        
-        if(cwldata->command)
-          eina_stringshare_del(cwldata->command);
-        
-        productivity_conf->cwl->cwldata_list = eina_list_remove(
-           productivity_conf->cwl->cwldata_list, cwldata);
-     }
-   productivity_conf->cwl->borders = eina_list_remove_list(
-      productivity_conf->cwl->borders,
-      productivity_conf->cwl->borders);
-   E_FREE(productivity_conf->cwl);
+   e_mod_config_windows_free();
    
    Remember *rem;
    EINA_LIST_FREE(productivity_conf->remember_list, rem)

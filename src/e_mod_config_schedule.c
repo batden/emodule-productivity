@@ -95,7 +95,7 @@ e_mod_config_schedule_new(Evas_Object *otb, Evas *evas, E_Config_Dialog_Data *cf
    evas_object_show(cfdata->schedule.stop_clk);
 
    cfdata->schedule.urgent_chk = elm_check_add(bx);
-   elm_object_text_set(cfdata->schedule.urgent_chk, "Allow Urgent Windows");
+   elm_object_text_set(cfdata->schedule.urgent_chk, "Satisfy urgent windows instantly");
    elm_check_state_set(cfdata->schedule.urgent_chk, cfdata->schedule.urgent);
    elm_box_pack_end(bx, cfdata->schedule.urgent_chk);
    evas_object_show(cfdata->schedule.urgent_chk);

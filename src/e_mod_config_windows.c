@@ -131,8 +131,12 @@ e_mod_config_window_manager(E_Config_Window_List *cwl)
         EINA_LIST_FOREACH(cwl->borders, l, bd)
           {
              _e_mod_config_window_remember_get(bd);
-             _e_mod_config_window_unhide(bd);
+
+             if(cfg->unhide == EINA_FALSE)
+               _e_mod_config_window_unhide(bd);
+
           }
+         cfg->unhide = EINA_TRUE;
         return;
      }
 
@@ -422,16 +426,16 @@ _e_mod_config_window_event_border_focus_out_cb(void *data, int type __UNUSED__, 
    ev = event;
 
    EVENT_DBG();
-   
+
    if(cwl->urgent == EINA_TRUE && productivity_conf->cur_iv.urgent)
      {
         EINA_LIST_FOREACH(cwl->urgent_window, l, bd)
-             if(bd == ev->border)
-               {
-                  CRI("i am now focused on the urgent window");
-                  cwl->urgent_window = eina_list_remove(cwl->urgent_window, bd);
-                  cwl->urgent = EINA_FALSE;
-               }
+           if(bd == ev->border)
+             {
+                CRI("i am now focused on the urgent window");
+                cwl->urgent_window = eina_list_remove(cwl->urgent_window, bd);
+                cwl->urgent = EINA_FALSE;
+             }
      }
 
    e_mod_config_window_manager(cwl);

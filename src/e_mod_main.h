@@ -143,6 +143,7 @@ struct _Config
 
    // e_mod_config_windows.c
    E_Config_Window_List *cwl;
+   Eina_Bool unhide :1;
 };
 
 /* This struct used to hold config for individual items from above list */

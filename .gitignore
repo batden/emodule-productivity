@@ -115,6 +115,7 @@ src/e_mod_main.lo
 src/e_mod_main.o
 src/e_mod_log.lo
 src/e_mod_log.o
+src/e_mod*.o
+src/e_mod*.lo
 src/module.la
 stamp-h1
-

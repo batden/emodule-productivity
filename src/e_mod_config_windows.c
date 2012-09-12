@@ -138,7 +138,7 @@ e_mod_config_window_manager(E_Config_Window_List *cwl)
         if(cfg->unhide == EINA_FALSE)
           e_mod_config_window_remember_free();
 
-         cfg->unhide = EINA_FALSE;
+        cfg->unhide = EINA_FALSE;
         return;
      }
 
@@ -570,7 +570,7 @@ _e_mod_config_window_remember_get(E_Border *bd)
    if(bd->client.netwm.pid <= 0) return;
    if(bd->client.icccm.command.argc <= 0) return;
    // if(!bd->iconic) return;
-   
+
    EINA_LIST_FOREACH(productivity_conf->remember_list, l, rem)
      {
         if((bd->client.netwm.pid == rem->pid) &&
@@ -582,12 +582,12 @@ _e_mod_config_window_remember_get(E_Border *bd)
              zone = e_container_zone_number_get(bd->zone->container,
                                                 rem->zone);
              desk = e_desk_at_xy_get(bd->zone, rem->desk_x, rem->desk_y);
-             
+
              if(zone == bd->zone)
-                  e_border_zone_set(bd, zone);
+               e_border_zone_set(bd, zone);
 
              if(desk)
-                  e_border_desk_set(bd, desk);
+               e_border_desk_set(bd, desk);
           }
      }
    e_mod_config_window_remember_cleanup();
@@ -631,7 +631,7 @@ e_mod_config_window_remember_free()
      {
         if(rem->name)
           eina_stringshare_del(rem->name);
-        
+
         if(rem->command)
           eina_stringshare_del(rem->command);
 
@@ -641,7 +641,7 @@ e_mod_config_window_remember_free()
    E_FREE(productivity_conf->remember_list);
    productivity_conf->remember_list = NULL;
 }
-        
+
 
 
 static Eina_Bool
@@ -693,6 +693,15 @@ break_time:
    if(cfg->secs_to_break < 10)
      WRN("Break will be over in %dsec", cfg->secs_to_break);
 
+   if(cfg->secs_to_break <= 5)
+     {
+        //Play sound to warn user break is over
+        char buf[PATH_MAX];
+
+        snprintf(buf, sizeof(buf), "mpg123 %s/data/button.mp3", e_module_dir_get(
+              productivity_conf->module));
+        ecore_exe_run(buf, NULL);
+     }
    if(cfg->secs_to_break)
      return EINA_TRUE;
 
@@ -713,28 +722,28 @@ void e_mod_config_windows_free(void)
 
    if(!(cwl = productivity_conf->cwl)) return;
    WRN("FREEING E_Config_Window_List");
-  
+
    EINA_LIST_FREE(productivity_conf->handlers, eh)
-     ecore_event_handler_del(eh);
+      ecore_event_handler_del(eh);
 
    EINA_LIST_FREE(cwl->borders, bd)
      {
         _e_mod_config_window_remember_get(bd);
         _e_mod_config_window_unhide(bd);
      }
-   
+
    EINA_LIST_FREE(cwl->cwldata_list, cwldata)
      {
         if(cwldata->name)
           eina_stringshare_del(cwldata->name);
-        
+
         if(cwldata->command)
           eina_stringshare_del(cwldata->command);
      }
-   
+
    eina_list_free(cwl->borders);
    eina_list_free(cwl->urgent_window);
-   
+
    E_FREE(bd);
    E_FREE(eh); 
    E_FREE(cwldata);

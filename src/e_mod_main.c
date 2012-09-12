@@ -756,12 +756,12 @@ _e_mod_main_get_current_config(Config *cfg)
                             cfg->cur_iv.urgent        = iv->urgent;
                             cfg->cur_iv.break_min_x   = iv->break_min_x;
                             cfg->cur_iv.break_min_y   = iv->break_min_y;
-                            cfg->cur_iv.start.hour    = iv->start.hour;
+                           /* cfg->cur_iv.start.hour    = iv->start.hour;
                             cfg->cur_iv.start.min     = iv->start.min;
                             cfg->cur_iv.start.sec     = iv->start.sec;
                             cfg->cur_iv.stop.hour     = iv->stop.hour;
                             cfg->cur_iv.stop.min      = iv->stop.min;
-                            cfg->cur_iv.stop.sec      = iv->stop.sec;
+                            cfg->cur_iv.stop.sec      = iv->stop.sec;*/
                          }
                     }
                }
@@ -806,7 +806,7 @@ e_mod_main_is_it_time_to_work()
 
    if(iv->lock == EINA_FALSE)
      return EINA_FALSE;
-
+/*
    stm.tm_hour = iv->start.hour;
    stm.tm_min = iv->start.min;
    stm.tm_sec = iv->start.sec;
@@ -825,9 +825,9 @@ e_mod_main_is_it_time_to_work()
    cur_t = mktime(tm);
 
    if((cur_t > start_t) && (cur_t < stop_t) &&
-      (productivity_conf->go_to_break == EINA_FALSE))
+      (productivity_conf->go_to_break == EINA_FALSE))*/
      return EINA_TRUE;
 
-   return EINA_FALSE;
+//   return EINA_FALSE;
 }
 

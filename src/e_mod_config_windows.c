@@ -132,11 +132,13 @@ e_mod_config_window_manager(E_Config_Window_List *cwl)
           {
              _e_mod_config_window_remember_get(bd);
 
-             if(cfg->unhide == EINA_FALSE)
+             if(cfg->unhide == EINA_TRUE)
                _e_mod_config_window_unhide(bd);
-
           }
-         cfg->unhide = EINA_TRUE;
+        if(cfg->unhide == EINA_FALSE)
+          e_mod_config_window_remember_free();
+
+         cfg->unhide = EINA_FALSE;
         return;
      }
 
@@ -157,6 +159,7 @@ e_mod_config_window_manager(E_Config_Window_List *cwl)
 
    EINA_LIST_FOREACH(cwl->borders, l, bd)
      {
+
         if(bd->client.icccm.name)
           if(strncmp(bd->client.icccm.name, "E", sizeof("E")) == 0)
             continue;
@@ -325,7 +328,8 @@ _e_mod_config_window_event_border_add_cb(void *data, int type __UNUSED__, void *
    cwl->cwldata_list = eina_list_append(cwl->cwldata_list, cwldata);
    cwl->borders = eina_list_append(cwl->borders, ev->border);
 
-   EVENT_DBG(); 
+   EVENT_DBG();
+   INF("URGENT??:%d", ev->border->client.icccm.urgent); 
    e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
@@ -354,6 +358,8 @@ _e_mod_config_window_event_border_remove_cb(void *data, int type __UNUSED__, voi
       DBG("LIST:%s",bd->client.icccm.name);
       }*/
    cwl->borders = eina_list_remove(cwl->borders, ev->border);
+   cwl->urgent_window = eina_list_remove(cwl->urgent_window, ev->border);
+
 
    EINA_LIST_FOREACH(cwl->cwldata_list, l, cwldata)
      {
@@ -468,6 +474,7 @@ _e_mod_config_window_event_border_urgent_change_cb(void *data, int type __UNUSED
 
    EVENT_DBG();
    cwl->urgent_window = eina_list_append(cwl->urgent_window, ev->border);
+   cwl->borders = eina_list_remove(cwl->borders, ev->border);
    cwl->urgent = EINA_TRUE;
 
    e_mod_config_window_manager(cwl);
@@ -558,13 +565,12 @@ static void
 _e_mod_config_window_remember_get(E_Border *bd)
 {
    Remember *rem;
-   Eina_List *l , *ll;
-   Eina_List *bdl;
+   Eina_List *l;
 
    if(bd->client.netwm.pid <= 0) return;
    if(bd->client.icccm.command.argc <= 0) return;
    // if(!bd->iconic) return;
-
+   
    EINA_LIST_FOREACH(productivity_conf->remember_list, l, rem)
      {
         if((bd->client.netwm.pid == rem->pid) &&
@@ -575,17 +581,13 @@ _e_mod_config_window_remember_get(E_Border *bd)
 
              zone = e_container_zone_number_get(bd->zone->container,
                                                 rem->zone);
-             if(zone)
-               {
-                  e_border_zone_set(bd, zone);
-               }
-
              desk = e_desk_at_xy_get(bd->zone, rem->desk_x, rem->desk_y);
+             
+             if(zone == bd->zone)
+                  e_border_zone_set(bd, zone);
 
              if(desk)
-               {
                   e_border_desk_set(bd, desk);
-               }
           }
      }
    e_mod_config_window_remember_cleanup();
@@ -617,6 +619,30 @@ e_mod_config_window_remember_cleanup()
      }
    eina_list_free(bdl);
 }
+
+void
+e_mod_config_window_remember_free()
+{
+   Remember *rem;
+
+   if(!productivity_conf->remember_list) return;
+
+   EINA_LIST_FREE(productivity_conf->remember_list, rem)
+     {
+        if(rem->name)
+          eina_stringshare_del(rem->name);
+        
+        if(rem->command)
+          eina_stringshare_del(rem->command);
+
+        if(rem->desktop_file)
+          eina_stringshare_del(rem->desktop_file);
+     }
+   E_FREE(productivity_conf->remember_list);
+   productivity_conf->remember_list = NULL;
+}
+        
+
 
 static Eina_Bool
 _e_mod_config_window_break_timer(void *data)

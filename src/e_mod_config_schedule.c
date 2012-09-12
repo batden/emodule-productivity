@@ -95,8 +95,11 @@ e_mod_config_schedule_new(Evas_Object *otb, Evas *evas, E_Config_Dialog_Data *cf
    evas_object_show(cfdata->schedule.stop_clk);
 
    cfdata->schedule.urgent_chk = elm_check_add(bx);
+   elm_object_style_set(cfdata->schedule.urgent_chk, "toggle");
    elm_object_text_set(cfdata->schedule.urgent_chk, "Satisfy urgent windows instantly");
    elm_check_state_set(cfdata->schedule.urgent_chk, cfdata->schedule.urgent);
+   elm_object_part_text_set(cfdata->schedule.urgent_chk, "on", "Yes");
+   elm_object_part_text_set(cfdata->schedule.urgent_chk, "off", "No");
    elm_box_pack_end(bx, cfdata->schedule.urgent_chk);
    evas_object_show(cfdata->schedule.urgent_chk);
    evas_object_smart_callback_add(cfdata->schedule.urgent_chk,
@@ -378,7 +381,7 @@ _e_mod_config_schedule_stop_working_cb(void *data, void *data2)
 
    e_mod_config_schedule_save_config(cfdata);
    e_mod_config_worktools_save(cfdata);
-   productivity_conf->unhide = EINA_FALSE;
+   productivity_conf->unhide = EINA_TRUE;
    e_mod_config_window_manager(productivity_conf->cwl);
    e_config_save_queue();
 }

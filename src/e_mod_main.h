@@ -27,7 +27,7 @@ extern int _productivity_log;
  * compatible anymore, it creates an entire new one.
  * You need to increment GENERATION when you add new values to the
  * configuration file but is not needed to delete the existing conf  */
-#define MOD_CONFIG_FILE_EPOCH 0x0001
+#define MOD_CONFIG_FILE_EPOCH 0x0002
 #define MOD_CONFIG_FILE_GENERATION 0x008e
 #define MOD_CONFIG_FILE_VERSION \
    ((MOD_CONFIG_FILE_EPOCH << 16) | MOD_CONFIG_FILE_GENERATION)
@@ -189,4 +189,5 @@ unsigned int e_mod_timestamp_get();
 void         e_mod_config_window_manager(E_Config_Window_List *cwl);
 void         e_mod_config_window_remember_cleanup();
 void         e_mod_config_windows_free(void);
+void         e_mod_config_window_remember_free(void);
 #endif

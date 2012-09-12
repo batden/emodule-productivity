@@ -95,6 +95,7 @@ AC_ARG_ENABLE(homedir-install,
 AC_OUTPUT([
 Makefile
 src/Makefile
+data/Makefile
 module.desktop
 e_modules-productivity.spec
 $po_makefile_in

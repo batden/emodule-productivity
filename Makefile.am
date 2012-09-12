@@ -3,7 +3,7 @@ MAINTAINERCLEANFILES = Makefile.in aclocal.m4 config.guess config.h.in \
 		       config.sub configure depcomp install-sh ltmain.sh \
 		       missing module.desktop config.rpath mkinstalldirs
 
-SUBDIRS = src
+SUBDIRS = src data
 
 if HAVE_PO
 
@@ -20,7 +20,8 @@ files_DATA = module.desktop e-module-productivity.edj
 EXTRA_DIST = module.desktop.in \
 	     e_modules-productivity.spec.in \
 	     e-module-productivity.edc \
-	     images/module_icon.png
+	     images/module_icon.png \
+		 $(files_DATA)
 
 e-module-productivity.edj: Makefile e-module-productivity.edc images/module_icon.png
 

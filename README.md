@@ -29,13 +29,15 @@ After to study a bit the psycology behind procrastination, we leave here one of 
 TODO and Ideas
 ==============
 
- * *Profiles*: There's different types of tasks in our lifes, for example _boring_ and _creative_, the creative ones requires the less distractions possible and calm music, the boring tasks requires active music and fast breaktimes. By having different profiles we can have different types of works, selectable on the main window, that makes our desktop act differently
+ * *Profiles*: There's different types of tasks in our lifes, for example _boring_ and _creative_, the creative ones requires the less distractions possible and calm music, the boring tasks requires active music and fast breaktimes. By having different profiles we can have different types of works, selectable on the main window, that makes our desktop act differently. Also remember that different types of _jobs_ requires different configurations (more exactly different applications to use).
 
  * *Statistcis*: One of the best ways to overcome procrastination is by *knowing* on what exactly _we lose time with_, we have already functions in the code to know how much times we have passed in every window, so we can make easly a way to show them to the user in *percentage bars* or a pie chart, we can also include the number of *keystrokes* used in every chart.
 
  * *Grant usage*: Sometimes we need a fast usage of a not-allowed application (like web), because we need for example a fast research in google, but at the same time is a focus of distraction, will be nice if by a _keyboard shortcut_ we call the module for grant us access to it, so it will ask us how much minutes we need for it and he will hide back the window after these minutes _(we are rational and sincere about the amount of time that we need, but we easly lose the control of the time passed, which is the task of this emodule)_, this feature will not allow to use again the application after passed a specific amount of time _'you already used it!'_
 
  * *Prohibited web access*: To have a list of comma-separated websites or keywords to pass to iptables for block us from access to the selected websites, this can give us the opportunity to use the web for our work but to not lose time in social websites (in fact we can easly lose time with any kind of website, specially new ones).
+
+ * *Full Internet disconnection*: Internet is a focus of distractions, the optimal solution is of course to entire block it, by other side is possible that we still require some access to internet (apt-get, cronjobs of backups, etc), could be nice if is triggered some iptables rules that *blocks everything* except what we have listed to be allowed, just like the list of applications to use, but for internet keywords.
 
  * *Focus watcher*: That was one of the original ideas, to control _'which is the focused window'_ (the one you are working on), by giving features like re-focus on the correct window after an amount of time or to punish you if you lose too much time in the non-working window, this feature was replaced by the simply control of hiding windows, but some good ideas can be still recycled from this concept.
 

@@ -39,6 +39,8 @@ TODO and Ideas
 
  * *Full Internet disconnection*: Internet is a focus of distractions, the optimal solution is of course to entire block it, by other side is possible that we still require some access to internet (apt-get, cronjobs of backups, etc), could be nice if is triggered some iptables rules that *blocks everything* except what we have listed to be allowed, just like the list of applications to use, but for internet keywords.
 
+ * *Password-protected*: We are our own victims of our distractions, so is very easy for us to unload the module, click on stop-working, etc... these things should be not allowed/possible, maybe using a special password set by someone else
+
  * *Focus watcher*: That was one of the original ideas, to control _'which is the focused window'_ (the one you are working on), by giving features like re-focus on the correct window after an amount of time or to punish you if you lose too much time in the non-working window, this feature was replaced by the simply control of hiding windows, but some good ideas can be still recycled from this concept.
 
  * *Reclaim*: If the user has not typed or moved the mouse by a specific amount of time, reclaim his attention.

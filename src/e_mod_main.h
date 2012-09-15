@@ -188,6 +188,6 @@ Eina_Bool e_mod_main_is_it_time_to_work();
 unsigned int e_mod_timestamp_get();
 void         e_mod_config_window_manager(E_Config_Window_List *cwl);
 void         e_mod_config_window_remember_cleanup();
-void         e_mod_config_windows_free(void);
-void         e_mod_config_window_remember_free(void);
+void         e_mod_config_window_free(void);
+void         e_mod_config_window_remember_free_all(void);
 #endif

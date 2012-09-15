@@ -172,7 +172,7 @@ e_modapi_init(E_Module *m)
    e_module_delayed_set(m, 3);
    //Load all work applications into productivity_conf->apps.
    productivity_conf->apps_list = e_mod_config_worktools_selected_get();
-   
+
    //Creates data, and adds callbacks
    e_mod_config_windows_create_data(productivity_conf);
 
@@ -229,9 +229,9 @@ e_modapi_shutdown(E_Module *m)
         E_FREE(ci);
      }
 
-   //    E_Mod_Config_Windows -- FREE
-   e_mod_config_windows_free();
-   
+   //    E_Mod_Config_Window -- FREE
+   e_mod_config_window_free();
+
    Remember *rem;
    EINA_LIST_FREE(productivity_conf->remember_list, rem)
      {
@@ -756,12 +756,12 @@ _e_mod_main_get_current_config(Config *cfg)
                             cfg->cur_iv.urgent        = iv->urgent;
                             cfg->cur_iv.break_min_x   = iv->break_min_x;
                             cfg->cur_iv.break_min_y   = iv->break_min_y;
-                           /* cfg->cur_iv.start.hour    = iv->start.hour;
-                            cfg->cur_iv.start.min     = iv->start.min;
-                            cfg->cur_iv.start.sec     = iv->start.sec;
-                            cfg->cur_iv.stop.hour     = iv->stop.hour;
-                            cfg->cur_iv.stop.min      = iv->stop.min;
-                            cfg->cur_iv.stop.sec      = iv->stop.sec;*/
+                            /* cfg->cur_iv.start.hour    = iv->start.hour;
+                               cfg->cur_iv.start.min     = iv->start.min;
+                               cfg->cur_iv.start.sec     = iv->start.sec;
+                               cfg->cur_iv.stop.hour     = iv->stop.hour;
+                               cfg->cur_iv.stop.min      = iv->stop.min;
+                               cfg->cur_iv.stop.sec      = iv->stop.sec;*/
                          }
                     }
                }
@@ -772,62 +772,22 @@ _e_mod_main_get_current_config(Config *cfg)
    E_FREE(iv);
 }
 
-time_t to_seconds(const char *date)
-{
-   struct tm storage={0,0,0,0,0,0,0,0,0};
-   char *p=NULL;
-   time_t retval=0;
-
-   p=(char *)strptime(date,"%d-%b-%Y",&storage);
-   if(p==NULL)
-     {
-        retval=0;
-     }
-   else
-     {
-        retval=mktime(&storage);
-     }
-   return retval;
-}
-
 Eina_Bool
 e_mod_main_is_it_time_to_work()
 {
+   Config *cfg;
    Intervals *iv;
 
+   if(!(cfg = productivity_conf)) return EINA_FALSE;
    if(!(iv = &productivity_conf->cur_iv)) return EINA_FALSE;
 
-   time_t tt, start_t, stop_t, cur_t;
-   struct tm *tm;
-   struct tm stm;
-
-   time(&tt);
-   tm = localtime(&tt);
-
-   if(iv->lock == EINA_FALSE)
-     return EINA_FALSE;
-/*
-   stm.tm_hour = iv->start.hour;
-   stm.tm_min = iv->start.min;
-   stm.tm_sec = iv->start.sec;
-   stm.tm_year = tm->tm_year;
-   stm.tm_mon = productivity_conf->cur_month.mon;
-   stm.tm_mday = productivity_conf->cur_day.mday;
-   start_t = mktime(&stm);
-
-   stm.tm_hour = iv->stop.hour;
-   stm.tm_min = iv->stop.min;
-   stm.tm_sec = iv->stop.sec;
-   stm.tm_year = tm->tm_year;
-   stm.tm_mon = productivity_conf->cur_month.mon;
-   stm.tm_mday = productivity_conf->cur_day.mday;
-   stop_t = mktime(&stm);
-   cur_t = mktime(tm);
-
-   if((cur_t > start_t) && (cur_t < stop_t) &&
-      (productivity_conf->go_to_break == EINA_FALSE))*/
+   if((iv->lock == EINA_TRUE) && (cfg->go_to_break == EINA_FALSE))
      return EINA_TRUE;
+   else if((iv->lock == EINA_TRUE) && (cfg->go_to_break == EINA_TRUE))
+     return EINA_FALSE;
+   else if((iv->lock == EINA_FALSE) && (cfg->go_to_break == EINA_TRUE))
+     return EINA_FALSE;
 
-//   return EINA_FALSE;
+   return EINA_FALSE;
 }
 

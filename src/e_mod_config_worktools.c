@@ -30,12 +30,10 @@ e_mod_config_worktools_create_data(E_Config_Dialog_Data *cfdata)
    char buf[PATH_MAX];
 
    e_user_dir_concat_static(buf, "applications/productivity");
-   INF(buf);
    //FIXME: check if dir exist before create
    ecore_file_mkdir(buf);
    e_user_dir_concat_static(buf, "applications/productivity/.order");
    cfdata->filename = eina_stringshare_add(buf);
-   INF(cfdata->filename);
    cfdata->apps_user.cfdata = cfdata;
    cfdata->apps = _e_mod_config_worktools_load_config(buf);
    return EINA_TRUE;

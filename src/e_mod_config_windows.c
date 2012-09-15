@@ -144,8 +144,6 @@ e_mod_config_window_manager(E_Config_Window_List *cwl)
              if(cfg->unhide == EINA_FALSE)
                _e_mod_config_window_remember_free(bd);
           }
-        if(cfg->unhide == EINA_FALSE)
-          e_mod_config_window_remember_free_all();
 
         cfg->unhide = EINA_FALSE;
         return;
@@ -252,7 +250,7 @@ e_mod_config_window_manager(E_Config_Window_List *cwl)
                          {
                             //DBG("Name:%s , Orig_Path:%s", desk->name, desk->orig_path);
                             if(bd->client.netwm.pid > 0)
-                            m = EINA_TRUE;
+                              m = EINA_TRUE;
 
                             EINA_LIST_FOREACH(productivity_conf->remember_list, lll, rem)
                               {
@@ -341,7 +339,6 @@ _e_mod_config_window_event_border_add_cb(void *data, int type __UNUSED__, void *
    cwl->borders = eina_list_append(cwl->borders, ev->border);
 
    EVENT_DBG();
-   INF("URGENT??:%d", ev->border->client.icccm.urgent); 
    e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
@@ -380,7 +377,10 @@ _e_mod_config_window_event_border_remove_cb(void *data, int type __UNUSED__, voi
       }
       */
    cwl->borders = eina_list_remove(cwl->borders, ev->border);
-   cwl->urgent_window = eina_list_remove(cwl->urgent_window, ev->border);
+   if(cwl->urgent == EINA_TRUE)
+     {
+        cwl->urgent_window = eina_list_remove(cwl->urgent_window, ev->border);
+     }
    /*
 
       EINA_LIST_FOREACH(cwl->cwldata_list, l, cwldata)
@@ -466,11 +466,11 @@ _e_mod_config_window_event_border_focus_out_cb(void *data, int type __UNUSED__, 
                {
                   if((ev->border->client.netwm.pid > 0) && (bd->client.netwm.pid == ev->border->client.netwm.pid))
                     {
-                        CRI("i am now focused on the urgent window");
+                       CRI("i am now focused on the urgent window");
                        //cwl->borders = eina_list_remove(cwl->borders, bd);
-                        cwl->urgent_window = eina_list_remove(cwl->urgent_window, bd);
-                        //cwl->borders = eina_list_append(cwl->borders, bd);
-             cwl->urgent = EINA_FALSE;
+                       cwl->urgent_window = eina_list_remove(cwl->urgent_window, bd);
+                       //cwl->borders = eina_list_append(cwl->borders, bd);
+                       cwl->urgent = EINA_FALSE;
                     }
                }
 
@@ -514,9 +514,12 @@ _e_mod_config_window_event_border_urgent_change_cb(void *data, int type __UNUSED
    ev = event;
 
    EVENT_DBG();
-   cwl->urgent_window = eina_list_append(cwl->urgent_window, ev->border);
-   cwl->borders = eina_list_remove(cwl->borders, ev->border);
-   cwl->urgent = EINA_TRUE;
+   if(cwl->urgent == EINA_TRUE)
+     {
+        cwl->urgent_window = eina_list_append(cwl->urgent_window, ev->border);
+        cwl->borders = eina_list_remove(cwl->borders, ev->border);
+        cwl->urgent = EINA_TRUE;
+     }
 
    e_mod_config_window_manager(cwl);
    return EINA_TRUE;

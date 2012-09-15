@@ -356,31 +356,12 @@ _e_mod_config_window_event_border_remove_cb(void *data, int type __UNUSED__, voi
    cwl = data;
    ev = event;
 
-   //seconds = _e_mod_config_windows_current_time_get();
-
-   //INF(ev->border->client.icccm.name);
-   //INF(ev->border->client.icccm.class);  
-   //INF("APP: %s PID:%d",ev->border->client.icccm.name, ev->border->client.netwm.pid);
-   /*
-      EINA_LIST_FOREACH(cwl->borders, l, bd)
-      {
-      DBG("LIST:%s",bd->client.icccm.name);
-
-      if(strncmp(bd->client.icccm.name, ev->border->client.icccm.name, sizeof(bd->client.icccm.name)) == 0)
-      {
-      if((ev->border->client.netwm.pid > 0) && (bd->client.netwm.pid == ev->border->client.netwm.pid))
-      {
-      INF("MATCH");
-      cwl->borders = eina_list_remove(cwl->borders, bd);
-      }
-      }
-      }
-      */
    cwl->borders = eina_list_remove(cwl->borders, ev->border);
-   if(cwl->urgent == EINA_TRUE)
+   if(productivity_conf->cur_iv.urgent == EINA_TRUE)
      {
         cwl->urgent_window = eina_list_remove(cwl->urgent_window, ev->border);
      }
+   
    /*
 
       EINA_LIST_FOREACH(cwl->cwldata_list, l, cwldata)
@@ -514,7 +495,7 @@ _e_mod_config_window_event_border_urgent_change_cb(void *data, int type __UNUSED
    ev = event;
 
    EVENT_DBG();
-   if(cwl->urgent == EINA_TRUE)
+   if(productivity_conf->cur_iv.urgent == EINA_TRUE)
      {
         cwl->urgent_window = eina_list_append(cwl->urgent_window, ev->border);
         cwl->borders = eina_list_remove(cwl->borders, ev->border);
@@ -765,16 +746,16 @@ break_time:
    if(cfg->secs_to_break < 10)
      WRN("Break will be over in %dsec", cfg->secs_to_break);
 
-   if(cfg->secs_to_break == 5)
+   if((cfg->secs_to_break >= 4) && (cfg->secs_to_break <=5))
      {
-        //Play sound to warn user break is over
         char buf[PATH_MAX];
-
+         
+        INF("Playing sound to warn user break is almost over");
         snprintf(buf, sizeof(buf), "mpg123 -q %s/data/button.mp3",
                  e_module_dir_get(cfg->module));
         ecore_exe_run(buf, NULL);
-
      }
+
    if(cfg->secs_to_break)
      return EINA_TRUE;
 

@@ -767,7 +767,7 @@ break_time:
         //Play sound to warn user break is over
         char buf[PATH_MAX];
 
-        snprintf(buf, sizeof(buf), "mpg123 %s/data/button.mp3",
+        snprintf(buf, sizeof(buf), "mpg123 -q %s/data/button.mp3",
                  e_module_dir_get(cfg->module));
         ecore_exe_run(buf, NULL);
 

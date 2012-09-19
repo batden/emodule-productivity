@@ -584,4 +584,8 @@ _e_mod_config_schedule_intervals_conf_get(E_Config_Dialog_Data *cfdata)
    return iv;
 }
 
+Eina_Bool e_mod_config_schedule_urgent_get()
+{
+   return productivity_conf->cur_iv.urgent;
+}
 

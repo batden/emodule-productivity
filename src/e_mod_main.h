@@ -108,8 +108,7 @@ struct _E_Config_Window_List
 {
    Eina_List *borders;
    Eina_List *cwldata_list;
-   Eina_List *urgent_window;
-   Eina_Bool urgent;
+   Eina_List *urgent;
 
    // e_mod_config_windows.c
    E_Config_Window_List_Data *cwldata;

@@ -19,6 +19,22 @@
      }                                                                              \
 }
 
+typedef struct _E_Config_Urgent_Window E_Config_Urgent_Window;
+typedef struct _E_Config_Remove_Window E_Config_Remove_Window;
+struct _E_Config_Urgent_Window
+{
+   const char *name;
+   const char *command;
+   const char *class;
+   int pid;
+};
+
+struct _E_Config_Remove_Window
+{
+   int pid;
+};
+
+E_Config_Remove_Window *crw = NULL;
 
 static Eina_Bool     _e_mod_config_window_event_border_add_cb(void *data,
                                                               int type, void *event);
@@ -45,6 +61,11 @@ static void          _e_mod_config_window_remember_set(E_Border *bd);
 static void          _e_mod_config_window_remember_get(E_Border *bd);
 static void          _e_mod_config_window_remember_free(E_Border *bd);
 
+static E_Config_Urgent_Window * _e_mod_config_window_urgent_set(E_Border *bd);
+
+static Eina_Bool     _e_mod_config_window_urgent_match(Eina_List *urgent, E_Border *bd);
+static void          _e_mod_config_window_urgent_remove(Eina_List *urgent, E_Border *bd);
+
 Eina_Bool
 e_mod_config_windows_create_data(void *data)
 {
@@ -52,8 +73,8 @@ e_mod_config_windows_create_data(void *data)
 
    if(!(cfg = data)) return EINA_FALSE;
 
-
    cfg->cwl = E_NEW(E_Config_Window_List, 1);
+   crw = E_NEW(E_Config_Remove_Window, 1);
 
    cfg->handlers = eina_list_append
       (cfg->handlers, ecore_event_handler_add
@@ -115,6 +136,7 @@ e_mod_timestamp_get()
 void
 e_mod_config_window_manager(E_Config_Window_List *cwl)
 {
+   INF("Manager Firing::");
    Eina_List *l, *ll, *lll, *ul;
    Config *cfg;
    Remember *rem;
@@ -149,24 +171,22 @@ e_mod_config_window_manager(E_Config_Window_List *cwl)
         return;
      }
 
-   if((cwl->urgent == EINA_TRUE) && 
-      (productivity_conf->cur_iv.urgent == EINA_TRUE))
-     {
-        EINA_LIST_FOREACH(cwl->urgent_window, ul, bd)
-          {
-             if(bd)
-               {
-                  INF("window manager found urgent window:%s",bd->client.icccm.name);
-                  _e_mod_config_window_remember_get(bd);
-                  _e_mod_config_window_unhide(bd);
-                  return;
-               }
-          }
-     }
-
    EINA_LIST_FOREACH(cwl->borders, l, bd)
      {
-        if(!bd) continue;
+        if(!(bd)) continue;
+
+        if((bd->client.icccm.delete_request) && 
+           (crw->pid == bd->client.netwm.pid))
+          {
+             if(bd->client.icccm.delete_request)
+               DBG("Delete Requested, removing border from list");
+             if(crw->pid > 0)
+               DBG("Remove Pid Match, removing border from list");
+
+             productivity_conf->cwl->borders = eina_list_remove(
+                productivity_conf->cwl->borders, bd);
+             continue;
+          }
 
         if(bd->client.icccm.name)
           if(strncmp(bd->client.icccm.name, "E", sizeof("E")) == 0)
@@ -267,12 +287,14 @@ e_mod_config_window_manager(E_Config_Window_List *cwl)
                     }
                }
 
+             if (_e_mod_config_window_urgent_match(cwl->urgent, bd))
+               m = EINA_TRUE;
+
              // if [m] is false , this means the application IS NOT in our worktools list, so we hide it!
              if (m == EINA_FALSE)
                {
                   //DBG("HIDING APPLICATON:%s", bd->desktop->name);
-                  //if(bd) _e_mod_config_window_remember_set(bd); 
-                  if(bd) _e_mod_config_window_hide(bd);
+                 if(bd) _e_mod_config_window_hide(bd);
                }
           }
 
@@ -356,12 +378,21 @@ _e_mod_config_window_event_border_remove_cb(void *data, int type __UNUSED__, voi
    cwl = data;
    ev = event;
 
-   cwl->borders = eina_list_remove(cwl->borders, ev->border);
-   if(productivity_conf->cur_iv.urgent == EINA_TRUE)
-     {
-        cwl->urgent_window = eina_list_remove(cwl->urgent_window, ev->border);
-     }
-   
+   if(_e_mod_config_window_urgent_match(cwl->urgent, ev->border))
+     _e_mod_config_window_urgent_remove(cwl->urgent, ev->border);
+   /*
+      EINA_LIST_FOREACH(cwl->borders, l, bd)
+      {
+      if(bd->client.netwm.pid == ev->border->client.netwm.pid)
+      productivity_conf->cwl->borders = eina_list_remove(
+      productivity_conf->cwl->borders, bd);
+      }*/
+   if(ev->border->client.netwm.pid > 0)
+     crw->pid = ev->border->client.netwm.pid;
+
+   /*productivity_conf->cwl->borders = 
+     eina_list_remove(productivity_conf->cwl->borders, ev->border);*/
+
    /*
 
       EINA_LIST_FOREACH(cwl->cwldata_list, l, cwldata)
@@ -407,6 +438,9 @@ _e_mod_config_window_event_border_uniconify_cb(void *data, int type __UNUSED__, 
    ev = event;
 
    EVENT_DBG();
+   if(_e_mod_config_window_urgent_match(cwl->urgent, ev->border))
+     return EINA_TRUE;
+
    e_mod_config_window_manager(cwl);
    _e_mod_config_window_remember_free(ev->border);
    return EINA_TRUE;
@@ -436,42 +470,22 @@ _e_mod_config_window_event_border_focus_out_cb(void *data, int type __UNUSED__, 
 
    if(!(cwl = data)) return;
    ev = event;
-
+   bd = ev->border;
    EVENT_DBG();
 
-   if((cwl->urgent == EINA_TRUE ) && (productivity_conf->cur_iv.urgent == EINA_TRUE))
+   if(_e_mod_config_window_urgent_match(cwl->urgent, ev->border))
      {
-        EINA_LIST_FOREACH(cwl->urgent_window, l, bd)
-          {
-             if(strncmp(bd->client.icccm.name, ev->border->client.icccm.name, sizeof(bd->client.icccm.name)) == 0)
-               {
-                  if((ev->border->client.netwm.pid > 0) && (bd->client.netwm.pid == ev->border->client.netwm.pid))
-                    {
-                       CRI("i am now focused on the urgent window");
-                       //cwl->borders = eina_list_remove(cwl->borders, bd);
-                       cwl->urgent_window = eina_list_remove(cwl->urgent_window, bd);
-                       //cwl->borders = eina_list_append(cwl->borders, bd);
-                       cwl->urgent = EINA_FALSE;
-                    }
-               }
-
-             /*
-                if(bd == ev->border)
-                {
-                CRI("i am now focused on the urgent window");
-                cwl->urgent_window = eina_list_remove(cwl->urgent_window, bd);
-             //cwl->borders = eina_list_append(cwl->borders, bd);
-             cwl->urgent = EINA_FALSE;
-             }*/
-          }
+     _e_mod_config_window_urgent_remove(cwl->urgent, ev->border);
+     //_e_mod_config_window_hide(ev->border);
      }
-
-   e_mod_config_window_manager(cwl);
+ 
+   //e_mod_config_window_manager(cwl);
    return EINA_TRUE;
 }
 
 static Eina_Bool
-_e_mod_config_window_event_border_property_cb(void *data, int type __UNUSED__, void *event)
+_e_mod_config_window_event_border_property_cb(void *data,
+                                              int type __UNUSED__, void *event)
 {
    E_Event_Border_Property *ev;
    E_Border *border;
@@ -485,7 +499,8 @@ _e_mod_config_window_event_border_property_cb(void *data, int type __UNUSED__, v
 }
 
 static Eina_Bool
-_e_mod_config_window_event_border_urgent_change_cb(void *data, int type __UNUSED__, void *event)
+_e_mod_config_window_event_border_urgent_change_cb(void *data,
+                                                   int type __UNUSED__, void *event)
 {
    E_Event_Border_Urgent_Change *ev;
    E_Border *border;
@@ -493,16 +508,20 @@ _e_mod_config_window_event_border_urgent_change_cb(void *data, int type __UNUSED
 
    if(!(cwl = data)) return;
    ev = event;
+   border = ev->border;
 
    EVENT_DBG();
-   if(productivity_conf->cur_iv.urgent == EINA_TRUE)
+   if((e_mod_config_schedule_urgent_get()) && (border->client.icccm.urgent))
      {
-        cwl->urgent_window = eina_list_append(cwl->urgent_window, ev->border);
-        cwl->borders = eina_list_remove(cwl->borders, ev->border);
-        cwl->urgent = EINA_TRUE;
+        INF("Urgent Window Detected:%d",border->client.icccm.urgent);
+        cwl->urgent = eina_list_append(cwl->urgent, _e_mod_config_window_urgent_set(border));
      }
 
    e_mod_config_window_manager(cwl);
+
+   if(_e_mod_config_window_urgent_match(cwl->urgent, border))
+     _e_mod_config_window_unhide(border);
+
    return EINA_TRUE;
 }
 /*
@@ -749,7 +768,7 @@ break_time:
    if((cfg->secs_to_break >= 4) && (cfg->secs_to_break <=5))
      {
         char buf[PATH_MAX];
-         
+
         INF("Playing sound to warn user break is almost over");
         snprintf(buf, sizeof(buf), "mpg123 -q %s/data/button.mp3",
                  e_module_dir_get(cfg->module));
@@ -796,7 +815,7 @@ void e_mod_config_window_free(void)
      }
 
    eina_list_free(cwl->borders);
-   eina_list_free(cwl->urgent_window);
+   //eina_list_free(cwl->urgent_window);
 
    E_FREE(bd);
    E_FREE(eh); 
@@ -804,3 +823,103 @@ void e_mod_config_window_free(void)
    E_FREE(cwl->cwldata);
    E_FREE(cwl);
 }
+
+static E_Config_Urgent_Window *
+_e_mod_config_window_urgent_set(E_Border *bd)
+{
+   Eina_List *urgent;
+   E_Config_Urgent_Window *cuw;
+
+   if(!(bd)) return;
+   cuw = E_NEW(E_Config_Urgent_Window, 1);
+
+   if(bd->client.icccm.name)
+     cuw->name = eina_stringshare_add(bd->client.icccm.name);
+
+   if(bd->client.icccm.class)
+     cuw->class = eina_stringshare_add(bd->client.icccm.class);
+
+   if((bd->client.icccm.command.argc > 0) && (bd->client.icccm.command.argv)) 
+     cuw->command = eina_stringshare_add(bd->client.icccm.command.argv[0]);
+
+   if(bd->client.netwm.pid > 0)
+     cuw->pid = bd->client.netwm.pid;
+
+   return cuw;
+}
+
+static Eina_Bool 
+_e_mod_config_window_urgent_match(Eina_List *urgent, E_Border *bd)
+{
+   Eina_List *l;
+   E_Config_Urgent_Window *cuw;
+   int match = 0;
+
+   if(!(urgent)) return;
+   if(!(bd->client.icccm.name)) return;
+   if(!(bd->client.icccm.class)) return;
+   if(!(bd->client.icccm.command.argc > 0)) return;
+   if(!(bd->client.icccm.command.argv)) return;
+   if(!(bd->client.netwm.pid > 0)) return;
+
+   EINA_LIST_FOREACH(urgent, l, cuw)
+     {
+        if(match > 0) match =  0;
+
+        if(strncmp(cuw->name, bd->client.icccm.name, sizeof(cuw->name)) == 0)
+          match += 1;
+
+        if(strncmp(cuw->class, bd->client.icccm.class, sizeof(cuw->class)) == 0)
+          match += 1;
+
+        if(strncmp(cuw->command, bd->client.icccm.command.argv[0], sizeof(cuw->command)) == 0)
+          match += 1;
+
+        if(cuw->pid == bd->client.netwm.pid)
+          match += 1;
+
+
+        if(match == 4)
+          return EINA_TRUE;
+     }
+   return EINA_FALSE;
+}
+
+static void
+_e_mod_config_window_urgent_remove(Eina_List *urgent, E_Border *bd)
+{ 
+   Eina_List *l;
+   E_Config_Urgent_Window *cuw;
+   int match = 0;
+
+   if(!(urgent)) return;
+   if(!(bd->client.icccm.name)) return;
+   if(!(bd->client.icccm.class)) return;
+   if(!(bd->client.icccm.command.argc > 0)) return;
+   if(!(bd->client.icccm.command.argv)) return;
+   if(!(bd->client.netwm.pid > 0)) return;
+
+   EINA_LIST_FOREACH(urgent, l, cuw)
+     {
+        if(match > 0) match =  0;
+
+        if(strncmp(cuw->name, bd->client.icccm.name, sizeof(cuw->name)) == 0)
+          match += 1;
+
+        if(strncmp(cuw->class, bd->client.icccm.class, sizeof(cuw->class)) == 0)
+          match += 1;
+
+        if(strncmp(cuw->command, bd->client.icccm.command.argv[0], sizeof(cuw->command)) == 0)
+          match += 1;
+
+        if(cuw->pid == bd->client.netwm.pid)
+          match += 1;
+
+
+        if(match == 4)
+          productivity_conf->cwl->urgent = 
+             eina_list_remove(productivity_conf->cwl->urgent, cuw);
+     }
+}
+
+

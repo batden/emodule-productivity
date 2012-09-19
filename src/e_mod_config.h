@@ -62,5 +62,6 @@ Eina_List   *e_mod_config_worktools_selected_get();
 
 //    e_mod_config_schedule.c
 Eina_Bool    e_mod_config_schedule_create_data(E_Config_Dialog_Data *cfdata);
+Eina_Bool    e_mod_config_schedule_urgent_get();
 Evas_Object *e_mod_config_schedule_new(Evas_Object *otb, Evas *evas,
                                        E_Config_Dialog_Data *cfdata);

@@ -190,175 +190,6 @@ e_mod_timestamp_get()
    return _e_mod_config_windows_current_time_get();
 }
 
-void
-e_mod_config_window_manager(E_Config_Window_List *cwl)
-{
-   INF("Manager Firing::");
-   Eina_List *l, *ll, *lll, *ul;
-   Config *cfg;
-   Remember *rem;
-   Efreet_Desktop *desk;
-   E_Border *bd;
-   Eina_Bool m = EINA_FALSE;
-
-   //If we cant find config return;
-   if(!(cfg = productivity_conf)) return;
-
-   // If the current time[NOW] is not more than [Start_time] and less than [Stop_time]
-   // return;
-   if(e_mod_main_is_it_time_to_work() != EINA_TRUE)
-     {
-        EINA_LIST_FOREACH(cwl->borders, l, bd)
-          {
-             if(!bd) continue;
-
-             // _e_mod_config_window_remember_get(bd);
-
-             if(cfg->go_to_break == EINA_TRUE)
-               cfg->unhide = EINA_TRUE;
-
-             if(cfg->unhide == EINA_TRUE)
-               _e_mod_config_window_unhide(bd);
-
-             // if(cfg->unhide == EINA_FALSE)
-             // _e_mod_config_window_remember_free(bd);
-          }
-
-        cfg->unhide = EINA_FALSE;
-        return;
-     }
-
-   EINA_LIST_FOREACH(cwl->borders, l, bd)
-     {
-        if(!(bd)) continue;
-
-        if((bd->client.icccm.delete_request) && 
-           (crw->pid == bd->client.netwm.pid))
-          {
-             if(bd->client.icccm.delete_request)
-               DBG("Delete Requested, removing border from list");
-             if(crw->pid > 0)
-               DBG("Remove Pid Match, removing border from list");
-
-             productivity_conf->cwl->borders = eina_list_remove(
-                productivity_conf->cwl->borders, bd);
-             continue;
-          }
-
-        if(bd->client.icccm.name)
-          if(strncmp(bd->client.icccm.name, "E", sizeof("E")) == 0)
-            continue;
-
-        if(bd->client.icccm.class)
-          if(strncmp(bd->client.icccm.class, "_config::", 8) == 0)
-            continue;
-
-        if (!bd->desktop)
-          {
-             bd->desktop = efreet_util_desktop_exec_find(bd->client.icccm.name);
-          }
-        if(!bd->desktop)
-          {
-             int i = 0;
-             char buf[PATH_MAX];
-             snprintf(buf, sizeof(buf), "%s",bd->client.icccm.name);
-
-             while(buf[i] < (sizeof(buf) -1))
-               {
-                  buf[i] = tolower(buf[i]);
-                  i++;
-               }
-             bd->desktop = efreet_util_desktop_exec_find(buf);
-          }
-        if(!bd->desktop)
-          {
-             int i = 0;
-             char buf[PATH_MAX];
-             snprintf(buf, sizeof(buf), "%s",bd->client.icccm.class);
-
-             while(buf[i] < (sizeof(buf) -1))
-               {
-                  buf[i] = tolower(buf[i]);
-                  i++;
-               }
-             bd->desktop = efreet_util_desktop_exec_find(buf);
-          }
-        if (!bd->desktop)
-          {
-             if ((bd->client.icccm.name) && (bd->client.icccm.class))
-               bd->desktop = efreet_util_desktop_wm_class_find(bd->client.icccm.name,
-                                                               bd->client.icccm.class);
-          }
-
-
-        /*//CRI("!Name:%s , Class:%s", bd->client.icccm.name, bd->client.icccm.class);
-          if(bd->client.icccm.command.argv)
-          {
-        //CRI("Command:%s",bd->client.icccm.command.argv[0]);
-        EINA_LIST_FOREACH(cfg->apps_list, ll, desk)
-        {
-        if(desk->exec)
-        {
-        //WRN("cmd:%s ? exec: %s", bd->client.icccm.command.argv[0], desk->exec);
-        }
-        }
-        }*/
-
-        //If we are still unable to get the .desktop just hide the window, user should always use .desktop
-        //file to launch worktools :) 
-        if(!bd->desktop)
-          {
-             ERR("Unable to get a .desktop, giving up, will now close %s",
-                 bd->client.icccm.name);
-             e_border_act_close_begin(bd);
-          }
-
-        // If the border has the correct .desktop file, we will do comparison to our worktools application
-        // list [cfg->apps], if we find a match [m] = EINA_TRUE.
-        if(bd->desktop)
-          {
-             //CRI("Name:%s , Class:%s", bd->client.icccm.name, bd->client.icccm.class);
-             EINA_LIST_FOREACH(cfg->apps_list, ll, desk)
-               {
-                  if(desk->name)
-                    {
-                       if ((strncmp(desk->name,bd->desktop->name, sizeof(desk->name)) == 0 ) &&
-                           (strncmp(desk->orig_path,bd->desktop->orig_path, sizeof(desk->orig_path)) == 0 ))
-                         {
-                            //DBG("Name:%s , Orig_Path:%s", desk->name, desk->orig_path);
-                            if(bd->client.netwm.pid > 0)
-                              m = EINA_TRUE;
-
-                            EINA_LIST_FOREACH(productivity_conf->remember_list, lll, rem)
-                              {
-                                 if(!rem) continue;
-
-                                 if(rem->pid == bd->client.netwm.pid)
-                                   {
-                                      _e_mod_config_window_unhide(bd);
-                                      productivity_conf->remember_list = 
-                                         eina_list_remove(productivity_conf->remember_list, rem);
-                                   }
-                              }
-                         }
-                    }
-               }
-
-             if (_e_mod_config_window_urgent_match(cwl->urgent, bd))
-               m = EINA_TRUE;
-
-             // if [m] is false , this means the application IS NOT in our worktools list, so we hide it!
-             if (m == EINA_FALSE)
-               {
-                  //DBG("HIDING APPLICATON:%s", bd->desktop->name);
-                  if(bd) _e_mod_config_window_hide(bd);
-               }
-          }
-
-        m = EINA_FALSE;
-     }
-} 
-
 /***********************************************************************************
   INTERNALS
  ************************************************************************************/
@@ -737,7 +568,7 @@ _e_mod_config_window_break_timer(void *data)
 
    INF("WORK TIME");
    if(!cfg->cur_iv.break_min_y) return EINA_TRUE;
-   sby = cfg->cur_iv.break_min_y * 59 - 50;
+   sby = cfg->cur_iv.break_min_y * 59;
 
    if(!cfg->secs_to_break)
      cfg->secs_to_break = sby;
@@ -764,7 +595,7 @@ break_time:
 
    INF("BREAK TIME");
    if(!cfg->cur_iv.break_min_x) return EINA_TRUE;
-   sbx = cfg->cur_iv.break_min_x * 59 - 50;
+   sbx = cfg->cur_iv.break_min_x * 59;
 
    if(!cfg->secs_to_break)
      cfg->secs_to_break = sbx;
@@ -973,6 +804,8 @@ e_mod_config_window_manager_v2(void *data)
 
       case E_MOD_PROD_INIT_STOP:
          INF("E_MOD_PROD_INIT_STOP");
+         _e_mod_config_window_remember_show_all(
+            cwl->borders, productivity_conf->remember_list);
          productivity_conf->init = E_MOD_PROD_STOPPED;
          //Do xyz..
          return EINA_TRUE;
@@ -980,6 +813,8 @@ e_mod_config_window_manager_v2(void *data)
       case E_MOD_PROD_INIT_START:
          INF("E_MOD_PROD_INIT_START");
          productivity_conf->init = E_MOD_PROD_STARTED;
+         _e_mod_config_window_border_add_all(cwl);
+         e_mod_config_window_manager_v2(cwl);
          //Do xyz...
          return EINA_TRUE;
 
@@ -1082,7 +917,8 @@ e_mod_config_window_manager_v2(void *data)
           } 
 
         if((cwl->event == E_BORDER_PROPERTY) && (ev_border->urgent == EINA_TRUE) && 
-           (worktool_match == EINA_FALSE) && (cbd->pid == ev_border->pid))
+           (worktool_match == EINA_FALSE) && (cbd->pid == ev_border->pid) &&
+           (e_mod_config_schedule_urgent_get() == EINA_TRUE))
           {
              INF("Urgent Window:%s", cbd->name);
              cbd->private.property ++;

@@ -209,6 +209,8 @@ e_modapi_shutdown(E_Module *m)
    productivity_conf->module = NULL;
    e_gadcon_provider_unregister(&_gc_class);
 
+   ecore_timer_del(productivity_conf->wm);
+   ecore_timer_del(productivity_conf->timer);
    /* Cleanup our item list */
    while (productivity_conf->conf_items) 
      {
@@ -768,24 +770,5 @@ _e_mod_main_get_current_config(Config *cfg)
    E_FREE(m);
    E_FREE(d);
    E_FREE(iv);
-}
-
-Eina_Bool
-e_mod_main_is_it_time_to_work()
-{
-   Config *cfg;
-   Intervals *iv;
-
-   if(!(cfg = productivity_conf)) return EINA_FALSE;
-   if(!(iv = &productivity_conf->cur_iv)) return EINA_FALSE;
-
-   if((iv->lock == EINA_TRUE) && (cfg->go_to_break == EINA_FALSE))
-     return EINA_TRUE;
-   else if((iv->lock == EINA_TRUE) && (cfg->go_to_break == EINA_TRUE))
-     return EINA_FALSE;
-   else if((iv->lock == EINA_FALSE) && (cfg->go_to_break == EINA_TRUE))
-     return EINA_FALSE;
-
-   return EINA_FALSE;
 }
 

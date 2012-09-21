@@ -50,6 +50,30 @@ typedef struct _Day   Day;
 typedef struct _Intervals Intervals;
 typedef struct _Remember Remember;
 
+typedef enum _Border_Event
+{
+   E_BORDER_NULL = -1,
+   E_BORDER_ADD = 0,
+   E_BORDER_REMOVE = 1,
+   E_BORDER_ICONIFY = 2,
+   E_BORDER_UNICONIFY = 3,
+   E_BORDER_FOCUS_IN = 4,
+   E_BORDER_FOCUS_OUT = 5,
+   E_BORDER_URGENT = 6,
+   E_BORDER_PROPERTY = 7,
+} Border_Event;
+
+typedef enum _Initialize
+{
+   E_MOD_PROD_STOPPED = 0,
+   E_MOD_PROD_STARTED = 1,
+   E_MOD_PROD_BREAK = 3,
+   E_MOD_PROD_INIT_STOP = 4,
+   E_MOD_PROD_INIT_START = 5,
+   E_MOD_PROD_INIT_BREAK = 6,
+   E_MOD_PROD_RESUME = 7,
+} Initialize;
+
 struct _Intervals
 {
    int id;
@@ -109,6 +133,8 @@ struct _E_Config_Window_List
    Eina_List *borders;
    Eina_List *cwldata_list;
    Eina_List *urgent;
+   Border_Event event;
+   E_Border *ev_border;
 
    // e_mod_config_windows.c
    E_Config_Window_List_Data *cwldata;
@@ -123,6 +149,7 @@ struct _Config
    int version;
    unsigned int timestamp;
    Ecore_Timer *timer;
+   Ecore_Timer *wm;
    int secs_to_break;
    Eina_Bool go_to_break;
 
@@ -143,6 +170,7 @@ struct _Config
    // e_mod_config_windows.c
    E_Config_Window_List *cwl;
    Eina_Bool unhide :1;
+   Initialize init;
 };
 
 /* This struct used to hold config for individual items from above list */
@@ -186,6 +214,7 @@ Eina_Bool e_mod_main_is_it_time_to_work();
 //    e_mod_config_windows.c
 unsigned int e_mod_timestamp_get();
 void         e_mod_config_window_manager(E_Config_Window_List *cwl);
+Eina_Bool    e_mod_config_window_manager_v2(void *data);
 void         e_mod_config_window_remember_cleanup();
 void         e_mod_config_window_free(void);
 void         e_mod_config_window_remember_free_all(void);

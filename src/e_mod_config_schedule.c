@@ -349,7 +349,12 @@ _e_mod_config_schedule_start_working_cb(void *data, void *data2)
    e_mod_config_schedule_save_config(cfdata);
    e_mod_config_worktools_save(cfdata);
    productivity_conf->unhide = EINA_FALSE;
-   e_mod_config_window_manager(productivity_conf->cwl);
+   
+   productivity_conf->init = E_MOD_PROD_INIT_START;
+   ecore_timer_freeze(productivity_conf->wm);
+   e_mod_config_window_manager_v2(productivity_conf->cwl);
+   ecore_timer_thaw(productivity_conf->wm);
+
    e_config_save_queue();
 }
 
@@ -382,7 +387,12 @@ _e_mod_config_schedule_stop_working_cb(void *data, void *data2)
    e_mod_config_schedule_save_config(cfdata);
    e_mod_config_worktools_save(cfdata);
    productivity_conf->unhide = EINA_TRUE;
-   e_mod_config_window_manager(productivity_conf->cwl);
+  
+   productivity_conf->init = E_MOD_PROD_INIT_STOP; 
+   ecore_timer_freeze(productivity_conf->wm);
+   e_mod_config_window_manager_v2(productivity_conf->cwl);
+   ecore_timer_thaw(productivity_conf->wm);
+
    e_config_save_queue();
 }
 

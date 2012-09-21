@@ -743,10 +743,7 @@ _e_mod_main_get_current_config(Config *cfg)
                        cfg->cur_day.name = eina_stringshare_add(d->name);
                        cfg->cur_day.mday = d->mday;
                        cfg->cur_day.total_time_worked = d->total_time_worked;
-                       /*cfg->cur_day.iv_list = eina_list_clone(
-                         eina_list_last(d->iv_list));*/
-
-                       //INF("FOUND CURRENT Day:%s",d->name);
+                       
                        last = eina_list_last(d->iv_list);
 
                        EINA_LIST_FOREACH(last, lll, iv)
@@ -756,12 +753,13 @@ _e_mod_main_get_current_config(Config *cfg)
                             cfg->cur_iv.urgent        = iv->urgent;
                             cfg->cur_iv.break_min_x   = iv->break_min_x;
                             cfg->cur_iv.break_min_y   = iv->break_min_y;
-                            /* cfg->cur_iv.start.hour    = iv->start.hour;
-                               cfg->cur_iv.start.min     = iv->start.min;
-                               cfg->cur_iv.start.sec     = iv->start.sec;
-                               cfg->cur_iv.stop.hour     = iv->stop.hour;
-                               cfg->cur_iv.stop.min      = iv->stop.min;
-                               cfg->cur_iv.stop.sec      = iv->stop.sec;*/
+
+                            //cfg->init = iv->lock;
+                            //FIXME: change lock from bool to int??;
+                            if(iv->lock)
+                              cfg->init = E_MOD_PROD_INIT_START;
+                            if(!iv->lock)
+                              cfg->init = E_MOD_PROD_STOPPED;
                          }
                     }
                }

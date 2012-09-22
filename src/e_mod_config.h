@@ -17,23 +17,14 @@ struct _E_Config_Schedule_Data
 {
    Evas_Object *start_btn;
    Evas_Object *stop_btn;
-   Evas_Object *start_clk;
-   Evas_Object *stop_clk;
    Evas_Object *break_x;
    Evas_Object *break_y;
    Evas_Object *label;
    Evas_Object *urgent_chk;
    Eina_Bool lock;
    int urgent;
-   int id;
    double break_min_x;
    double break_min_y;
-   struct
-     {
-        int hour;
-        int min;
-        int sec;
-     }start_time, stop_time;
 };
 
 //    e_mod_config.c
@@ -47,7 +38,6 @@ struct _E_Config_Dialog_Data
 
    // e_mod_config_schedule.c
    E_Config_Schedule_Data   schedule;
-   Ecore_Timer             *clock_delay;
 };
 
 //    e_mod_config_worktools.c

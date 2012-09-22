@@ -183,7 +183,7 @@ e_mod_config_windows_create_data(void *data)
    productivity_conf->wm = 
       ecore_timer_loop_add(0.50, e_mod_config_window_manager_v2, cfg->cwl);
 
-   productivity_conf->timer = 
+   productivity_conf->brk = 
       ecore_timer_loop_add(1.00, _e_mod_config_window_break_timer, cfg->cwl);
 
    if(cfg->cwl->borders) return EINA_TRUE;
@@ -572,8 +572,8 @@ _e_mod_config_window_break_timer(void *data)
    if(cfg->init == E_MOD_PROD_BREAK)
      goto break_time;
 
-   if(!cfg->cur_iv.break_min_y) return EINA_TRUE;
-   sby = cfg->cur_iv.break_min_y * 59;
+   if(!cfg->break_min_y) return EINA_TRUE;
+   sby = cfg->break_min_y * 59;
 
    if(!cfg->secs_to_break)
      cfg->secs_to_break = sby;
@@ -598,8 +598,8 @@ _e_mod_config_window_break_timer(void *data)
 
 break_time:
 
-   if(!cfg->cur_iv.break_min_x) return EINA_TRUE;
-   sbx = cfg->cur_iv.break_min_x * 59;
+   if(!cfg->break_min_x) return EINA_TRUE;
+   sbx = cfg->break_min_x * 59;
 
    if(!cfg->secs_to_break)
      cfg->secs_to_break = sbx;
@@ -637,7 +637,6 @@ break_time:
 void e_mod_config_window_free(void)
 {
    E_Config_Window_List *cwl;
-   E_Config_Window_List_Data *cwldata;
    Ecore_Event_Handler *eh;
    E_Border *bd = NULL;
 
@@ -800,7 +799,7 @@ e_mod_config_window_manager_v2(void *data)
       case E_MOD_PROD_RESUME:
          MINF("E_MOD_PROD_RESUME");
          productivity_conf->init = E_MOD_PROD_INIT_START;
-         productivity_conf->timer =
+         productivity_conf->brk =
             ecore_timer_loop_add(1.00, _e_mod_config_window_break_timer, cwl);
          return EINA_TRUE;
 
@@ -1220,13 +1219,13 @@ _e_mod_config_window_remember_show_all(Eina_List *cbd_lst, Eina_List *rem_lst)
                {
                   E_Zone *zone;
                   E_Desk *desk;
-                  
+
                   zone = e_container_zone_number_get(bd->zone->container,
                                                      rem->zone);
                   desk = e_desk_at_xy_get(zone, rem->desk_x, rem->desk_y);
 
                   _e_mod_config_window_unhide(bd);
-                  
+
                   if(bd->zone->num != rem->zone)
                     e_border_zone_set(bd, zone);
 
@@ -1241,4 +1240,4 @@ _e_mod_config_window_remember_show_all(Eina_List *cbd_lst, Eina_List *rem_lst)
 }
 
 
-   
+

@@ -63,8 +63,6 @@ _free_data(E_Config_Dialog *cfd, E_Config_Dialog_Data *cfdata)
    WRN("FREEING Schedule");
    evas_object_del(cfdata->schedule.start_btn);
    evas_object_del(cfdata->schedule.stop_btn);
-   evas_object_del(cfdata->schedule.start_clk);
-   evas_object_del(cfdata->schedule.stop_clk);
    evas_object_del(cfdata->schedule.break_x);
    evas_object_del(cfdata->schedule.break_y);
    evas_object_del(cfdata->schedule.urgent_chk);

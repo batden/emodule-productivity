@@ -27,28 +27,18 @@ extern int _productivity_log;
  * compatible anymore, it creates an entire new one.
  * You need to increment GENERATION when you add new values to the
  * configuration file but is not needed to delete the existing conf  */
-#define MOD_CONFIG_FILE_EPOCH 0x0002
+#define MOD_CONFIG_FILE_EPOCH 0x0003
 #define MOD_CONFIG_FILE_GENERATION 0x008e
 #define MOD_CONFIG_FILE_VERSION \
    ((MOD_CONFIG_FILE_EPOCH << 16) | MOD_CONFIG_FILE_GENERATION)
-
-/* More mac/def; Define your own. What do you need ? */
-#define CONN_DEVICE_ETHERNET 0
 
 /* We create a structure config for our module, and also a config structure
  * for every item element (you can have multiple gadgets for the same module) */
 
 typedef struct _Config Config;
 typedef struct _Config_Item Config_Item;
-//typedef struct _Config_Schedule_Start Config_Schedule_Start;
-
-typedef struct _E_Config_Window_List_Data E_Config_Window_List_Data;
-typedef struct _E_Config_Window_List E_Config_Window_List;
-
-typedef struct _Month Month;
-typedef struct _Day   Day;
-typedef struct _Intervals Intervals;
 typedef struct _Remember Remember;
+typedef struct _E_Config_Window_List E_Config_Window_List;
 
 typedef enum _Border_Event
 {
@@ -74,39 +64,6 @@ typedef enum _Initialize
    E_MOD_PROD_RESUME = 7,
 } Initialize;
 
-struct _Intervals
-{
-   int id;
-   int lock;
-   int urgent;
-   int break_min_x;
-   int break_min_y;
-   struct
-     {
-        int hour;
-        int min;
-        int sec;
-     }start, stop;
-};
-
-struct _Day
-{
-   const char *name;
-   int mday;
-   double total_time_worked;
-   Intervals iv;
-   Eina_List *iv_list;
-};
-
-
-struct _Month
-{
-   const char *name;
-   int mon;
-   Day day;
-   Eina_List *day_list;
-};
-
 struct _Remember
 {
    const char *name;
@@ -119,15 +76,6 @@ struct _Remember
 };
 
 //    e_mod_config_windows.c
-struct _E_Config_Window_List_Data
-{
-   const char *name;
-   const char *command;
-   int pid;
-   long seconds;
-};
-
-//    e_mod_config_windows.c
 struct _E_Config_Window_List
 {
    Eina_List *borders;
@@ -135,9 +83,6 @@ struct _E_Config_Window_List
    Eina_List *urgent;
    Border_Event event;
    E_Border *ev_border;
-
-   // e_mod_config_windows.c
-   E_Config_Window_List_Data *cwldata;
 };
 
 struct _Config 
@@ -146,41 +91,31 @@ struct _Config
    E_Int_Menu_Augmentation *maug;
    E_Config_Dialog *cfd;
    Eina_List *conf_items;
+   
    int version;
-   unsigned int timestamp;
-   Ecore_Timer *timer;
+   int lock;
+   int urgent;
+   int break_min_x;
+   int break_min_y;
+   
+   Ecore_Timer *brk;
    Ecore_Timer *wm;
    int secs_to_break;
    Eina_Bool go_to_break;
 
    /*Work application list*/
    Eina_List *apps_list;
-   Eina_List *month_list;
    Eina_List *remember_list;
    Eina_List *handlers;
 
-   Intervals iv;
-   //Day day;
-   //Month month;
-   
-   Month cur_month;
-   Day cur_day;
-   Intervals cur_iv;
-
    // e_mod_config_windows.c
    E_Config_Window_List *cwl;
-   Eina_Bool unhide :1;
    Initialize init;
 };
 
-/* This struct used to hold config for individual items from above list */
 struct _Config_Item 
 {
-   /* unique id for every running gadget, this is managed by gadcon */
    const char *id;
-
-   /* actual config properties independently for every running gadget. */
-   int switch2;
 };
 
 /* Setup the E Module Version, Needed to check if module can run. */
@@ -208,11 +143,8 @@ E_Config_Dialog *e_int_config_productivity_module(E_Container *con, const char *
 void e_mod_log_cb(const Eina_Log_Domain *d, Eina_Log_Level level, const char *file, const char *fnc, int line, const char *fmt, void *data, va_list args);
 
 extern Config *productivity_conf;
-void e_mod_main_reload_config();
-Eina_Bool e_mod_main_is_it_time_to_work();
 
 //    e_mod_config_windows.c
-unsigned int e_mod_timestamp_get();
 void         e_mod_config_window_manager(E_Config_Window_List *cwl);
 Eina_Bool    e_mod_config_window_manager_v2(void *data);
 void         e_mod_config_window_remember_cleanup();

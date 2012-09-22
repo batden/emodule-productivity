@@ -21,20 +21,17 @@ static void _e_mod_config_schedule_break_x_time_cb(void *data, Evas_Object *obj,
                                                    void *event_info);
 static void _e_mod_config_schedule_break_y_time_cb(void *data, Evas_Object *obj,
                                                    void *event_info);
-static void _e_mod_config_schedule_clock_fill_delay(E_Config_Schedule_Data *csd);
 static void _e_mod_config_schedule_lock_update(E_Config_Schedule_Data *csd);
-static void _e_mod_config_schedule_productivity_conf_update(Config *cfg,
-                                                            E_Config_Dialog_Data *cfdata);
-
-static Eina_Bool e_mod_config_schedule_clock_fill_delay(void *data);
-static Intervals _e_mod_config_schedule_intervals_conf_get(E_Config_Dialog_Data *cfdata);
 static void  _e_mod_config_schedule_label_update(E_Config_Schedule_Data *csd);
 
 
 Eina_Bool
 e_mod_config_schedule_create_data(E_Config_Dialog_Data *cfdata)
-{ 
-   _e_mod_config_schedule_clock_fill_delay(&cfdata->schedule);
+{  
+   cfdata->schedule.lock            = productivity_conf->lock;
+   cfdata->schedule.urgent          = productivity_conf->urgent;
+   cfdata->schedule.break_min_x     = productivity_conf->break_min_x;
+   cfdata->schedule.break_min_y     = productivity_conf->break_min_y;
 }
 
 Evas_Object *
@@ -87,59 +84,10 @@ e_mod_config_schedule_new_v2(Evas_Object *otb, Evas *evas, E_Config_Dialog_Data 
 Eina_Bool
 e_mod_config_schedule_save_config(E_Config_Dialog_Data *cfdata)
 {
-   Month *m, mm;
-   Day *d;
-   Intervals *iv, new_iv;
-   Eina_List *l, *ll, *lll;
-   Eina_List *iv_list;
-   Eina_Bool dm = EINA_FALSE;
-
-   time_t tt;
-   struct tm *tm;
-
-   time(&tt);
-   tm = localtime(&tt);
-
-   productivity_conf->timestamp = e_mod_timestamp_get();
-
-   EINA_LIST_FOREACH(productivity_conf->month_list, l, m)
-     {
-        if (tm->tm_mon == m->mon)
-          {
-             EINA_LIST_FOREACH(m->day_list, ll, d)
-               {
-                  if (d->mday == tm->tm_mday)
-                    {
-                       EINA_LIST_FOREACH(d->iv_list, lll, iv)
-                         {
-                            if (iv->id == cfdata->schedule.id)
-                              {
-                                 d->iv_list = eina_list_remove(d->iv_list, iv);
-                              }
-                         }
-
-                       m->day.iv = _e_mod_config_schedule_intervals_conf_get(cfdata);
-                       d->iv_list = eina_list_append(d->iv_list, 
-                                                     &m->day.iv);
-                       dm = EINA_TRUE;
-                    }
-               }
-             if(dm == EINA_FALSE)
-               {
-                  char buf[16];
-
-                  INF("Today is a new day, so we create a new day :)");
-                  strftime(buf, 16, "%A", tm);
-                  m->day.name = eina_stringshare_add(buf);
-                  m->day.mday = tm->tm_mday;
-                  m->day_list = eina_list_append(m->day_list, &m->day);
-                  m->day.iv = _e_mod_config_schedule_intervals_conf_get(cfdata);
-                  m->day.iv_list = eina_list_append(m->day.iv_list, &m->day.iv);
-               }
-          }
-     }
-   _e_mod_config_schedule_productivity_conf_update(productivity_conf, cfdata);
-   e_mod_main_reload_config();
+   productivity_conf->lock         = cfdata->schedule.lock;
+   productivity_conf->urgent       = cfdata->schedule.urgent;
+   productivity_conf->break_min_x  = cfdata->schedule.break_min_x;
+   productivity_conf->break_min_y  = cfdata->schedule.break_min_y;
 } 
 
 static void
@@ -167,7 +115,6 @@ _e_mod_config_schedule_start_working_cb(void *data, void *data2)
 
    e_mod_config_schedule_save_config(cfdata);
    e_mod_config_worktools_save(cfdata);
-   productivity_conf->unhide = EINA_FALSE;
 
    productivity_conf->init = E_MOD_PROD_INIT_START;
    ecore_timer_freeze(productivity_conf->wm);
@@ -201,7 +148,6 @@ _e_mod_config_schedule_stop_working_cb(void *data, void *data2)
 
    e_mod_config_schedule_save_config(cfdata);
    e_mod_config_worktools_save(cfdata);
-   productivity_conf->unhide = EINA_TRUE;
 
    productivity_conf->init = E_MOD_PROD_INIT_STOP; 
    ecore_timer_freeze(productivity_conf->wm);
@@ -219,7 +165,7 @@ _e_mod_config_schedule_urgent_cb(void *data, Evas_Object *obj, void *event_info)
    if(!(cfdata = data)) return;
 
    cfdata->schedule.urgent = e_widget_check_checked_get(obj);
-   productivity_conf->cur_iv.urgent = cfdata->schedule.urgent;
+   productivity_conf->urgent = cfdata->schedule.urgent;
    e_mod_config_schedule_save_config(cfdata);
    e_mod_config_worktools_save(cfdata);
    e_config_save_queue();
@@ -256,28 +202,6 @@ _e_mod_config_schedule_label_update(E_Config_Schedule_Data *csd)
    e_widget_label_text_set(csd->label, buf);
 }
 
-static Eina_Bool
-e_mod_config_schedule_clock_fill_delay(void *data)
-{
-   E_Config_Dialog_Data *cfdata;
-
-   if(!(cfdata = data)) return ECORE_CALLBACK_CANCEL;
-   _e_mod_config_schedule_clock_fill_delay(&cfdata->schedule);
-
-   cfdata->clock_delay = NULL;
-   return ECORE_CALLBACK_CANCEL;
-}
-
-static void
-_e_mod_config_schedule_clock_fill_delay(E_Config_Schedule_Data *csd)
-{
-   csd->id              = productivity_conf->cur_iv.id;
-   csd->lock            = productivity_conf->cur_iv.lock;
-   csd->urgent          = productivity_conf->cur_iv.urgent;
-   csd->break_min_x     = productivity_conf->cur_iv.break_min_x;
-   csd->break_min_y     = productivity_conf->cur_iv.break_min_y;
-}
-
 static void
 _e_mod_config_schedule_lock_update(E_Config_Schedule_Data *csd)
 {
@@ -303,32 +227,8 @@ _e_mod_config_schedule_lock_update(E_Config_Schedule_Data *csd)
      }
 }
 
-static void
-_e_mod_config_schedule_productivity_conf_update(Config *cfg,
-                                                E_Config_Dialog_Data *cfdata)
-{
-   cfg->iv.id           = cfdata->schedule.id;
-   cfg->iv.lock         = cfdata->schedule.lock;
-   cfg->iv.urgent       = cfdata->schedule.urgent;
-   cfg->iv.break_min_x  = cfdata->schedule.break_min_x;
-   cfg->iv.break_min_y  = cfdata->schedule.break_min_y;
-}
-
-static Intervals
-_e_mod_config_schedule_intervals_conf_get(E_Config_Dialog_Data *cfdata)
-{
-   Intervals iv;
-
-   iv.id          = cfdata->schedule.id;
-   iv.lock        = cfdata->schedule.lock;
-   iv.urgent      = cfdata->schedule.urgent;
-   iv.break_min_x = cfdata->schedule.break_min_x;
-   iv.break_min_y = cfdata->schedule.break_min_y;
-   return iv;
-}
-
 Eina_Bool e_mod_config_schedule_urgent_get()
 {
-   return productivity_conf->cur_iv.urgent;
+   return productivity_conf->urgent;
 }
 

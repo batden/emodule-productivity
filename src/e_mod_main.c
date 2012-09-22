@@ -20,14 +20,6 @@ static void _productivity_cb_menu_configure(void *data, E_Menu *mn, E_Menu_Item 
 static void _productivity_mod_menu_add(void *data, E_Menu *m);
 static void _productivity_mod_run_cb(void *data, E_Menu *m, E_Menu_Item *mi);
 
-static Month      *_e_mod_main_month_conf_item_get();
-static Day         _e_mod_main_day_conf_item_get();
-static Intervals   _e_mod_main_intervals_get();
-static Remember   *_e_mod_main_remember_get();
-
-static void _config_init();
-static void _e_mod_main_get_current_config(Config *cfg);
-
 /* Local Structures */
 typedef struct _Instance Instance;
 struct _Instance 
@@ -52,10 +44,6 @@ int _productivity_log;
 /* Local Variables */
 static Eina_List *instances = NULL;
 static E_Config_DD *conf_edd = NULL;
-static E_Config_DD *month_edd = NULL;
-static E_Config_DD *day_edd = NULL;
-static E_Config_DD *intervals_edd = NULL;
-static E_Config_DD *remember_edd = NULL;
 
 Config *productivity_conf = NULL;
 
@@ -104,9 +92,18 @@ e_modapi_init(E_Module *m)
    /* add right-side item */
    e_configure_registry_item_add("advanced/productivity", 110, _("Productivity"), 
                                  NULL, buf, e_int_config_productivity_module);
-
-   _config_init();
-
+#undef T
+#undef D
+#define T Config
+#define D conf_edd
+   conf_edd = E_CONFIG_DD_NEW("Config", Config);
+   E_CONFIG_VAL(D, T, version, INT);
+   E_CONFIG_VAL(D, T, lock, INT);
+   E_CONFIG_VAL(D, T, urgent, INT);
+   E_CONFIG_VAL(D, T, break_min_x, INT);
+   E_CONFIG_VAL(D, T, break_min_y, INT);
+#undef T
+#undef D
    /* Tell E to find any existing module data. First run ? */
    productivity_conf = e_config_domain_load("module.productivity", conf_edd);
 
@@ -154,8 +151,6 @@ e_modapi_init(E_Module *m)
    /* if we don't have a config yet, or it got erased above, 
     * then create a default one */
    if (!productivity_conf) _productivity_conf_new();
-
-   _e_mod_main_get_current_config(productivity_conf);
 
    //After the config is loaded from the .cfg file, it's all in eina_lists
    //this function should assign what is in the list into our structures
@@ -210,7 +205,7 @@ e_modapi_shutdown(E_Module *m)
    e_gadcon_provider_unregister(&_gc_class);
 
    ecore_timer_del(productivity_conf->wm);
-   ecore_timer_del(productivity_conf->timer);
+   ecore_timer_del(productivity_conf->brk);
    /* Cleanup our item list */
    while (productivity_conf->conf_items) 
      {
@@ -234,53 +229,11 @@ e_modapi_shutdown(E_Module *m)
    //    E_Mod_Config_Window -- FREE
    e_mod_config_window_free();
 
-   Remember *rem;
-   EINA_LIST_FREE(productivity_conf->remember_list, rem)
-     {
-        if(rem->name)
-          eina_stringshare_del(rem->name);
-
-        if(rem->command)
-          eina_stringshare_del(rem->command);
-
-        if(rem->desktop_file)
-          eina_stringshare_del(rem->command);
-     }
-
-   Month *mon;
-   Day *d;
-   EINA_LIST_FREE(productivity_conf->month_list, mon)
-     {
-        if(mon->name)
-          eina_stringshare_del(mon->name);
-
-        EINA_LIST_FREE(mon->day_list, d)
-          {
-             if(d->name)
-               eina_stringshare_del(d->name);
-
-             d->iv_list = eina_list_remove_list(
-                d->iv_list, d->iv_list);
-          }
-        mon->day_list = eina_list_remove_list(
-           mon->day_list, mon->day_list);
-     }
-
-   if(productivity_conf->cur_month.name)
-     eina_stringshare_del(productivity_conf->cur_month.name);
-
-   if(productivity_conf->cur_day.name)
-     eina_stringshare_del(productivity_conf->cur_day.name);
-
    //    E_Mod_Config_Windows -- FREE -- END
    /* Cleanup the main config structure */
    E_FREE(productivity_conf);
 
    /* Clean EET */
-   E_CONFIG_DD_FREE(month_edd);
-   E_CONFIG_DD_FREE(day_edd);
-   E_CONFIG_DD_FREE(intervals_edd);
-   E_CONFIG_DD_FREE(remember_edd);
    E_CONFIG_DD_FREE(conf_edd);
 
    INF("Shutting down Productivity");
@@ -296,7 +249,6 @@ EAPI int
 e_modapi_save(E_Module *m) 
 {
    //ERR("SAVING!!!!!!!!!!!!");
-   productivity_conf->timestamp = e_mod_timestamp_get();
    e_config_domain_save("module.productivity", conf_edd, productivity_conf);
    return 1;
 }
@@ -426,9 +378,6 @@ _productivity_conf_new(void)
    /* setup defaults */
    IFMODCFG(0x008e);
    CRI("CREATING NEW CONFIG!!!");
-   _e_mod_main_month_conf_item_get();
-   productivity_conf->remember_list = eina_list_append(
-      productivity_conf->remember_list, _e_mod_main_remember_get());
    IFMODCFGEND;
 
    /* update the version */
@@ -481,85 +430,8 @@ _productivity_conf_item_get(const char *id)
 
    ci = E_NEW(Config_Item, 1);
    ci->id = eina_stringshare_add(id);
-   ci->switch2 = 0;
    productivity_conf->conf_items = eina_list_append(productivity_conf->conf_items, ci);
    return ci;
-}
-
-static Month *
-_e_mod_main_month_conf_item_get()
-{
-   Month *m;
-   char buf[16];
-   time_t tt;
-   struct tm *tm;
-
-   time(&tt);
-   tm = localtime(&tt);
-   strftime(buf, 16, "%B", tm);
-
-   m = E_NEW(Month, 1);
-   m->name = eina_stringshare_add(buf);
-   m->mon = tm->tm_mon;
-   m->day = _e_mod_main_day_conf_item_get();
-   m->day_list = eina_list_append(m->day_list, &m->day);
-
-   m->day.iv = _e_mod_main_intervals_get();
-   m->day.iv_list = eina_list_append(m->day.iv_list, &m->day.iv);
-
-   productivity_conf->month_list =
-      eina_list_append(productivity_conf->month_list, m);
-   return m;
-}
-
-static Day 
-_e_mod_main_day_conf_item_get()
-{
-   Day d;
-   char buf[16];
-   time_t tt;
-   struct tm *tm;
-
-   time(&tt);
-   tm = localtime(&tt);
-   strftime(buf, 16, "%A", tm);
-
-   d.name = eina_stringshare_add(buf);
-   d.mday = tm->tm_mday;
-   return d;
-}
-
-static Intervals  
-_e_mod_main_intervals_get()
-{
-   Intervals iv;
-
-   iv.id = 0;
-   iv.lock = 0;
-   iv.break_min_x = 10;
-   iv.break_min_y = 50;
-   iv.start.hour = 8;
-   iv.start.min = 0;
-   iv.start.sec = 0;
-   iv.stop.hour = 16;
-   iv.stop.min = 0;
-   iv.stop.sec = 0;
-   return iv;
-}
-
-static Remember * 
-_e_mod_main_remember_get()
-{
-   Remember *rem;
-
-   rem = E_NEW(Remember, 1);
-
-   rem->name = eina_stringshare_add("");
-   rem->command = eina_stringshare_add("");
-   rem->desktop_file = eina_stringshare_add("");
-   rem->desk_x = 0;
-   rem->desk_y = 0;
-   return rem;
 }
 
 /* Pants On */
@@ -643,132 +515,5 @@ _productivity_mod_menu_add(void *data __UNUSED__, E_Menu *m)
    e_menu_item_label_set(mi, _("Productivity"));
    e_util_menu_item_theme_icon_set(mi, "preferences-desktop-shelf");
    e_menu_item_callback_set(mi, _productivity_mod_run_cb, NULL);
-}
-
-static void
-_config_init()
-{
-#undef T
-#undef D
-#define T Intervals
-#define D intervals_edd
-   intervals_edd = E_CONFIG_DD_NEW("Intervals", Intervals);
-   E_CONFIG_VAL(D, T, id, INT);
-   E_CONFIG_VAL(D, T, lock, INT);
-   E_CONFIG_VAL(D, T, urgent, INT);
-   E_CONFIG_VAL(D, T, break_min_x, INT);
-   E_CONFIG_VAL(D, T, break_min_y, INT);
-   E_CONFIG_VAL(D, T, start.hour, INT);
-   E_CONFIG_VAL(D, T, start.min, INT);
-   E_CONFIG_VAL(D, T, start.sec, INT);
-   E_CONFIG_VAL(D, T, stop.hour, INT);
-   E_CONFIG_VAL(D, T, stop.min, INT);
-   E_CONFIG_VAL(D, T, stop.sec, INT);
-
-#undef T
-#undef D
-#define T Day
-#define D day_edd
-   day_edd = E_CONFIG_DD_NEW("Day", Day);
-   E_CONFIG_VAL(D, T, name, STR);
-   E_CONFIG_VAL(D, T, mday, INT);
-   E_CONFIG_VAL(D, T, total_time_worked, DOUBLE); 
-   E_CONFIG_LIST(D, T, iv_list, intervals_edd);
-
-#undef T
-#undef D
-#define T Month
-#define D month_edd
-   month_edd = E_CONFIG_DD_NEW("Month", Month);
-   E_CONFIG_VAL(D, T, name, STR);
-   E_CONFIG_VAL(D, T, mon, INT);
-   E_CONFIG_LIST(D, T, day_list, day_edd);
-
-#undef T
-#undef D
-#define T Remember
-#define D remember_edd
-   remember_edd = E_CONFIG_DD_NEW("Remember", Remember);
-   E_CONFIG_VAL(D, T, name, STR);
-   E_CONFIG_VAL(D, T, command, STR);
-   E_CONFIG_VAL(D, T, desktop_file, STR);
-   E_CONFIG_VAL(D, T, pid, INT);
-   E_CONFIG_VAL(D, T, zone, INT);
-   E_CONFIG_VAL(D, T, desk_x, INT);
-   E_CONFIG_VAL(D, T, desk_y, INT);
-
-#undef T
-#undef D
-#define T Config
-#define D conf_edd
-   conf_edd = E_CONFIG_DD_NEW("Config", Config);
-   E_CONFIG_VAL(D, T, version, INT);
-   E_CONFIG_VAL(D, T, timestamp, UINT);
-   E_CONFIG_LIST(D, T, month_list, month_edd);
-   E_CONFIG_LIST(D, T, remember_list, remember_edd);
-}
-
-void
-e_mod_main_reload_config()
-{
-   _e_mod_main_get_current_config(productivity_conf);
-}
-
-static void
-_e_mod_main_get_current_config(Config *cfg)
-{
-   Eina_List *l, *ll, *lll, *llll;
-   Eina_List *last;
-   Month *m;
-   Day *d;
-   Intervals *iv;
-   Remember *rem;
-
-   time_t tt;
-   struct tm *tm;
-
-   time(&tt);
-   tm = localtime(&tt);
-
-   EINA_LIST_FOREACH(cfg->month_list, l, m)
-     {
-        if (tm->tm_mon == m->mon)
-          {
-             //INF("FOUND CURRENT Month:%s",m->name);
-             cfg->cur_month.name = eina_stringshare_add(m->name);
-             cfg->cur_month.mon = m->mon;
-
-             EINA_LIST_FOREACH(m->day_list, ll, d)
-               {
-                  if (d->mday == tm->tm_mday)
-                    {
-                       cfg->cur_day.name = eina_stringshare_add(d->name);
-                       cfg->cur_day.mday = d->mday;
-                       cfg->cur_day.total_time_worked = d->total_time_worked;
-                       
-                       last = eina_list_last(d->iv_list);
-
-                       EINA_LIST_FOREACH(last, lll, iv)
-                         {
-                            cfg->cur_iv.id            = iv->id;
-                            cfg->cur_iv.lock          = iv->lock;
-                            cfg->cur_iv.urgent        = iv->urgent;
-                            cfg->cur_iv.break_min_x   = iv->break_min_x;
-                            cfg->cur_iv.break_min_y   = iv->break_min_y;
-
-                            //cfg->init = iv->lock;
-                            //FIXME: change lock from bool to int??;
-                            if(iv->lock)
-                              cfg->init = E_MOD_PROD_INIT_START;
-                            if(!iv->lock)
-                              cfg->init = E_MOD_PROD_STOPPED;
-                         }
-                    }
-               }
-          }
-     }
-   E_FREE(m);
-   E_FREE(d);
-   E_FREE(iv);
 }
 

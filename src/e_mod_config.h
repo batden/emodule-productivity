@@ -26,14 +26,14 @@ struct _E_Config_Schedule_Data
    Eina_Bool lock;
    int urgent;
    int id;
-   int break_min_x;
-   int break_min_y;
+   double break_min_x;
+   double break_min_y;
    struct
-   {
-       int hour;
-       int min;
-       int sec;
-   }start_time, stop_time;
+     {
+        int hour;
+        int min;
+        int sec;
+     }start_time, stop_time;
 };
 
 //    e_mod_config.c
@@ -65,3 +65,5 @@ Eina_Bool    e_mod_config_schedule_create_data(E_Config_Dialog_Data *cfdata);
 Eina_Bool    e_mod_config_schedule_urgent_get();
 Evas_Object *e_mod_config_schedule_new(Evas_Object *otb, Evas *evas,
                                        E_Config_Dialog_Data *cfdata);
+Evas_Object *e_mod_config_schedule_new_v2(Evas_Object *otb, Evas *evas,
+                                          E_Config_Dialog_Data *cfdata);

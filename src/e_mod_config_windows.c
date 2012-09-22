@@ -19,6 +19,12 @@
      }                                                                              \
 }
 
+#define MINF_(s)
+#define MINF(s) \
+   INF(s)
+
+
+
 typedef struct _E_Config_Border_Data   E_Config_Border_Data;
 typedef struct _E_Config_Urgent_Window E_Config_Urgent_Window;
 typedef struct _E_Config_Remove_Window E_Config_Remove_Window;
@@ -566,7 +572,6 @@ _e_mod_config_window_break_timer(void *data)
    if(cfg->init == E_MOD_PROD_BREAK)
      goto break_time;
 
-   INF("WORK TIME");
    if(!cfg->cur_iv.break_min_y) return EINA_TRUE;
    sby = cfg->cur_iv.break_min_y * 59;
 
@@ -583,7 +588,7 @@ _e_mod_config_window_break_timer(void *data)
 
    if(!cfg->secs_to_break)
      {
-        CRI("GO TO BREAK!");
+        MINF("GO TO BREAK!");
         productivity_conf->init = E_MOD_PROD_INIT_BREAK;
 
         ecore_timer_freeze(productivity_conf->wm);
@@ -593,7 +598,6 @@ _e_mod_config_window_break_timer(void *data)
 
 break_time:
 
-   INF("BREAK TIME");
    if(!cfg->cur_iv.break_min_x) return EINA_TRUE;
    sbx = cfg->cur_iv.break_min_x * 59;
 
@@ -620,7 +624,7 @@ break_time:
 
    if(!cfg->secs_to_break)
      {
-        CRI("GO TO WORK!");
+        MINF("GO TO WORK!");
 
         productivity_conf->init = E_MOD_PROD_RESUME;
 
@@ -779,48 +783,43 @@ e_mod_config_window_manager_v2(void *data)
    switch(productivity_conf->init)
      {
       case E_MOD_PROD_STOPPED:
-         INF("E_MOD_PROD_STOPPED");
+         MINF("E_MOD_PROD_STOPPED");
          //Do cleanup when we stop.
          return EINA_TRUE;
 
       case E_MOD_PROD_STARTED:
-         INF("E_MOD_PROD_STARTED");
+         MINF("E_MOD_PROD_STARTED");
          //If we need to add this on first start?
          break;
 
       case E_MOD_PROD_BREAK:
-         INF("E_MOD_PROD_BREAK");
+         MINF("E_MOD_PROD_BREAK");
          //It's break time, do nothing, ??
          return EINA_TRUE;
 
       case E_MOD_PROD_RESUME:
-         INF("E_MOD_PROD_RESUME");
-         //here we clean up our remember list, to start a fresh!
+         MINF("E_MOD_PROD_RESUME");
          productivity_conf->init = E_MOD_PROD_INIT_START;
-         //Restart timer!!!
          productivity_conf->timer =
             ecore_timer_loop_add(1.00, _e_mod_config_window_break_timer, cwl);
          return EINA_TRUE;
 
       case E_MOD_PROD_INIT_STOP:
-         INF("E_MOD_PROD_INIT_STOP");
+         MINF("E_MOD_PROD_INIT_STOP");
          _e_mod_config_window_remember_show_all(
             cwl->borders, productivity_conf->remember_list);
          productivity_conf->init = E_MOD_PROD_STOPPED;
-         //Do xyz..
          return EINA_TRUE;
 
       case E_MOD_PROD_INIT_START:
-         INF("E_MOD_PROD_INIT_START");
+         MINF("E_MOD_PROD_INIT_START");
          productivity_conf->init = E_MOD_PROD_STARTED;
          _e_mod_config_window_border_add_all(cwl);
          e_mod_config_window_manager_v2(cwl);
-         //Do xyz...
          return EINA_TRUE;
 
       case E_MOD_PROD_INIT_BREAK:
-         INF("E_MOD_PROD_INIT_BREAK");
-         //Do unhide of all windows we hide!
+         MINF("E_MOD_PROD_INIT_BREAK");
          _e_mod_config_window_remember_show_all(
             cwl->borders, productivity_conf->remember_list);
          productivity_conf->init = E_MOD_PROD_BREAK;
@@ -830,16 +829,16 @@ e_mod_config_window_manager_v2(void *data)
    switch(cwl->event)
      {
       case E_BORDER_ADD:
-         INF("E_BORDER_ADD");
+         MINF("E_BORDER_ADD");
          break;
 
       case E_BORDER_REMOVE:
-         INF("E_BORDER_REMOVE");
+         MINF("E_BORDER_REMOVE");
          _e_mod_config_window_border_del(cwl, ev_border);
          break;
 
       case E_BORDER_ICONIFY:
-         INF("E_BORDER_ICONIFY");
+         MINF("E_BORDER_ICONIFY");
          if(!_e_mod_config_window_border_worktool_match_v2(
                ev_border, productivity_conf->apps_list))
            {
@@ -849,30 +848,30 @@ e_mod_config_window_manager_v2(void *data)
          break;
 
       case E_BORDER_UNICONIFY:
-         INF("E_BORDER_UNICONIFY");
+         MINF("E_BORDER_UNICONIFY");
          break;
 
       case E_BORDER_FOCUS_IN:
-         INF("E_BORDER_FOCUS_IN");
+         MINF("E_BORDER_FOCUS_IN");
          break;
 
       case E_BORDER_FOCUS_OUT:
-         INF("E_BORDER_FOCUS_OUT");
+         MINF("E_BORDER_FOCUS_OUT");
          break;
 
       case E_BORDER_URGENT:
-         INF("E_BORDER_URGENT");
+         MINF("E_BORDER_URGENT");
 
          //if((e_mod_config_schedule_urgent_get()) && (ev_border->urgent))
          _e_mod_config_window_border_urgent_set(cwl, ev_border);
       case E_BORDER_PROPERTY:
-         INF("E_BORDER_PROPERTY");
+         MINF("E_BORDER_PROPERTY");
          if(ev_border->urgent)
            INF("Urgent:%d", ev_border->urgent);
          break;
 
       case E_BORDER_NULL:
-         INF("E_BORDER_NULL");
+         MINF("E_BORDER_NULL");
          break;
 
      }

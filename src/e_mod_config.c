@@ -80,22 +80,6 @@ _fill_data(E_Config_Dialog_Data *cfdata)
    /* load a temp copy of the config variables */
 }
 
-//TODO:remove this after calendar is implemented
-static void
-_item_2_pressed(void *data, Evas_Object *obj, void *event_info)
-{
-   Evas_Object *bx = data;
-   Evas_Object *cal;
-   
-   elm_box_clear(bx);
-   
-   cal = elm_calendar_add(bx);
-   evas_object_size_hint_weight_set(cal, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
-   evas_object_size_hint_align_set(cal, EVAS_HINT_FILL, EVAS_HINT_FILL);
-   elm_box_pack_end(bx, cal);
-   evas_object_show(cal);
-}
-
 static Evas_Object *
 _basic_create(E_Config_Dialog *cfd, Evas *evas, E_Config_Dialog_Data *cfdata) 
 {
@@ -104,7 +88,7 @@ _basic_create(E_Config_Dialog *cfd, Evas *evas, E_Config_Dialog_Data *cfdata)
    INF("PROD_LOG_CONFIG:%d\n", _productivity_log);
    otb = e_widget_toolbook_add(evas, 24, 24);
 
-   e_mod_config_schedule_new(otb, evas, cfdata);
+   e_mod_config_schedule_new_v2(otb, evas, cfdata);
    e_mod_config_worktools_new(otb, evas, cfdata);
 
    e_widget_toolbook_page_show(otb, 0);

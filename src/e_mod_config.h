@@ -15,16 +15,16 @@ struct _E_Config_App_List
 //    e_mod_config_schedule.c
 struct _E_Config_Schedule_Data
 {
-   Evas_Object *start_btn;
-   Evas_Object *stop_btn;
-   Evas_Object *break_x;
-   Evas_Object *break_y;
-   Evas_Object *label;
-   Evas_Object *urgent_chk;
+   Evas_Object *obstart;
+   Evas_Object *obstop;
+   Evas_Object *obbreak;
+   Evas_Object *obwork;
+   Evas_Object *oblabel;
+   Evas_Object *oburgent;
    Eina_Bool lock;
    int urgent;
-   double break_min_x;
-   double break_min_y;
+   double break_min;
+   double work_min;
 };
 
 //    e_mod_config.c

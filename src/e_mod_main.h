@@ -27,7 +27,7 @@ extern int _productivity_log;
  * compatible anymore, it creates an entire new one.
  * You need to increment GENERATION when you add new values to the
  * configuration file but is not needed to delete the existing conf  */
-#define MOD_CONFIG_FILE_EPOCH 0x0003
+#define MOD_CONFIG_FILE_EPOCH 0x0005
 #define MOD_CONFIG_FILE_GENERATION 0x008e
 #define MOD_CONFIG_FILE_VERSION \
    ((MOD_CONFIG_FILE_EPOCH << 16) | MOD_CONFIG_FILE_GENERATION)
@@ -95,8 +95,8 @@ struct _Config
    int version;
    int lock;
    int urgent;
-   int break_min_x;
-   int break_min_y;
+   int break_min;
+   int work_min;
    
    Ecore_Timer *brk;
    Ecore_Timer *wm;

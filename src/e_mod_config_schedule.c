@@ -1,28 +1,13 @@
 #include <e.h>
-#include <Elementary.h>
 #include "e_mod_config.h"
 
-//Round slider floating point minutes into interger.
-#define round(x) ((x)>=0?(long)((x)+0.5):(long)((x)-0.5))
-
-//After clicking start work, notify the user he has 5min to prepair, real work will start
-//after the DELAY_START_MIN time has passed;
-#define DELAY_START_MIN 0
-#define DEFAULT_WORK_HOURS 3
-#define DEFAULT_MINIMUM_WORK_MIN 30; //TODO: not implemented!
-
-static void _start_clock_cb(void *data, Evas_Object *obj, void *event_info);
-static void _stop_clock_cb(void *data, Evas_Object *obj, void *event_info);
 static void _e_mod_config_schedule_start_working_cb(void *data, void *data2);
 static void _e_mod_config_schedule_stop_working_cb(void *data, void *data2);
-static void _e_mod_config_schedule_urgent_cb(void *data, Evas_Object *obj,
-                                             void *event_info);
-static void _e_mod_config_schedule_break_x_time_cb(void *data, Evas_Object *obj,
-                                                   void *event_info);
-static void _e_mod_config_schedule_break_y_time_cb(void *data, Evas_Object *obj,
-                                                   void *event_info);
+static void _e_mod_config_schedule_urgent_cb(void *data, Evas_Object *obj, void *event_info);
+static void _e_mod_config_schedule_obbreak_time_cb(void *data, Evas_Object *obj, void *event_info);
+static void _e_mod_config_schedule_obwork_time_cb(void *data, Evas_Object *obj, void *event_info);
 static void _e_mod_config_schedule_lock_update(E_Config_Schedule_Data *csd);
-static void  _e_mod_config_schedule_label_update(E_Config_Schedule_Data *csd);
+static void _e_mod_config_schedule_label_update(E_Config_Schedule_Data *csd);
 
 
 Eina_Bool
@@ -30,8 +15,8 @@ e_mod_config_schedule_create_data(E_Config_Dialog_Data *cfdata)
 {  
    cfdata->schedule.lock            = productivity_conf->lock;
    cfdata->schedule.urgent          = productivity_conf->urgent;
-   cfdata->schedule.break_min_x     = productivity_conf->break_min_x;
-   cfdata->schedule.break_min_y     = productivity_conf->break_min_y;
+   cfdata->schedule.break_min     = productivity_conf->break_min;
+   cfdata->schedule.work_min     = productivity_conf->work_min;
 }
 
 Evas_Object *
@@ -42,42 +27,42 @@ e_mod_config_schedule_new_v2(Evas_Object *otb, Evas *evas, E_Config_Dialog_Data 
 
    ol = e_widget_list_add(evas, 0, 0);
 #define S cfdata->schedule
-   S.urgent_chk = e_widget_check_add(evas, "Satisfy urgent windows instantly",
+   S.oburgent = e_widget_check_add(evas, "Satisfy urgent windows instantly",
                                                     &S.urgent);
-   evas_object_smart_callback_add(S.urgent_chk, "changed", _e_mod_config_schedule_urgent_cb, cfdata);
-   e_widget_list_object_append(ol, S.urgent_chk, 0, 0, 0.5);
+   evas_object_smart_callback_add(S.oburgent, "changed", _e_mod_config_schedule_urgent_cb, cfdata);
+   e_widget_list_object_append(ol, S.oburgent, 0, 0, 0.5);
 
-   S.label = e_widget_label_add(evas, NULL);
+   S.oblabel = e_widget_label_add(evas, NULL);
    _e_mod_config_schedule_label_update(&S); 
-   e_widget_list_object_append(ol, S.label, 0, 0, 0.5);
+   e_widget_list_object_append(ol, S.oblabel, 0, 0, 0.5);
 
    label = e_widget_label_add(evas, "Break Time");
    e_widget_list_object_append(ol, label, 1, 0, 0.5);
 
-   S.break_x = e_widget_slider_add(evas, 1, 0, _("%1.0f Minutes"), 0.0, 30.0, 1.00, 0, &(S.break_min_x), NULL, 100);
-   evas_object_smart_callback_add(S.break_x, "changed", _e_mod_config_schedule_break_x_time_cb, &S); 
-   e_widget_list_object_append(ol, S.break_x, 1, 0, 0.5);
+   S.obbreak = e_widget_slider_add(evas, 1, 0, _("%1.0f Minutes"), 0.0, 30.0, 1.00, 0, &(S.break_min), NULL, 100);
+   evas_object_smart_callback_add(S.obbreak, "changed", _e_mod_config_schedule_obbreak_time_cb, &S); 
+   e_widget_list_object_append(ol, S.obbreak, 1, 0, 0.5);
 
    label = e_widget_label_add(evas, "Time to Work before Break");
    e_widget_list_object_append(ol, label, 1, 0, 0.5);
 
-   S.break_y = e_widget_slider_add(evas, 1, 0, _("%1.0f Minutes"), 0.0, 320.0, 1.00, 0, &(S.break_min_y), NULL, 100);
-   evas_object_smart_callback_add(S.break_y, "changed", _e_mod_config_schedule_break_y_time_cb, &S); 
-   e_widget_list_object_append(ol, S.break_y, 1, 0, 0.5);
+   S.obwork = e_widget_slider_add(evas, 1, 0, _("%1.0f Minutes"), 0.0, 320.0, 1.00, 0, &(S.work_min), NULL, 100);
+   evas_object_smart_callback_add(S.obwork, "changed", _e_mod_config_schedule_obwork_time_cb, &S); 
+   e_widget_list_object_append(ol, S.obwork, 1, 0, 0.5);
 
    ot = e_widget_table_add(evas, EINA_FALSE);
 
-   S.start_btn = e_widget_button_add(evas, _("Start Working"), "list-add", _e_mod_config_schedule_start_working_cb, &S, cfdata);
+   S.obstart = e_widget_button_add(evas, _("Start Working"), "list-add", _e_mod_config_schedule_start_working_cb, &S, cfdata);
 
-   e_widget_table_object_append(ot, S.start_btn, 0, 1, 1, 1, 1, 1, 1, 0);
+   e_widget_table_object_append(ot, S.obstart, 0, 1, 1, 1, 1, 1, 1, 0);
 
-   S.stop_btn = e_widget_button_add(evas, _("Stop Working"), "list-remove", _e_mod_config_schedule_stop_working_cb, &S, cfdata);
-   e_widget_table_object_append(ot, S.stop_btn, 1, 1, 1, 1, 1, 1, 1, 0);
+   S.obstop = e_widget_button_add(evas, _("Stop Working"), "list-remove", _e_mod_config_schedule_stop_working_cb, &S, cfdata);
+   e_widget_table_object_append(ot, S.obstop, 1, 1, 1, 1, 1, 1, 1, 0);
 
    e_widget_list_object_append(ol, ot, 1, 1, 0.5);
    _e_mod_config_schedule_lock_update(&S);
 #undef S
-   e_widget_toolbook_page_append(otb, NULL, _("Schedule v2"), ol, 1, 1, 1, 1, 0.5, 0.0);
+   e_widget_toolbook_page_append(otb, NULL, _("Schedule"), ol, 1, 1, 1, 1, 0.5, 0.0);
 }
 
 
@@ -86,8 +71,8 @@ e_mod_config_schedule_save_config(E_Config_Dialog_Data *cfdata)
 {
    productivity_conf->lock         = cfdata->schedule.lock;
    productivity_conf->urgent       = cfdata->schedule.urgent;
-   productivity_conf->break_min_x  = cfdata->schedule.break_min_x;
-   productivity_conf->break_min_y  = cfdata->schedule.break_min_y;
+   productivity_conf->break_min  = cfdata->schedule.break_min;
+   productivity_conf->work_min  = cfdata->schedule.work_min;
 } 
 
 static void
@@ -100,10 +85,10 @@ _e_mod_config_schedule_start_working_cb(void *data, void *data2)
    if(!(csd = data)) return;
    if(!(cfdata = data2)) return;
 
-   if(e_widget_disabled_get(csd->stop_btn) == EINA_TRUE)
+   if(e_widget_disabled_get(csd->obstop) == EINA_TRUE)
      {
-        e_widget_disabled_set(csd->break_x, EINA_TRUE);
-        e_widget_disabled_set(csd->break_y, EINA_TRUE);
+        e_widget_disabled_set(csd->obbreak, EINA_TRUE);
+        e_widget_disabled_set(csd->obwork, EINA_TRUE);
         if(csd->lock == EINA_FALSE)
           {
              csd->lock = EINA_TRUE;
@@ -134,10 +119,10 @@ _e_mod_config_schedule_stop_working_cb(void *data, void *data2)
    if(!(csd = data)) return;
    if(!(cfdata = data2)) return;
 
-   if(e_widget_disabled_get(csd->start_btn) == EINA_TRUE)
+   if(e_widget_disabled_get(csd->obstart) == EINA_TRUE)
      {
-        e_widget_disabled_set(csd->break_x, EINA_FALSE);
-        e_widget_disabled_set(csd->break_y, EINA_FALSE);
+        e_widget_disabled_set(csd->obbreak, EINA_FALSE);
+        e_widget_disabled_set(csd->obwork, EINA_FALSE);
 
         if(csd->lock == EINA_TRUE)
           {
@@ -172,7 +157,7 @@ _e_mod_config_schedule_urgent_cb(void *data, Evas_Object *obj, void *event_info)
 }
 
 static void
-_e_mod_config_schedule_break_x_time_cb(void *data, Evas_Object *obj, void *event_info)
+_e_mod_config_schedule_obbreak_time_cb(void *data, Evas_Object *obj, void *event_info)
 {
    E_Config_Schedule_Data *csd;
 
@@ -182,7 +167,7 @@ _e_mod_config_schedule_break_x_time_cb(void *data, Evas_Object *obj, void *event
 }
 
 static void
-_e_mod_config_schedule_break_y_time_cb(void *data, Evas_Object *obj, void *event_info)
+_e_mod_config_schedule_obwork_time_cb(void *data, Evas_Object *obj, void *event_info)
 {
    E_Config_Schedule_Data *csd;
 
@@ -197,9 +182,9 @@ _e_mod_config_schedule_label_update(E_Config_Schedule_Data *csd)
    char buf[1024];
 
    snprintf(buf, sizeof(buf), "%1.0f Minutes of Break for %1.0f Minutes of Work",
-            csd->break_min_x, csd->break_min_y);
+            csd->break_min, csd->work_min);
 
-   e_widget_label_text_set(csd->label, buf);
+   e_widget_label_text_set(csd->oblabel, buf);
 }
 
 static void
@@ -207,23 +192,23 @@ _e_mod_config_schedule_lock_update(E_Config_Schedule_Data *csd)
 {
    if(csd->lock == EINA_TRUE)
      {
-        e_widget_disabled_set(csd->stop_btn, EINA_FALSE);
-        e_widget_disabled_set(csd->break_x, EINA_TRUE);
-        e_widget_disabled_set(csd->break_y, EINA_TRUE);
-        e_widget_disabled_set(csd->urgent_chk, EINA_TRUE);
+        e_widget_disabled_set(csd->obstop, EINA_FALSE);
+        e_widget_disabled_set(csd->obbreak, EINA_TRUE);
+        e_widget_disabled_set(csd->obwork, EINA_TRUE);
+        e_widget_disabled_set(csd->oburgent, EINA_TRUE);
 
-        if(e_widget_disabled_get(csd->start_btn) == EINA_FALSE)
-          e_widget_disabled_set(csd->start_btn, EINA_TRUE);
+        if(e_widget_disabled_get(csd->obstart) == EINA_FALSE)
+          e_widget_disabled_set(csd->obstart, EINA_TRUE);
      }
    else if (csd->lock == EINA_FALSE)
      {
-        e_widget_disabled_set(csd->stop_btn, EINA_TRUE);
-        e_widget_disabled_set(csd->break_x, EINA_FALSE);
-        e_widget_disabled_set(csd->break_y, EINA_FALSE);
-        e_widget_disabled_set(csd->urgent_chk, EINA_FALSE);
+        e_widget_disabled_set(csd->obstop, EINA_TRUE);
+        e_widget_disabled_set(csd->obbreak, EINA_FALSE);
+        e_widget_disabled_set(csd->obwork, EINA_FALSE);
+        e_widget_disabled_set(csd->oburgent, EINA_FALSE);
 
-        if(e_widget_disabled_get(csd->start_btn) == EINA_TRUE)
-          e_widget_disabled_set(csd->start_btn, EINA_FALSE);
+        if(e_widget_disabled_get(csd->obstart) == EINA_TRUE)
+          e_widget_disabled_set(csd->obstart, EINA_FALSE);
      }
 }
 

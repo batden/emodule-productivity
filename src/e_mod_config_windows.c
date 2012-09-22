@@ -562,7 +562,7 @@ _e_mod_config_window_break_timer(void *data)
 {
    E_Config_Window_List *cwl;
    Config *cfg;
-   int sbx, sby; //sb = seconds to break, x= break_min_x, y= break_min_y
+   int sbx, sby; //sb = seconds to break, x= break_min, y= work_min
 
    if(!(cfg = productivity_conf)) return EINA_FALSE;
    if(!(cwl = data)) return EINA_FALSE;
@@ -572,8 +572,8 @@ _e_mod_config_window_break_timer(void *data)
    if(cfg->init == E_MOD_PROD_BREAK)
      goto break_time;
 
-   if(!cfg->break_min_y) return EINA_TRUE;
-   sby = cfg->break_min_y * 59;
+   if(!cfg->work_min) return EINA_TRUE;
+   sby = cfg->work_min * 59;
 
    if(!cfg->secs_to_break)
      cfg->secs_to_break = sby;
@@ -598,8 +598,8 @@ _e_mod_config_window_break_timer(void *data)
 
 break_time:
 
-   if(!cfg->break_min_x) return EINA_TRUE;
-   sbx = cfg->break_min_x * 59;
+   if(!cfg->break_min) return EINA_TRUE;
+   sbx = cfg->break_min * 59;
 
    if(!cfg->secs_to_break)
      cfg->secs_to_break = sbx;

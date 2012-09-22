@@ -1,5 +1,4 @@
 #include <e.h>
-#include <Elementary.h>
 #include "e_mod_config.h"
 
 /* Local Function Prototypes */
@@ -61,11 +60,11 @@ _free_data(E_Config_Dialog *cfd, E_Config_Dialog_Data *cfdata)
 {
    productivity_conf->cfd = NULL;
    WRN("FREEING Schedule");
-   evas_object_del(cfdata->schedule.start_btn);
-   evas_object_del(cfdata->schedule.stop_btn);
-   evas_object_del(cfdata->schedule.break_x);
-   evas_object_del(cfdata->schedule.break_y);
-   evas_object_del(cfdata->schedule.urgent_chk);
+   evas_object_del(cfdata->schedule.obstart);
+   evas_object_del(cfdata->schedule.obstop);
+   evas_object_del(cfdata->schedule.obbreak);
+   evas_object_del(cfdata->schedule.obwork);
+   evas_object_del(cfdata->schedule.oburgent);
 
    e_mod_config_worktools_free(cfdata);
    

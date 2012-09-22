@@ -49,8 +49,6 @@ e_mod_config_worktools_save(E_Config_Dialog_Data *cfdata)
    return EINA_TRUE;
 }
 
-/*FIXME: Do not use as yet, this needs some cleaning
- */
 void
 e_mod_config_worktools_free(E_Config_Dialog_Data *cfdata)
 {
@@ -321,9 +319,6 @@ _e_mod_config_worktools_load_config(const char *path)
      {
         efreet_desktop_ref(desk);
         apps = eina_list_append(apps, desk);
-        //INF(desk->name);
-        //INF(desk->exec);
-        //INF(ecore_file_file_get(desk->orig_path));
      }
    e_object_del(E_OBJECT(order));
    return apps;

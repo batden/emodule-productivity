@@ -44,7 +44,7 @@ int _productivity_log;
 /* Local Variables */
 static Eina_List *instances = NULL;
 static E_Config_DD *conf_edd = NULL;
-
+static E_Config_DD *remember_edd = NULL;
 Config *productivity_conf = NULL;
 
 static const E_Gadcon_Client_Class _gc_class = 
@@ -94,16 +94,31 @@ e_modapi_init(E_Module *m)
                                  NULL, buf, e_int_config_productivity_module);
 #undef T
 #undef D
+#define T Remember
+#define D remember_edd
+   remember_edd = E_CONFIG_DD_NEW("Remember", Remember);
+   E_CONFIG_VAL(D, T, name, STR);
+   E_CONFIG_VAL(D, T, command, STR);
+   E_CONFIG_VAL(D, T, desktop_file, STR);
+   E_CONFIG_VAL(D, T, pid, INT);
+   E_CONFIG_VAL(D, T, zone, INT);
+   E_CONFIG_VAL(D, T, desk_x, INT);
+   E_CONFIG_VAL(D, T, desk_y, INT);
+#undef T
+#undef D
 #define T Config
 #define D conf_edd
    conf_edd = E_CONFIG_DD_NEW("Config", Config);
    E_CONFIG_VAL(D, T, version, INT);
    E_CONFIG_VAL(D, T, lock, INT);
    E_CONFIG_VAL(D, T, urgent, INT);
-   E_CONFIG_VAL(D, T, break_min_x, INT);
-   E_CONFIG_VAL(D, T, break_min_y, INT);
+   E_CONFIG_VAL(D, T, break_min, INT);
+   E_CONFIG_VAL(D, T, work_min, INT);
+   E_CONFIG_LIST(D, T, remember_list, remember_edd);
 #undef T
 #undef D
+
+
    /* Tell E to find any existing module data. First run ? */
    productivity_conf = e_config_domain_load("module.productivity", conf_edd);
 
@@ -152,12 +167,9 @@ e_modapi_init(E_Module *m)
     * then create a default one */
    if (!productivity_conf) _productivity_conf_new();
 
-   //After the config is loaded from the .cfg file, it's all in eina_lists
-   //this function should assign what is in the list into our structures
-   //but only for the current setting.
+   if(productivity_conf->lock == EINA_TRUE)
+     productivity_conf->init = E_MOD_PROD_INIT_START;
 
-   /* create a link from the modules config to the module
-    * this is not written */
    productivity_conf->module = m;
 
    productivity_conf->maug =
@@ -378,6 +390,10 @@ _productivity_conf_new(void)
    /* setup defaults */
    IFMODCFG(0x008e);
    CRI("CREATING NEW CONFIG!!!");
+   productivity_conf->lock = 0;
+   productivity_conf->urgent = 1;
+   productivity_conf->break_min = 10;
+   productivity_conf->work_min = 50;
    IFMODCFGEND;
 
    /* update the version */

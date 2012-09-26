@@ -525,10 +525,13 @@ static void
 _productivity_mod_menu_add(void *data __UNUSED__, E_Menu *m)
 {
    E_Menu_Item *mi;
+   char buf[PATH_MAX];
 
    mi = e_menu_item_new(m);
    e_menu_item_label_set(mi, _("Productivity"));
-   e_util_menu_item_theme_icon_set(mi, "preferences-desktop-shelf");
+   snprintf(buf, sizeof(buf), "%s/e-module-productivity.edj",
+            productivity_conf->module->dir);
+   e_util_menu_item_theme_icon_set(mi, buf);
    e_menu_item_callback_set(mi, _productivity_mod_run_cb, NULL);
 }
 

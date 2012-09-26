@@ -244,7 +244,7 @@ _e_mod_config_worktools_application_selected_list_cb(void *data)
    unsigned int enabled = 0, disabled = 0;
 
    if (!(apps = data)) return;
-   EINA_LIST_FOREACH(e_widget_ilist_items_get(apps->o_list), l, it)
+   EINA_LIST_FOREACH(eina_list_clone(e_widget_ilist_items_get(apps->o_list)), l, it)
      {
         if ((!it->selected) || (it->header)) continue;
         if (eina_list_search_unsorted(apps->cfdata->apps, _cb_desks_name, it->label))
@@ -278,7 +278,7 @@ _e_mod_config_worktools_add_cb(void *data, void *data2)
 
    if (!(cfdata = data2)) return;
    if (!(apps = data)) return;
-   EINA_LIST_FOREACH(e_widget_ilist_items_get(apps->o_list), l, it)
+   EINA_LIST_FOREACH(eina_list_clone(e_widget_ilist_items_get(apps->o_list)), l, it)
      {
         Efreet_Desktop *desk;
 
@@ -364,7 +364,7 @@ _e_mod_config_worktools_del_cb(void *data, void *data2)
 
    if (!(cfdata = data2)) return;
    if (!(apps = data)) return;
-   EINA_LIST_FOREACH(e_widget_ilist_items_get(apps->o_list), l, it)
+   EINA_LIST_FOREACH(eina_list_clone(e_widget_ilist_items_get(apps->o_list)), l, it)
      {
         Efreet_Desktop *desk;
 

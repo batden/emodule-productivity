@@ -69,10 +69,9 @@ e_modapi_init(E_Module *m)
    char buf[PATH_MAX];
    Eina_List *apps;
 
-   _productivity_log = eina_log_domain_register("E_MOD_PRODUCTIVITY",EINA_COLOR_CYAN);
-   printf("PROD_LOG:%d\n", _productivity_log);
+   _productivity_log = eina_log_domain_register("MOD:PROD",EINA_COLOR_CYAN);
    eina_log_print_cb_set(e_mod_log_cb, NULL);
-   eina_log_domain_level_set("E_MOD_PRODUCTIVITY", EINA_LOG_LEVEL_DBG);
+   eina_log_domain_level_set("MOD:PROD", EINA_LOG_LEVEL_DBG);
    INF("Initialized Productivity Module");
 
    /* Location of message catalogs for localization */
@@ -239,7 +238,7 @@ e_modapi_shutdown(E_Module *m)
      }
 
    //    E_Mod_Config_Window -- FREE
-   e_mod_config_window_free();
+   //e_mod_config_window_free();
 
    //    E_Mod_Config_Windows -- FREE -- END
    /* Cleanup the main config structure */

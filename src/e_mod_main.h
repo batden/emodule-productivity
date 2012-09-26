@@ -82,6 +82,7 @@ struct _E_Config_Window_List
    Eina_List *cwldata_list;
    Eina_List *urgent;
    Border_Event event;
+   Border_Event previous_event;
    E_Border *ev_border;
 };
 
@@ -111,6 +112,7 @@ struct _Config
    // e_mod_config_windows.c
    E_Config_Window_List *cwl;
    Initialize init;
+   Initialize previous_init;
 };
 
 struct _Config_Item 

@@ -561,7 +561,7 @@ break_time:
    if(cfg->secs_to_break < 10)
      WRN("Break will be over in %dsec", cfg->secs_to_break);
 
-   if((cfg->secs_to_break >= 4) && (cfg->secs_to_break <=5))
+   if(((cfg->secs_to_break >= 4) && (cfg->secs_to_break <=5)) || cfg->secs_to_break == 15)
      {
         char buf[PATH_MAX];
 

@@ -212,12 +212,11 @@ _e_mod_config_window_event_border_add_cb(void *data, int type __UNUSED__, void *
    E_Event_Border_Add *ev;
    E_Config_Window_List *cwl;
 
-   //if(productivity_conf->init != E_MOD_PROD_INIT_START | E_MOD_PROD_STARTED) return EINA_TRUE;
+   if(productivity_conf->init != E_MOD_PROD_STARTED) return EINA_TRUE;
 
    if(!(cwl = data)) return;
    ev = event;
    EVENT_DBG();
-
 
    if(cwl->borders)
      {
@@ -254,7 +253,7 @@ _e_mod_config_window_event_border_remove_cb(void *data, int type __UNUSED__, voi
 {
    E_Event_Border_Remove *ev;
    E_Config_Window_List *cwl;
-   //if(productivity_conf->init != E_MOD_PROD_INIT_START | E_MOD_PROD_STARTED) return EINA_TRUE;
+   if(productivity_conf->init != E_MOD_PROD_STARTED) return EINA_TRUE;
    if(!(cwl = data)) return;
    ev = event;
    EVENT_DBG();
@@ -275,7 +274,7 @@ _e_mod_config_window_event_border_iconify_cb(void *data, int type __UNUSED__, vo
 {
    E_Event_Border_Iconify *ev;
    E_Config_Window_List *cwl;
-   //if(productivity_conf->init != E_MOD_PROD_INIT_START | E_MOD_PROD_STARTED) return EINA_TRUE;
+   if(productivity_conf->init != E_MOD_PROD_STARTED) return EINA_TRUE;
    if(!(cwl = data)) return;
    ev = event;
    //EVENT_DBG();
@@ -295,7 +294,7 @@ _e_mod_config_window_event_border_uniconify_cb(void *data, int type __UNUSED__, 
 {
    E_Event_Border_Uniconify *ev;
    E_Config_Window_List *cwl;
-   //if(productivity_conf->init != E_MOD_PROD_INIT_START | E_MOD_PROD_STARTED) return EINA_TRUE;
+   if(productivity_conf->init != E_MOD_PROD_STARTED) return EINA_TRUE;
    if(!(cwl = data)) return;
    ev = event;
    EVENT_DBG();
@@ -315,7 +314,7 @@ _e_mod_config_window_event_border_focus_in_cb(void *data, int type __UNUSED__, v
 {
    E_Event_Border_Focus_In *ev;
    E_Config_Window_List *cwl;
-   //if(productivity_conf->init != E_MOD_PROD_INIT_START | E_MOD_PROD_STARTED) return EINA_TRUE;
+   if(productivity_conf->init != E_MOD_PROD_STARTED) return EINA_TRUE;
    if(!(cwl = data)) return;
    ev = event;
    EVENT_DBG();
@@ -335,7 +334,7 @@ _e_mod_config_window_event_border_focus_out_cb(void *data, int type __UNUSED__, 
 {
    E_Event_Border_Focus_Out *ev;
    E_Config_Window_List *cwl;
-   //if(productivity_conf->init != E_MOD_PROD_INIT_START | E_MOD_PROD_STARTED) return EINA_TRUE;
+   if(productivity_conf->init != E_MOD_PROD_STARTED) return EINA_TRUE;
    if(!(cwl = data)) return;
    ev = event;
    EVENT_DBG();
@@ -357,7 +356,7 @@ _e_mod_config_window_event_border_property_cb(void *data,
    E_Event_Border_Property *ev;
    E_Border *border;
    E_Config_Window_List *cwl;
-   //if(productivity_conf->init != E_MOD_PROD_INIT_START | E_MOD_PROD_STARTED) return EINA_TRUE;
+   if(productivity_conf->init != E_MOD_PROD_STARTED) return EINA_TRUE;
    if(!(cwl = data)) return;
    ev = event;
    EVENT_DBG();
@@ -378,7 +377,7 @@ _e_mod_config_window_event_border_urgent_change_cb(void *data,
    E_Event_Border_Urgent_Change *ev;
    E_Border *border;
    E_Config_Window_List *cwl;
-   //if(productivity_conf->init != E_MOD_PROD_INIT_START | E_MOD_PROD_STARTED) return EINA_TRUE;
+   if(productivity_conf->init != E_MOD_PROD_STARTED) return EINA_TRUE;
    if(!(cwl = data)) return;
    ev = event;
    EVENT_DBG();

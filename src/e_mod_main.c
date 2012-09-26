@@ -259,7 +259,6 @@ e_modapi_shutdown(E_Module *m)
 EAPI int 
 e_modapi_save(E_Module *m) 
 {
-   //ERR("SAVING!!!!!!!!!!!!");
    e_config_domain_save("module.productivity", conf_edd, productivity_conf);
    return 1;
 }

@@ -6,7 +6,7 @@ static void *_create_data(E_Config_Dialog *cfd);
 static void _free_data(E_Config_Dialog *cfd, E_Config_Dialog_Data *cfdata);
 static void _fill_data(E_Config_Dialog_Data *cfdata);
 static Evas_Object *_basic_create(E_Config_Dialog *cfd, Evas *evas, E_Config_Dialog_Data *cfdata);
-static int _basic_apply(E_Config_Dialog *cfd, E_Config_Dialog_Data *cfdata);
+static int _close_data(E_Config_Dialog *cfd, E_Config_Dialog_Data *cfdata);
 /* External Functions */
 
 /* Function for calling our personal dialog menu */
@@ -25,6 +25,7 @@ e_int_config_productivity_module(E_Container *con, const char *params)
 
    v->create_cfdata = _create_data;
    v->free_cfdata = _free_data;
+   v->close_cfdata = _close_data;
    v->basic.create_widgets = _basic_create;
 
    /* Icon in the theme */
@@ -94,11 +95,11 @@ _basic_create(E_Config_Dialog *cfd, Evas *evas, E_Config_Dialog_Data *cfdata)
 }
 
 static int 
-_basic_apply(E_Config_Dialog *cfd, E_Config_Dialog_Data *cfdata) 
+_close_data(E_Config_Dialog *cfd, E_Config_Dialog_Data *cfdata) 
 {
    e_mod_config_worktools_save(cfdata);
    e_mod_config_schedule_save_config(cfdata);
-   e_config_save_queue();
+   e_config_save();
    return 1;
 }
 

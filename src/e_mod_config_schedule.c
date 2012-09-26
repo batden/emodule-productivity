@@ -106,7 +106,7 @@ _e_mod_config_schedule_start_working_cb(void *data, void *data2)
    e_mod_config_window_manager_v2(productivity_conf->cwl);
    ecore_timer_thaw(productivity_conf->wm);
 
-   e_config_save_queue();
+   e_config_save();
 }
 
 static void
@@ -139,7 +139,7 @@ _e_mod_config_schedule_stop_working_cb(void *data, void *data2)
    e_mod_config_window_manager_v2(productivity_conf->cwl);
    ecore_timer_thaw(productivity_conf->wm);
 
-   e_config_save_queue();
+   e_config_save();
 }
 
 static void

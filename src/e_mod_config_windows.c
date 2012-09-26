@@ -331,10 +331,10 @@ _e_mod_config_window_event_border_iconify_cb(void *data, int type __UNUSED__, vo
    cwl->event = E_BORDER_ICONIFY;
    ev_border = _e_mod_config_window_border_create(ev->border);
 
-   //ecore_timer_freeze(productivity_conf->wm);
-   //e_mod_config_window_manager_v2(cwl);
-   //ecore_timer_thaw(productivity_conf->wm);
-   ecore_timer_reset(productivity_conf->wm);
+   ecore_timer_freeze(productivity_conf->wm);
+   e_mod_config_window_manager_v2(cwl);
+   ecore_timer_thaw(productivity_conf->wm);
+   //ecore_timer_reset(productivity_conf->wm);
    return EINA_TRUE;
 }
 
@@ -796,6 +796,7 @@ e_mod_config_window_manager_v2(void *data)
      {
       case E_MOD_PROD_STOPPED:
          IINF("E_MOD_PROD_STOPPED");
+         productivity_conf->previous_init = E_MOD_PROD_STOPPED;
          //Do cleanup when we stop.
          return EINA_TRUE;
 
@@ -806,6 +807,7 @@ e_mod_config_window_manager_v2(void *data)
 
       case E_MOD_PROD_BREAK:
          IINF("E_MOD_PROD_BREAK");
+         productivity_conf->previous_init = E_MOD_PROD_BREAK;
          //It's break time, do nothing, ??
          return EINA_TRUE;
 
@@ -857,6 +859,7 @@ e_mod_config_window_manager_v2(void *data)
                ev_border, productivity_conf->apps_list))
            {
               _e_mod_config_window_remember_set(ev_border);
+
               e_config_save_queue();
            }
          break;
@@ -969,9 +972,9 @@ e_mod_config_window_manager_v2(void *data)
           {
 //             if(_e_mod_config_window_border_match(cbd, bd))
 //                {
-                   CBD_DEBUG(cbd, "Unhide Urgent Window!");
                    _e_mod_config_window_unhide(bd);
                    cbd->iconic = 0;
+                   CBD_DEBUG(cbd, "Unhide Urgent Window!");
 //                }
           }
         if((cbd->urgent == EINA_TRUE) && (cwl->event == E_BORDER_FOCUS_OUT) && (cbd->iconic == 0) && (cbd->private.property == 1))

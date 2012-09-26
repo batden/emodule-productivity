@@ -238,7 +238,7 @@ e_modapi_shutdown(E_Module *m)
      }
 
    //    E_Mod_Config_Window -- FREE
-   //e_mod_config_window_free();
+   e_mod_config_window_free();
 
    //    E_Mod_Config_Windows -- FREE -- END
    /* Cleanup the main config structure */

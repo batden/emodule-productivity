@@ -29,35 +29,20 @@ INF(s)
 INF(s)
 
 
-#define CBD_DEBUG(cbd, fname) \
-   INF(":::Function:%s", fname); \
-INF("::::Name: %s", cbd->name); \
-DBG(":::::cmd: %s", cbd->command);\
-DBG(":::class: %s", cbd->class);\
-DBG(":::deskn: %s", cbd->desktop_name);\
-DBG(":::::pid: %d", cbd->pid);\
-DBG("::iconic: %d", cbd->iconic); \
-DBG("::urgent: %d", cbd->urgent); \
-DBG(":priprop: %d", cbd->private.property);\
-DBG("focusout: %d", cbd->focus_out);
+#define CBD_DEBUG(cbd, fname)                                                       \
+   INF(":::Function:%s", fname);                                                    \
+INF("::::Name: %s", cbd->name);                                                     \
+DBG(":::::cmd: %s", cbd->command);                                                  \
+DBG(":::class: %s", cbd->class);                                                    \
+DBG(":::deskn: %s", cbd->desktop_name);                                             \
+DBG(":::::pid: %d", cbd->pid);                                                      \
+DBG("::iconic: %d", cbd->iconic);                                                   \
+DBG("::urgent: %d", cbd->urgent);                                                   \
+DBG(":priprop: %d", cbd->private.property);                                         \
+DBG("focusout: %d", cbd->focus_out);                                                \
+DBG(":focusin: %d", cbd->focus_in);
 
 typedef struct _E_Config_Border_Data   E_Config_Border_Data;
-typedef struct _E_Config_Urgent_Window E_Config_Urgent_Window;
-typedef struct _E_Config_Remove_Window E_Config_Remove_Window;
-struct _E_Config_Urgent_Window
-{
-   const char *name;
-   const char *command;
-   const char *class;
-   int pid;
-};
-
-struct _E_Config_Remove_Window
-{
-   int pid;
-};
-
-E_Config_Remove_Window *crw = NULL;
 
 struct _E_Config_Border_Data
 {
@@ -78,11 +63,7 @@ struct _E_Config_Border_Data
    struct 
      {
         int property;
-        Eina_Bool hidden;
-        Eina_Bool hidden_urgent;
         Eina_Bool was_urgent;
-        Border_Event prev_action;
-        Border_Event next_action;
      } private;
 
    struct
@@ -91,39 +72,26 @@ struct _E_Config_Border_Data
         int desk_x;
         int desk_y;
      } rem;
-   unsigned int timestamp; 
 };
 
-int __urgent__ = 0;
 E_Config_Border_Data *ev_border = NULL;
 
-static Eina_Bool     _e_mod_config_window_event_border_add_cb(void *data,
-                                                              int type, void *event);
-static Eina_Bool     _e_mod_config_window_event_border_remove_cb(void *data,
-                                                                 int type, void *event);
-static Eina_Bool     _e_mod_config_window_event_border_iconify_cb(void *data,
-                                                                  int type, void *event);
-static Eina_Bool     _e_mod_config_window_event_border_uniconify_cb(void *data,
-                                                                    int type, void *event);
-static Eina_Bool     _e_mod_config_window_event_border_property_cb(void *data,
-                                                                   int type, void *event);
-static Eina_Bool     _e_mod_config_window_event_border_focus_in_cb(void *data,
-                                                                   int type, void *event);
-static Eina_Bool     _e_mod_config_window_event_border_focus_out_cb(void *data,
-                                                                    int type, void *event);
-static Eina_Bool     _e_mod_config_window_event_border_urgent_change_cb(void *data,
-                                                                        int type, void *event);
-static Eina_Bool     _e_mod_config_window_break_timer(void *data);
+static Eina_Bool        _e_mod_config_window_event_border_add_cb(void *data, int type, void *event);
+static Eina_Bool        _e_mod_config_window_event_border_remove_cb(void *data, int type, void *event);
+static Eina_Bool        _e_mod_config_window_event_border_iconify_cb(void *data, int type, void *event);
+static Eina_Bool        _e_mod_config_window_event_border_uniconify_cb(void *data, int type, void *event);
+static Eina_Bool        _e_mod_config_window_event_border_property_cb(void *data, int type, void *event);
+static Eina_Bool        _e_mod_config_window_event_border_focus_in_cb(void *data, int type, void *event);
+static Eina_Bool        _e_mod_config_window_event_border_focus_out_cb(void *data, int type, void *event);
+static Eina_Bool        _e_mod_config_window_event_border_urgent_change_cb(void *data, int type, void *event);
 
-static unsigned int  _e_mod_config_window_current_time_get();
-static void          _e_mod_config_window_hide(E_Border *bd);
-static void          _e_mod_config_window_unhide(E_Border *bd);
-static void          _e_mod_config_window_remember_set(E_Config_Border_Data *bd);
+static Eina_Bool        _e_mod_config_window_break_timer(void *data);
 
-static E_Config_Urgent_Window * _e_mod_config_window_urgent_set(E_Border *bd);
+static void             _e_mod_config_window_hide(E_Border *bd);
+static void             _e_mod_config_window_unhide(E_Border *bd);
 
-static Eina_Bool     _e_mod_config_window_urgent_match(Eina_List *urgent, E_Border *bd);
-static void          _e_mod_config_window_urgent_remove(Eina_List *urgent, E_Border *bd);
+static void             _e_mod_config_window_remember_show_all(Eina_List *cbd_lst, Eina_List *rem_lst);
+static void             _e_mod_config_window_remember_set(E_Config_Border_Data *bd);
 
 static Eina_Bool        _e_mod_config_window_border_add(E_Config_Window_List *cwl, E_Border *bd);
 static Eina_Bool        _e_mod_config_window_border_del(E_Config_Window_List *cwl, E_Config_Border_Data *cbd);
@@ -131,12 +99,8 @@ static Efreet_Desktop * _e_mod_config_window_border_find_desktop(E_Border *bd);
 E_Config_Border_Data  * _e_mod_config_window_border_create(E_Border *bd);
 static void             _e_mod_config_window_border_add_all(E_Config_Window_List *cwl);
 static Eina_Bool        _e_mod_config_window_border_match(E_Config_Border_Data *cbd, E_Border *bd);
-static Eina_Bool        _e_mod_config_window_border_worktool_match(E_Border *bd, Eina_List *worktools);
 static void             _e_mod_config_window_border_urgent_set(E_Config_Window_List *cwl, E_Config_Border_Data *cbd);
 static Eina_Bool        _e_mod_config_window_border_worktool_match_v2(E_Config_Border_Data *cbd, Eina_List *worktools);
-static void             _e_mod_config_window_remember_show_all(Eina_List *cbd_lst, Eina_List *rem_lst);
-static Eina_Bool        _e_mod_config_window_border_urgent_match_v2(Eina_List *borders, E_Config_Border_Data *cur_cbd);
-static Eina_Bool        _e_mod_config_window_border_urgent_status_remove(Eina_List *borders, E_Config_Border_Data *cur_cbd);
 static void             _e_mod_config_window_border_cleaner(E_Config_Window_List *cwl);
 
 Eina_Bool
@@ -147,13 +111,9 @@ e_mod_config_windows_create_data(void *data)
    if(!(cfg = data)) return EINA_FALSE;
 
    cfg->cwl = E_NEW(E_Config_Window_List, 1);
-   crw = E_NEW(E_Config_Remove_Window, 1);
-
    ev_border = E_NEW(E_Config_Border_Data, 1); 
 
    cfg->cwl->event = E_BORDER_NULL;
-   //_e_mod_config_window_border_add_all(cfg->cwl);
-   //e_mod_config_window_manager_v2(cfg->cwl);
 
    cfg->handlers = eina_list_append
       (cfg->handlers, ecore_event_handler_add
@@ -195,9 +155,6 @@ e_mod_config_windows_create_data(void *data)
        (E_EVENT_BORDER_URGENT_CHANGE, 
         _e_mod_config_window_event_border_urgent_change_cb, cfg->cwl));
 
-
-
-
    productivity_conf->wm = 
       ecore_timer_loop_add(0.20, e_mod_config_window_manager_v2, cfg->cwl);
 
@@ -207,11 +164,6 @@ e_mod_config_windows_create_data(void *data)
    if(cfg->cwl->borders) return EINA_TRUE;
 
    return EINA_FALSE;
-}
-unsigned int
-e_mod_timestamp_get()
-{
-   return _e_mod_config_window_current_time_get();
 }
 
 /***********************************************************************************
@@ -443,20 +395,6 @@ _e_mod_config_window_event_border_urgent_change_cb(void *data,
  * End of Handlers
  * **************************************************************************/
 
-/*
- * Gets the current time in seconds, it's used to calculate, the time an application opens
- * and the time the application is closed, this allows us to track how long the application was
- * opened.
- */
-static unsigned int
-_e_mod_config_window_current_time_get()
-{
-   time_t seconds;
-
-   seconds = time(NULL);
-   return (unsigned int) seconds;
-}
-
 static void
 _e_mod_config_window_remember_set(E_Config_Border_Data *cbd)
 {
@@ -659,14 +597,17 @@ void e_mod_config_window_free(void)
    EINA_LIST_FREE(productivity_conf->handlers, eh)
       ecore_event_handler_del(eh);
 
+   productivity_conf->init = E_MOD_PROD_INIT_STOP;
+   e_mod_config_window_manager_v2(productivity_conf->cwl);
+
    EINA_LIST_FREE(productivity_conf->cwl->borders, cbd)
      {
         if(cbd->name)
           eina_stringshare_del(cbd->name);
-
+/*
         if(cbd->command)
           eina_stringshare_del(cbd->command);
-
+*/
         if(cbd->class)
           eina_stringshare_del(cbd->class);
 
@@ -683,111 +624,12 @@ void e_mod_config_window_free(void)
    E_FREE(eh); 
 }
 
-static E_Config_Urgent_Window *
-_e_mod_config_window_urgent_set(E_Border *bd)
-{
-   Eina_List *urgent;
-   E_Config_Urgent_Window *cuw;
-
-   if(!(bd)) return;
-   cuw = E_NEW(E_Config_Urgent_Window, 1);
-
-   if(bd->client.icccm.name)
-     cuw->name = eina_stringshare_add(bd->client.icccm.name);
-
-   if(bd->client.icccm.class)
-     cuw->class = eina_stringshare_add(bd->client.icccm.class);
-
-   if((bd->client.icccm.command.argc > 0) && (bd->client.icccm.command.argv)) 
-     cuw->command = eina_stringshare_add(bd->client.icccm.command.argv[0]);
-
-   if(bd->client.netwm.pid > 0)
-     cuw->pid = bd->client.netwm.pid;
-
-   return cuw;
-}
-
-static Eina_Bool 
-_e_mod_config_window_urgent_match(Eina_List *urgent, E_Border *bd)
-{
-   Eina_List *l;
-   E_Config_Urgent_Window *cuw;
-   int match = 0;
-
-   if(!(urgent)) return;
-   if(!(bd->client.icccm.name)) return;
-   if(!(bd->client.icccm.class)) return;
-   if(!(bd->client.icccm.command.argc > 0)) return;
-   if(!(bd->client.icccm.command.argv)) return;
-   if(!(bd->client.netwm.pid > 0)) return;
-
-   EINA_LIST_FOREACH(urgent, l, cuw)
-     {
-        if(match > 0) match =  0;
-
-        if(strncmp(cuw->name, bd->client.icccm.name, sizeof(cuw->name)) == 0)
-          match += 1;
-
-        if(strncmp(cuw->class, bd->client.icccm.class, sizeof(cuw->class)) == 0)
-          match += 1;
-
-        if(strncmp(cuw->command, bd->client.icccm.command.argv[0], sizeof(cuw->command)) == 0)
-          match += 1;
-
-        if(cuw->pid == bd->client.netwm.pid)
-          match += 1;
-
-
-        if(match == 4)
-          return EINA_TRUE;
-     }
-   return EINA_FALSE;
-}
-
-static void
-_e_mod_config_window_urgent_remove(Eina_List *urgent, E_Border *bd)
-{ 
-   Eina_List *l;
-   E_Config_Urgent_Window *cuw;
-   int match = 0;
-
-   if(!(urgent)) return;
-   if(!(bd->client.icccm.name)) return;
-   if(!(bd->client.icccm.class)) return;
-   if(!(bd->client.icccm.command.argc > 0)) return;
-   if(!(bd->client.icccm.command.argv)) return;
-   if(!(bd->client.netwm.pid > 0)) return;
-
-   EINA_LIST_FOREACH(urgent, l, cuw)
-     {
-        if(match > 0) match =  0;
-
-        if(strncmp(cuw->name, bd->client.icccm.name, sizeof(cuw->name)) == 0)
-          match += 1;
-
-        if(strncmp(cuw->class, bd->client.icccm.class, sizeof(cuw->class)) == 0)
-          match += 1;
-
-        if(strncmp(cuw->command, bd->client.icccm.command.argv[0], sizeof(cuw->command)) == 0)
-          match += 1;
-
-        if(cuw->pid == bd->client.netwm.pid)
-          match += 1;
-
-
-        if(match == 4)
-          productivity_conf->cwl->urgent = 
-             eina_list_remove(productivity_conf->cwl->urgent, cuw);
-     }
-}
-
 Eina_Bool 
 e_mod_config_window_manager_v2(void *data)
 {
    E_Config_Window_List *cwl;
    E_Config_Border_Data *cbd;
    Eina_List *l, *ll;
-
 
    //if(productivity_conf->init != E_MOD_PROD_INIT_START | E_MOD_PROD_STARTED) return EINA_TRUE;
    if(!(cwl = data)) return EINA_FALSE;
@@ -866,18 +708,6 @@ e_mod_config_window_manager_v2(void *data)
 
       case E_BORDER_UNICONIFY:
          BINF("E_BORDER_UNICONIFY");
-         /*if(!_e_mod_config_window_border_worktool_match_v2(
-           ev_border, productivity_conf->apps_list))
-           {
-           if(_e_mod_config_window_border_urgent_match_v2(
-           cwl->borders, ev_border))
-           {
-           WRN("Uniconify urgent match!");
-           cwl->event = E_BORDER_NULL;
-           _e_mod_config_window_border_urgent_status_remove(cwl->borders, ev_border);
-           return EINA_TRUE;
-           }
-           }      */                                  
          break;
 
       case E_BORDER_FOCUS_IN:
@@ -892,7 +722,6 @@ e_mod_config_window_manager_v2(void *data)
       case E_BORDER_URGENT:
          BINF("E_BORDER_URGENT");
 
-         //if((e_mod_config_schedule_urgent_get()) && (ev_border->urgent))
       case E_BORDER_PROPERTY:
          BINF("E_BORDER_PROPERTY");
          if(ev_border->urgent)
@@ -938,44 +767,11 @@ e_mod_config_window_manager_v2(void *data)
         if(match == EINA_FALSE) continue;
         if(worktool_match == EINA_TRUE) continue;
 
-        //DBG("NAME:%s, PID:%d prop:%d", cbd->name, cbd->pid, cbd->private.property);
-        /*if((cbd->private.was_urgent == EINA_TRUE) && (cbd->private.property >= 2))
-          {
-          WRN("Time to un-urgent :%d", cbd->private.property);
-          cwl->event == E_BORDER_NULL;
-          cbd->private.property = 0;
-          cbd->private.was_urgent = EINA_FALSE;
-          cbd->private.prev_action = E_BORDER_NULL;
-          e_mod_config_window_manager_v2(cwl);
-          }*/
-/*
-        if((cwl->event == E_BORDER_NULL) &&
-           (cbd->focus_out == EINA_TRUE) &&
-           (_e_mod_config_window_border_match(cbd, bd)))
-          {
-             CRI("HIDE THIS WINDOW!!!!!!!!!!!!________________<<>>>>");
-             CBD_DEBUG(cbd, "Urgent Window to hide");
-            _e_mod_config_window_hide(bd);
-          }
-
-
-        if((cwl->event == E_BORDER_FOCUS_OUT) &&
-           (cbd->private.property >= 1) &&
-           (_e_mod_config_window_border_match(cbd, bd)))
-          {
-             cbd->private.property ++;
-             //cbd->focus_out = EINA_TRUE;
-             CBD_DEBUG(cbd, "Focus Out!");
-          }
-*/
         if((cbd->urgent == EINA_TRUE) && (cwl->event == E_BORDER_NULL) && (cbd->iconic == 1))
           {
-//             if(_e_mod_config_window_border_match(cbd, bd))
-//                {
-                   _e_mod_config_window_unhide(bd);
-                   cbd->iconic = 0;
-                   CBD_DEBUG(cbd, "Unhide Urgent Window!");
-//                }
+             _e_mod_config_window_unhide(bd);
+             cbd->iconic = 0;
+             CBD_DEBUG(cbd, "Unhide Urgent Window!");
           }
         if((cbd->urgent == EINA_TRUE) && (cwl->event == E_BORDER_FOCUS_OUT) && (cbd->iconic == 0) && (cbd->private.property == 1))
           {
@@ -1005,25 +801,6 @@ e_mod_config_window_manager_v2(void *data)
              CBD_DEBUG(cbd, "GOOD BYE Urgent WINDOW!");
           }
 
-/*        if(((cbd->private.was_urgent == EINA_TRUE) || (cbd->urgent == EINA_TRUE)) &&
-           (cwl->event == E_BORDER_PROPERTY | E_BORDER_NULL ) &&
-           (cbd->private.property == 1))
-          {
-             Eina_List *lll;
-             E_Border *bd_;
-             EINA_LIST_FOREACH(bcl, lll, bd_)
-               {
-                  if(_e_mod_config_window_border_match(cbd, bd_))
-                    {
-                       if(!bd_->iconic) continue;
-
-                       CBD_DEBUG(cbd, "Unhide");
-                       cbd->private.property = 2;
-                       _e_mod_config_window_unhide(bd_);
-                    }
-               }
-          }*/
-
         if((cbd->private.was_urgent == EINA_FALSE) && (cbd->urgent == EINA_FALSE) &&
            (cwl->event == E_BORDER_FOCUS_IN | E_BORDER_NULL | E_BORDER_REMOVE ) &&
            (cbd->urgent == EINA_FALSE))
@@ -1042,105 +819,14 @@ e_mod_config_window_manager_v2(void *data)
                     }
                }
           }
-   
+
         if((cbd->private.was_urgent == EINA_TRUE) && (cbd->private.property == 5))
           {
              cbd->private.was_urgent = EINA_FALSE;
              cbd->private.property = 0;
           }
-
-
-        /*
-           if((cbd->private.was_urgent == EINA_TRUE ) && ((cwl->event == E_BORDER_FOCUS_IN) ||
-           (cwl->event == E_BORDER_NULL) || 
-           (cwl->event == E_BORDER_REMOVE)))
-           {
-           if(cbd->private.property >= 1)
-           {
-           INF("Unhiding Urgent:%s ::%d", cbd->name, cbd->private.property);
-           WRN("Iconic:%d :: %d :: %d", cbd->iconic, ev_border->iconic, bd->iconic);
-
-           if((cbd->private.property == 1) && ((ev_border->iconic == 1) ||
-           (bd->iconic == 1)))
-           {
-           cwl->event = E_BORDER_NULL;
-           _e_mod_config_window_unhide(bd);
-           }
-           }
-           } 
-
-           if((cwl->event == E_BORDER_PROPERTY) && (ev_border->urgent == EINA_TRUE) && 
-           (worktool_match == EINA_FALSE) && (cbd->pid == ev_border->pid) &&
-           (e_mod_config_schedule_urgent_get() == EINA_TRUE))
-           {
-           INF("Urgent Window:%s", cbd->name);
-           cbd->private.property ++;
-           cbd->private.was_urgent = EINA_TRUE;
-           }
-
-           if((worktool_match == EINA_FALSE) && ((cwl->event == E_BORDER_FOCUS_IN) ||
-           (cwl->event == E_BORDER_REMOVE) ||
-           (cwl->event == E_BORDER_NULL)))
-           {
-           if((cbd->private.was_urgent == EINA_FALSE) && (cbd->private.property <= 0))
-           {
-           Eina_List *il, *ill;
-           E_Border *ibd;
-
-           EINA_LIST_FOREACH(e_border_client_list(), il, ibd)
-           {
-           if((strncmp(cbd->name, ibd->client.icccm.name, sizeof(cbd->name)) == 0) &&
-           (ev_border->pid == cbd->pid) && (ev_border->pid == ibd->client.netwm.pid) &&
-           (cbd->pid == ibd->client.netwm.pid))
-           {
-           INF("HID PID:%d :: %d :: %d", ev_border->pid, cbd->pid, ibd->client.netwm.pid);
-           if(!ibd->iconic)
-           _e_mod_config_window_hide(ibd);
-           }
-           }
-           eina_list_free(il);
-           E_FREE(ibd);
-           ibd = NULL;
-           il = NULL;
-           }
-           }
-        //Meld@
-        if((worktool_match == EINA_FALSE) && (cwl->event == E_BORDER_UNICONIFY) &&
-        (cbd->private.was_urgent == EINA_FALSE))
-        {
-        _e_mod_config_window_hide(bd);
-        }
-
-
-        if((cbd->private.was_urgent == EINA_TRUE) && (cbd->private.property >= 2))
-        {
-        WRN("Time to un-urgent :%d", cbd->private.property);
-        cwl->event == E_BORDER_NULL;
-        cbd->private.property = 0;
-        cbd->private.was_urgent = EINA_FALSE;
-        cbd->private.prev_action = E_BORDER_NULL;
-        e_mod_config_window_manager_v2(cwl);
-        }
-
-        if((cbd->pid == ev_border->pid) && (cbd->private.was_urgent == EINA_TRUE) && 
-           (cbd->private.property >= 1) && (cbd->private.prev_action == E_BORDER_FOCUS_OUT))
-          {
-             DBG("Time to remove private");
-             cbd->private.property++;
-             cwl->event = E_BORDER_NULL;
-             e_mod_config_window_manager_v2(cwl);
-          }
-
-
-        if((cbd->private.property == 1) && (bd->iconic == 1) && (cbd->pid == ev_border->pid))
-          {
-             cwl->event = E_BORDER_NULL;
-             _e_mod_config_window_unhide(bd);
-             e_mod_config_window_manager_v2(cwl);
-          }
-
-        cbd->private.prev_action = cwl->event;*/
      }
+
    _e_mod_config_window_border_cleaner(cwl);
    cwl->previous_event = cwl->event;
    productivity_conf->previous_init = productivity_conf->init;
@@ -1175,7 +861,7 @@ _e_mod_config_window_border_add(E_Config_Window_List *cwl, E_Border *bd)
 
    if(_e_mod_config_window_border_worktool_match_v2(cbd, productivity_conf->apps_list)) return EINA_FALSE;
 
-   INF("Name:%s, CMD:%s, PID:%d, Time:%d", cbd->name, cbd->command, cbd->pid, cbd->timestamp);
+   INF("Name:%s, CMD:%s, PID:%d", cbd->name, cbd->command, cbd->pid);
    cwl->borders = eina_list_append(cwl->borders, cbd);
    return EINA_TRUE;
 }
@@ -1272,7 +958,6 @@ _e_mod_config_window_border_create(E_Border *bd)
    cbd->rem.zone           = bd->zone->num;
    cbd->rem.desk_x         = bd->desk->x;
    cbd->rem.desk_y         = bd->desk->y;
-   cbd->timestamp          = _e_mod_config_window_current_time_get(); 
    return cbd;
 }
 
@@ -1335,30 +1020,6 @@ _e_mod_config_window_border_find_desktop(E_Border *bd)
    if(!(desktop)) ERR("Unable to get a .desktop, giving up!");
 
    return desktop;
-}
-
-static Eina_Bool 
-_e_mod_config_window_border_worktool_match(E_Border *bd, Eina_List *worktools)
-{
-   Efreet_Desktop *desktop;
-   Eina_List *l;
-
-   if(!(bd)) return EINA_FALSE;
-   if(!(worktools)) return EINA_FALSE;
-
-   EINA_LIST_FOREACH(worktools, l, desktop)
-     {
-        if(!desktop->name) continue;
-
-        if ((strncmp(desktop->name,bd->desktop->name, sizeof(desktop->name)) == 0 ) &&
-            (strncmp(desktop->orig_path,bd->desktop->orig_path, sizeof(desktop->orig_path)) == 0 ))
-          {
-             //DBG("Name:%s , Orig_Path:%s", desk->name, desk->orig_path);
-             if(bd->client.netwm.pid > 0)
-               return EINA_TRUE;
-          }
-     }
-   return EINA_FALSE;
 }
 
 static Eina_Bool 
@@ -1429,48 +1090,6 @@ _e_mod_config_window_remember_show_all(Eina_List *cbd_lst, Eina_List *rem_lst)
                }
           }
      }
-}
-
-
-static Eina_Bool
-_e_mod_config_window_border_urgent_match_v2(Eina_List *borders, E_Config_Border_Data *cur_cbd)
-{
-   E_Config_Border_Data *cbd;
-   Eina_List *l, *ll;
-
-   if(!(cur_cbd)) return;
-   if(!(borders)) return;
-
-   EINA_LIST_FOREACH(borders, l, cbd)
-     {
-        if((cbd->pid == cur_cbd->pid) && (cbd->private.was_urgent == EINA_TRUE))
-          return EINA_TRUE;
-     }
-   return EINA_FALSE;
-}
-
-static Eina_Bool
-_e_mod_config_window_border_urgent_status_remove(Eina_List *borders, E_Config_Border_Data *cur_cbd)
-{
-   E_Config_Border_Data *cbd;
-   Eina_List *l, *ll;
-
-   if(!(cur_cbd)) return;
-   if(!(borders)) return;
-
-   EINA_LIST_FOREACH(borders, l, cbd)
-     {
-        if((cbd->pid == cur_cbd->pid) && (cbd->private.was_urgent == EINA_TRUE) &&
-           (cbd->private.prev_action == E_BORDER_FOCUS_OUT))
-          {
-             cbd->private.was_urgent = EINA_FALSE;
-             if(cbd->private.property >= 1)
-               cbd->private.property = 0;
-
-             return EINA_TRUE;
-          }
-     }
-   return EINA_FALSE;
 }
 
 static void

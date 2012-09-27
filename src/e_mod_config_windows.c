@@ -30,17 +30,30 @@ INF(s)
 
 
 #define CBD_DEBUG(cbd, fname)                                                       \
+{                                                                                   \
    INF(":::Function:%s", fname);                                                    \
-INF("::::Name: %s", cbd->name);                                                     \
-DBG(":::::cmd: %s", cbd->command);                                                  \
-DBG(":::class: %s", cbd->class);                                                    \
-DBG(":::deskn: %s", cbd->desktop_name);                                             \
-DBG(":::::pid: %d", cbd->pid);                                                      \
-DBG("::iconic: %d", cbd->iconic);                                                   \
-DBG("::urgent: %d", cbd->urgent);                                                   \
-DBG(":priprop: %d", cbd->private.property);                                         \
-DBG("focusout: %d", cbd->focus_out);                                                \
-DBG(":focusin: %d", cbd->focus_in);
+   INF("::::Name: %s", cbd->name);                                                  \
+   DBG(":::::cmd: %s", cbd->command);                                               \
+   DBG(":::class: %s", cbd->class);                                                 \
+   DBG(":::deskn: %s", cbd->desktop_name);                                          \
+   DBG(":::::pid: %d", cbd->pid);                                                   \
+   DBG("::iconic: %d", cbd->iconic);                                                \
+   DBG("::urgent: %d", cbd->urgent);                                                \
+   DBG(":priprop: %d", cbd->private.property);                                      \
+   DBG("focusout: %d", cbd->focus_out);                                             \
+   DBG(":focusin: %d", cbd->focus_in);                                              \
+}
+
+#define ENLIGHTENMENT_CMD_IGNORE(command, stat)                                     \
+{                                                                                   \
+   if((command.argc > 0) && (command.argv))                                         \
+     {                                                                              \
+        if(strcmp("enlightenment", ecore_file_file_get(command.argv[0])) == 0)      \
+          {                                                                         \
+             return stat;                                                           \
+          }                                                                         \
+     }                                                                              \
+}
 
 typedef struct _E_Config_Border_Data   E_Config_Border_Data;
 
@@ -216,6 +229,7 @@ _e_mod_config_window_event_border_add_cb(void *data, int type __UNUSED__, void *
 
    if(!(cwl = data)) return;
    ev = event;
+   ENLIGHTENMENT_CMD_IGNORE(ev->border->client.icccm.command, EINA_FALSE);
    EVENT_DBG();
 
    if(cwl->borders)
@@ -256,6 +270,7 @@ _e_mod_config_window_event_border_remove_cb(void *data, int type __UNUSED__, voi
    if(productivity_conf->init != E_MOD_PROD_STARTED) return EINA_TRUE;
    if(!(cwl = data)) return;
    ev = event;
+   ENLIGHTENMENT_CMD_IGNORE(ev->border->client.icccm.command, EINA_FALSE);
    EVENT_DBG();
 
    cwl->event = E_BORDER_REMOVE;
@@ -277,6 +292,7 @@ _e_mod_config_window_event_border_iconify_cb(void *data, int type __UNUSED__, vo
    if(productivity_conf->init != E_MOD_PROD_STARTED) return EINA_TRUE;
    if(!(cwl = data)) return;
    ev = event;
+   ENLIGHTENMENT_CMD_IGNORE(ev->border->client.icccm.command, EINA_FALSE);
    //EVENT_DBG();
 
    cwl->event = E_BORDER_ICONIFY;
@@ -297,6 +313,7 @@ _e_mod_config_window_event_border_uniconify_cb(void *data, int type __UNUSED__, 
    if(productivity_conf->init != E_MOD_PROD_STARTED) return EINA_TRUE;
    if(!(cwl = data)) return;
    ev = event;
+   ENLIGHTENMENT_CMD_IGNORE(ev->border->client.icccm.command, EINA_FALSE);
    EVENT_DBG();
 
    cwl->event = E_BORDER_UNICONIFY;
@@ -317,6 +334,7 @@ _e_mod_config_window_event_border_focus_in_cb(void *data, int type __UNUSED__, v
    if(productivity_conf->init != E_MOD_PROD_STARTED) return EINA_TRUE;
    if(!(cwl = data)) return;
    ev = event;
+   ENLIGHTENMENT_CMD_IGNORE(ev->border->client.icccm.command, EINA_FALSE);
    EVENT_DBG();
 
    cwl->event = E_BORDER_FOCUS_IN;
@@ -337,6 +355,7 @@ _e_mod_config_window_event_border_focus_out_cb(void *data, int type __UNUSED__, 
    if(productivity_conf->init != E_MOD_PROD_STARTED) return EINA_TRUE;
    if(!(cwl = data)) return;
    ev = event;
+   ENLIGHTENMENT_CMD_IGNORE(ev->border->client.icccm.command, EINA_FALSE);
    EVENT_DBG();
 
    cwl->event = E_BORDER_FOCUS_OUT;
@@ -359,6 +378,7 @@ _e_mod_config_window_event_border_property_cb(void *data,
    if(productivity_conf->init != E_MOD_PROD_STARTED) return EINA_TRUE;
    if(!(cwl = data)) return;
    ev = event;
+   ENLIGHTENMENT_CMD_IGNORE(ev->border->client.icccm.command, EINA_FALSE);
    EVENT_DBG();
 
    cwl->event = E_BORDER_PROPERTY;
@@ -380,6 +400,7 @@ _e_mod_config_window_event_border_urgent_change_cb(void *data,
    if(productivity_conf->init != E_MOD_PROD_STARTED) return EINA_TRUE;
    if(!(cwl = data)) return;
    ev = event;
+   ENLIGHTENMENT_CMD_IGNORE(ev->border->client.icccm.command, EINA_FALSE);
    EVENT_DBG();
 
    cwl->event = E_BORDER_URGENT;
@@ -603,10 +624,10 @@ void e_mod_config_window_free(void)
      {
         if(cbd->name)
           eina_stringshare_del(cbd->name);
-/*
-        if(cbd->command)
-          eina_stringshare_del(cbd->command);
-*/
+        /*
+           if(cbd->command)
+           eina_stringshare_del(cbd->command);
+           */
         if(cbd->class)
           eina_stringshare_del(cbd->class);
 
@@ -838,13 +859,7 @@ _e_mod_config_window_border_add(E_Config_Window_List *cwl, E_Border *bd)
 {
    E_Config_Border_Data *cbd;
 
-   if(bd->client.icccm.name) //ignore borders that relates to e17
-     if(strncmp(bd->client.icccm.name, "E", sizeof("E")) == 0)
-       return EINA_FALSE;
-
-   if(bd->client.icccm.class) //ignore borders that relates to e17
-     if(strncmp(bd->client.icccm.class, "_config::", 8) == 0)
-       return EINA_FALSE;
+   ENLIGHTENMENT_CMD_IGNORE(bd->client.icccm.command, EINA_FALSE);
 
    if(!bd->desktop)
      bd->desktop = _e_mod_config_window_border_find_desktop(bd);
@@ -858,7 +873,11 @@ _e_mod_config_window_border_add(E_Config_Window_List *cwl, E_Border *bd)
    cbd = E_NEW(E_Config_Border_Data, 1);
    cbd = _e_mod_config_window_border_create(bd);
 
-   if(_e_mod_config_window_border_worktool_match_v2(cbd, productivity_conf->apps_list)) return EINA_FALSE;
+   if(_e_mod_config_window_border_worktool_match_v2(cbd, productivity_conf->apps_list))
+     {
+        E_FREE(cbd);
+        return EINA_FALSE;
+     }
 
    INF("Name:%s, CMD:%s, PID:%d", cbd->name, cbd->command, cbd->pid);
    cwl->borders = eina_list_append(cwl->borders, cbd);

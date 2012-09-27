@@ -379,6 +379,10 @@ _e_mod_config_window_event_border_property_cb(void *data,
    if(!(cwl = data)) return;
    ev = event;
    ENLIGHTENMENT_CMD_IGNORE(ev->border->client.icccm.command, EINA_FALSE);
+   
+   if(ev->border->client.icccm.urgent == EINA_FALSE)
+     return EINA_FALSE;
+
    EVENT_DBG();
 
    cwl->event = E_BORDER_PROPERTY;

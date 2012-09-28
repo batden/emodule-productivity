@@ -20,14 +20,13 @@
 #define WRN(...)            EINA_LOG_DOM_WARN(_productivity_log, __VA_ARGS__)
 #define ERR(...)            EINA_LOG_DOM_ERR(_productivity_log, __VA_ARGS__)
 #define CRI(...)            EINA_LOG_DOM_CRIT(_productivity_log, __VA_ARGS__)
-
 extern int _productivity_log;
 /* Macros used for config file versioning */
 /* You can increment the EPOCH value if the old configuration is not
  * compatible anymore, it creates an entire new one.
  * You need to increment GENERATION when you add new values to the
  * configuration file but is not needed to delete the existing conf  */
-#define MOD_CONFIG_FILE_EPOCH 0x0005
+#define MOD_CONFIG_FILE_EPOCH 0x0007
 #define MOD_CONFIG_FILE_GENERATION 0x008e
 #define MOD_CONFIG_FILE_VERSION \
    ((MOD_CONFIG_FILE_EPOCH << 16) | MOD_CONFIG_FILE_GENERATION)
@@ -69,7 +68,7 @@ struct _Remember
    const char *name;
    const char *command;
    const char *desktop_file;
-   int pid;
+   Ecore_X_Window win;
    int zone;
    int desk_x;
    int desk_y;
@@ -113,6 +112,7 @@ struct _Config
    E_Config_Window_List *cwl;
    Initialize init;
    Initialize previous_init;
+   const char *log_name;
 };
 
 struct _Config_Item 

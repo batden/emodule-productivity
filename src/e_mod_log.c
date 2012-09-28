@@ -5,8 +5,8 @@ void
 e_mod_log_cb(const Eina_Log_Domain *d, Eina_Log_Level level, const char *file,
               const char *fnc, int line, const char *fmt, void *data, va_list args)
 {
-   if ((d->name) && (d->namelen == sizeof("E_PRODUCTIVITY") - 1) &&
-       (memcmp(d->name, "E_PRODUCTIVITY", sizeof("E_PRODUCTIVITY") - 1) == 0))
+   if ((d->name) && (d->namelen == sizeof(productivity_conf->log_name) - 1) &&
+       (memcmp(d->name, productivity_conf->log_name, sizeof(productivity_conf->log_name) - 1) == 0))
      {
         const char *prefix;
         Eina_Bool use_color = !eina_log_color_disable_get();

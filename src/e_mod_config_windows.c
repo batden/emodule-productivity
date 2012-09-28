@@ -36,7 +36,7 @@ INF(s)
    DBG(":::::cmd: %s", cbd->command);                                               \
    DBG(":::class: %s", cbd->class);                                                 \
    DBG(":::deskn: %s", cbd->desktop_name);                                          \
-   DBG(":::::pid: %d", cbd->pid);                                                   \
+   DBG(":::::win: %d", cbd->win);                                                   \
    DBG("::iconic: %d", cbd->iconic);                                                \
    DBG("::urgent: %d", cbd->urgent);                                                \
    DBG(":priprop: %d", cbd->private.property);                                      \
@@ -64,7 +64,7 @@ struct _E_Config_Border_Data
    const char *class;
    const char *desktop_name;
    const char *desktop_orig_path;
-   int pid;
+   Ecore_X_Window win;
    Eina_Bool iconic;
    Eina_Bool user_skip_winlist;
    Eina_Bool lock_user_iconify;
@@ -241,7 +241,7 @@ _e_mod_config_window_event_border_add_cb(void *data, int type __UNUSED__, void *
 
         EINA_LIST_FOREACH(cwl->borders, l, cbd)
           {
-             if(cbd->pid == ev->border->client.netwm.pid)
+             if(cbd->win == ev->border->win)
                {
                   exists = EINA_TRUE;
                   break;
@@ -435,14 +435,13 @@ _e_mod_config_window_remember_set(E_Config_Border_Data *cbd)
                 eina_list_remove(productivity_conf->remember_list,
                                  rem);
           }
-        if(rem->pid == 0)
+        /*if(rem->pid == 0)
           {
              productivity_conf->remember_list =
                 eina_list_remove(productivity_conf->remember_list,
                                  rem);
-          }
-        if((cbd->pid > 0) && 
-           (cbd->pid == rem->pid))
+          }*/
+        if(cbd->win == rem->win)
           {
              exists = EINA_TRUE;
           }
@@ -474,10 +473,7 @@ _e_mod_config_window_remember_set(E_Config_Border_Data *cbd)
         rem->command = eina_stringshare_add(cbd->command);
      }
 
-   if(cbd->pid > 0)
-     {
-        rem->pid = cbd->pid;
-     }
+   rem->win    = cbd->win;
    rem->zone   = cbd->rem.zone;
    rem->desk_x = cbd->rem.desk_x;
    rem->desk_y = cbd->rem.desk_y;
@@ -501,8 +497,7 @@ e_mod_config_window_remember_cleanup()
      {     
         EINA_LIST_FOREACH(bdl, ll, bd)
           {
-             if(bd->client.netwm.pid > 0)
-               if(bd->client.netwm.pid == rem->pid)
+               if(bd->win == rem->win)
                  pass = EINA_TRUE;
           }
 
@@ -909,7 +904,7 @@ _e_mod_config_window_border_add(E_Config_Window_List *cwl, E_Border *bd)
         return EINA_FALSE;
      }
 
-   INF("Name:%s, CMD:%s, PID:%d", cbd->name, cbd->command, cbd->pid);
+   INF("Name:%s, CMD:%s, WIN:%d", cbd->name, cbd->command, cbd->win);
    cwl->borders = eina_list_append(cwl->borders, cbd);
    return EINA_TRUE;
 }
@@ -925,7 +920,7 @@ _e_mod_config_window_border_del(E_Config_Window_List *cwl, E_Config_Border_Data 
    EINA_LIST_FOREACH(cwl->borders, l, cbd_a)
       if(strncmp(cbd->name,cbd_a->name, sizeof(cbd->name)) == 0)
         if(strncmp(cbd->class, cbd_a->class, sizeof(cbd->class)) == 0)
-          if(cbd->pid == cbd_a->pid)
+          if(cbd->win == cbd_a->win)
             cwl->borders = eina_list_remove(cwl->borders, cbd_a);
 
    return EINA_TRUE;
@@ -941,7 +936,7 @@ _e_mod_config_window_border_match(E_Config_Border_Data *cbd, E_Border *bd)
 
    if(strncmp(cbd->name,bd->client.icccm.name, sizeof(cbd->name)) == 0)
      if(strncmp(cbd->class, bd->client.icccm.class, sizeof(cbd->class)) == 0)
-       if(cbd->pid == bd->client.netwm.pid)
+       if(cbd->win == bd->win)
          {
             ENLIGHTENMENT_CMD_IGNORE(bd->client.icccm.command, EINA_FALSE);
             return EINA_TRUE;
@@ -961,9 +956,9 @@ _e_mod_config_window_border_urgent_set(E_Config_Window_List *cwl, E_Config_Borde
    EINA_LIST_FOREACH(cwl->borders, l, cbd_a)
       if(strncmp(cbd->name,cbd_a->name, sizeof(cbd->name)) == 0)
         if(strncmp(cbd->class, cbd_a->class, sizeof(cbd->class)) == 0)
-          if(cbd->pid == cbd_a->pid)
+          if(cbd->win == cbd_a->win)
             {
-               DBG("Setting urgent:%s :: %d", cbd_a->name, cbd_a->pid);
+               DBG("Setting urgent:%s :: %d", cbd_a->name, cbd_a->win);
                cbd_a->private.property = 1;
                cbd_a->urgent = EINA_TRUE;
                cbd_a->private.was_urgent = EINA_TRUE;
@@ -988,9 +983,6 @@ _e_mod_config_window_border_create(E_Border *bd)
    if((bd->client.icccm.command.argc > 0) && (bd->client.icccm.command.argv))
      cbd->command = bd->client.icccm.command.argv[0];
 
-   if(bd->client.netwm.pid > 0)
-     cbd->pid = bd->client.netwm.pid;
-
    if(bd->desktop)
      {
         if(bd->desktop->name)
@@ -1005,6 +997,7 @@ _e_mod_config_window_border_create(E_Border *bd)
    cbd->lock_user_iconify  = bd->lock_user_iconify;
    cbd->skip_pager         = bd->client.netwm.state.skip_pager;
    cbd->urgent             = bd->client.icccm.urgent;
+   cbd->win                = bd->win;
 
    cbd->rem.zone           = bd->zone->num;
    cbd->rem.desk_x         = bd->desk->x;
@@ -1090,7 +1083,7 @@ _e_mod_config_window_border_worktool_match_v2(E_Config_Border_Data *cbd, Eina_Li
             (strncmp(desktop->orig_path,cbd->desktop_orig_path, sizeof(desktop->orig_path)) == 0 ))
           {
              //DBG("Name:%s , Orig_Path:%s", desk->name, desk->orig_path);
-             if(cbd->pid > 0)
+             if(cbd->win) //RECHECK THIS :FIXME
                return EINA_TRUE;
           }
      }
@@ -1119,7 +1112,7 @@ _e_mod_config_window_remember_show_all(Eina_List *cbd_lst, Eina_List *rem_lst)
 
         EINA_LIST_FOREACH(rem_lst, ll, rem)
           {
-             if(rem->pid == bd->client.netwm.pid)
+             if(rem->win == bd->win)
                {
                   E_Zone *zone;
                   E_Desk *desk;
@@ -1155,7 +1148,7 @@ _e_mod_config_window_border_cleaner(E_Config_Window_List *cwl)
      {
         EINA_LIST_FOREACH(e_border_client_list(), ll, bd)
           {
-             if(bd->client.netwm.pid == cbd->pid)
+             if(bd->win == cbd->win)
                {
                   found = EINA_TRUE;
                   break;

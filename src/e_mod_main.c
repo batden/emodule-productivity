@@ -69,11 +69,6 @@ e_modapi_init(E_Module *m)
    char buf[PATH_MAX];
    Eina_List *apps;
 
-   _productivity_log = eina_log_domain_register("MOD:PROD",EINA_COLOR_CYAN);
-   eina_log_print_cb_set(e_mod_log_cb, NULL);
-   eina_log_domain_level_set("MOD:PROD", EINA_LOG_LEVEL_DBG);
-   INF("Initialized Productivity Module");
-
    /* Location of message catalogs for localization */
    snprintf(buf, sizeof(buf), "%s/locale", e_module_dir_get(m));
    bindtextdomain(PACKAGE, buf);
@@ -99,7 +94,7 @@ e_modapi_init(E_Module *m)
    E_CONFIG_VAL(D, T, name, STR);
    E_CONFIG_VAL(D, T, command, STR);
    E_CONFIG_VAL(D, T, desktop_file, STR);
-   E_CONFIG_VAL(D, T, pid, INT);
+   E_CONFIG_VAL(D, T, win, UINT);
    E_CONFIG_VAL(D, T, zone, INT);
    E_CONFIG_VAL(D, T, desk_x, INT);
    E_CONFIG_VAL(D, T, desk_y, INT);
@@ -165,7 +160,15 @@ e_modapi_init(E_Module *m)
    /* if we don't have a config yet, or it got erased above, 
     * then create a default one */
    if (!productivity_conf) _productivity_conf_new();
+   productivity_conf->log_name = eina_stringshare_add("MOD:PROD");
 
+   _productivity_log = eina_log_domain_register(
+      productivity_conf->log_name,EINA_COLOR_CYAN);
+   //eina_log_print_cb_set(e_mod_log_cb, NULL);
+   eina_log_domain_level_set(
+      productivity_conf->log_name, EINA_LOG_LEVEL_DBG);
+   INF("Initialized Productivity Module");
+  
    if(productivity_conf->lock == EINA_TRUE)
      productivity_conf->init = E_MOD_PROD_INIT_START;
 

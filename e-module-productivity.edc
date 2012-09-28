@@ -46,13 +46,6 @@ collections
                rel2.offset: -3 -3;
                image.normal: "module_icon.png";
             }
-            description 
-            {
-               state: "bigger" 0.0;
-               inherit: "default" 0.0;
-               rel1.offset: -2 -2;
-               rel2.offset: 3 3;
-            }
          }
          part 
          {
@@ -64,27 +57,6 @@ collections
                state: "default" 0.0;
                color: 255 255 255 0;
             }
-         }
-      }
-      programs 
-      {
-         program 
-         {
-            name: "mouse_in";
-            signal: "mouse,in";
-            source: "event";
-            action: STATE_SET "bigger" 0.0;
-            transition: LINEAR 0.1;
-            target: "icon";
-         }
-         program 
-         {
-            name: "mouse_out";
-            signal: "mouse,out";
-            source: "event";
-            action: STATE_SET "default" 0.0;
-            transition: LINEAR 0.2;
-            target: "icon";
          }
       }
    }

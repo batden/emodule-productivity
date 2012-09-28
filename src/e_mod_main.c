@@ -488,6 +488,12 @@ _productivity_cb_mouse_down(void *data, Evas *evas, Evas_Object *obj, void *even
         evas_event_feed_mouse_up(inst->gcc->gadcon->evas, ev->button, 
                                  EVAS_BUTTON_NONE, ev->timestamp, NULL);
      }
+
+   if ((ev->button == 1) && (!inst->menu))
+     {
+        E_Container *con = e_container_current_get(e_manager_current_get());
+        e_int_config_productivity_module(con, NULL);
+     }
 }
 
 /* popup menu closing, cleanup */

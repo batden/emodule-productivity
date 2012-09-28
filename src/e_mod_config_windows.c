@@ -942,7 +942,10 @@ _e_mod_config_window_border_match(E_Config_Border_Data *cbd, E_Border *bd)
    if(strncmp(cbd->name,bd->client.icccm.name, sizeof(cbd->name)) == 0)
      if(strncmp(cbd->class, bd->client.icccm.class, sizeof(cbd->class)) == 0)
        if(cbd->pid == bd->client.netwm.pid)
-         return EINA_TRUE;
+         {
+            ENLIGHTENMENT_CMD_IGNORE(bd->client.icccm.command, EINA_FALSE);
+            return EINA_TRUE;
+         }
 
    return EINA_FALSE;
 }

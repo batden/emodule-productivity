@@ -115,6 +115,7 @@ static Eina_Bool        _e_mod_config_window_border_match(E_Config_Border_Data *
 static void             _e_mod_config_window_border_urgent_set(E_Config_Window_List *cwl, E_Config_Border_Data *cbd);
 static Eina_Bool        _e_mod_config_window_border_worktool_match_v2(E_Config_Border_Data *cbd, Eina_List *worktools);
 static void             _e_mod_config_window_border_cleaner(E_Config_Window_List *cwl);
+static Eina_Bool        _e_mod_config_window_dpms_screen_blank_get(void);
 
 Eina_Bool
 e_mod_config_windows_create_data(void *data)
@@ -379,7 +380,7 @@ _e_mod_config_window_event_border_property_cb(void *data,
    if(!(cwl = data)) return;
    ev = event;
    ENLIGHTENMENT_CMD_IGNORE(ev->border->client.icccm.command, EINA_FALSE);
-   
+
    if(ev->border->client.icccm.urgent == EINA_FALSE)
      return EINA_FALSE;
 
@@ -535,6 +536,24 @@ e_mod_config_window_remember_free_all()
 }
 
 static Eina_Bool
+_e_mod_config_window_dpms_screen_blank_get(void)
+{
+   if(ecore_x_dpms_enabled_get() == EINA_TRUE)
+     {
+        Ecore_X_Display *exd;
+        unsigned char state;
+        unsigned short power_lvl;
+
+        exd = ecore_x_display_get();
+        DPMSInfo(exd, &power_lvl, &state);
+
+        if((int)power_lvl > 0)
+             return EINA_TRUE;
+     }
+   return EINA_FALSE;
+}
+
+static Eina_Bool
 _e_mod_config_window_break_timer(void *data)
 {
    E_Config_Window_List *cwl;
@@ -545,6 +564,9 @@ _e_mod_config_window_break_timer(void *data)
    if(!(cwl = data)) return EINA_FALSE;
 
    if(cfg->init == E_MOD_PROD_STOPPED) return EINA_TRUE;
+
+   if(_e_mod_config_window_dpms_screen_blank_get() == EINA_TRUE)
+     return EINA_TRUE;
 
    if(cfg->init == E_MOD_PROD_BREAK)
      goto break_time;
@@ -656,7 +678,11 @@ e_mod_config_window_manager_v2(void *data)
    Eina_List *l, *ll;
 
    //if(productivity_conf->init != E_MOD_PROD_INIT_START | E_MOD_PROD_STARTED) return EINA_TRUE;
+
    if(!(cwl = data)) return EINA_FALSE;
+
+   if(_e_mod_config_window_dpms_screen_blank_get() == EINA_TRUE)
+     return EINA_TRUE;
 
    switch(productivity_conf->init)
      {

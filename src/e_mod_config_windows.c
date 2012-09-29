@@ -582,6 +582,13 @@ _e_mod_config_window_break_timer(void *data)
 
    if(!cfg->secs_to_break)
      {
+        char buf[PATH_MAX];
+
+        INF("Playing sound to warn user about breaktime");
+        snprintf(buf, sizeof(buf), "mpg123 -q %s/data/button.mp3",
+                 e_module_dir_get(cfg->module));
+        ecore_exe_run(buf, NULL);
+
         MINF("GO TO BREAK!");
         productivity_conf->init = E_MOD_PROD_INIT_BREAK;
 
@@ -603,7 +610,7 @@ break_time:
    if(cfg->secs_to_break < 10)
      WRN("Break will be over in %dsec", cfg->secs_to_break);
 
-   if(((cfg->secs_to_break >= 4) && (cfg->secs_to_break <=5)) || cfg->secs_to_break == 15)
+   if(((cfg->secs_to_break >= 3) && (cfg->secs_to_break <=4)) || cfg->secs_to_break == 15)
      {
         char buf[PATH_MAX];
 

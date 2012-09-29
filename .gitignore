@@ -119,3 +119,5 @@ src/e_mod*.o
 src/e_mod*.lo
 src/module.la
 stamp-h1
+.gitignore
+mkdeb_editing

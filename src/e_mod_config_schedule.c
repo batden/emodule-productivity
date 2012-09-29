@@ -39,14 +39,14 @@ e_mod_config_schedule_new_v2(Evas_Object *otb, Evas *evas, E_Config_Dialog_Data 
    label = e_widget_label_add(evas, "Break Time");
    e_widget_list_object_append(ol, label, 1, 0, 0.5);
 
-   S.obbreak = e_widget_slider_add(evas, 1, 0, _("%1.0f Minutes"), 0.0, 30.0, 1.00, 0, &(S.break_min), NULL, 100);
+   S.obbreak = e_widget_slider_add(evas, 1, 0, _("%1.0f Minutes"), 0.0, 20.0, 1.00, 0, &(S.break_min), NULL, 100);
    evas_object_smart_callback_add(S.obbreak, "changed", _e_mod_config_schedule_obbreak_time_cb, &S); 
    e_widget_list_object_append(ol, S.obbreak, 1, 0, 0.5);
 
    label = e_widget_label_add(evas, "Time to Work before Break");
    e_widget_list_object_append(ol, label, 1, 0, 0.5);
 
-   S.obwork = e_widget_slider_add(evas, 1, 0, _("%1.0f Minutes"), 0.0, 320.0, 1.00, 0, &(S.work_min), NULL, 100);
+   S.obwork = e_widget_slider_add(evas, 1, 0, _("%1.0f Minutes"), 0.0, 90.0, 1.00, 0, &(S.work_min), NULL, 100);
    evas_object_smart_callback_add(S.obwork, "changed", _e_mod_config_schedule_obwork_time_cb, &S); 
    e_widget_list_object_append(ol, S.obwork, 1, 0, 0.5);
 
@@ -181,7 +181,7 @@ _e_mod_config_schedule_label_update(E_Config_Schedule_Data *csd)
 {
    char buf[1024];
 
-   snprintf(buf, sizeof(buf), "%1.0f Minutes of Break for %1.0f Minutes of Work",
+   snprintf(buf, sizeof(buf), "%1.0f Minutes of Break per every %1.0f Minutes of Work",
             csd->break_min, csd->work_min);
 
    e_widget_label_text_set(csd->oblabel, buf);

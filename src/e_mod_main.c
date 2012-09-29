@@ -393,8 +393,8 @@ _productivity_conf_new(void)
    CRI("CREATING NEW CONFIG!!!");
    productivity_conf->lock = 0;
    productivity_conf->urgent = 1;
-   productivity_conf->break_min = 10;
-   productivity_conf->work_min = 50;
+   productivity_conf->break_min = 2;
+   productivity_conf->work_min = 15;
    IFMODCFGEND;
 
    /* update the version */

@@ -4,7 +4,6 @@
 /* Local Function Prototypes */
 static void *_create_data(E_Config_Dialog *cfd);
 static void _free_data(E_Config_Dialog *cfd, E_Config_Dialog_Data *cfdata);
-static void _fill_data(E_Config_Dialog_Data *cfdata);
 static Evas_Object *_basic_create(E_Config_Dialog *cfd, Evas *evas, E_Config_Dialog_Data *cfdata);
 static int _close_data(E_Config_Dialog *cfd, E_Config_Dialog_Data *cfdata);
 /* External Functions */
@@ -46,7 +45,6 @@ e_int_config_productivity_module(E_Container *con, const char *params)
 static void *
 _create_data(E_Config_Dialog *cfd) 
 {
-   char buf[PATH_MAX];
    E_Config_Dialog_Data *cfdata = NULL;
    
    cfdata = E_NEW(E_Config_Dialog_Data, 1);
@@ -70,12 +68,6 @@ _free_data(E_Config_Dialog *cfd, E_Config_Dialog_Data *cfdata)
    e_mod_config_worktools_free(cfdata);
    
    E_FREE(cfdata);
-}
-
-static void 
-_fill_data(E_Config_Dialog_Data *cfdata) 
-{
-   /* load a temp copy of the config variables */
 }
 
 static Evas_Object *

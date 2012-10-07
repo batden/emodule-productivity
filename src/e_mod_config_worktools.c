@@ -1,7 +1,6 @@
 #include <e.h>
 #include "e_mod_config.h"
 
-static Eina_List * _load_menu(const char *path);
 static Eina_List * _e_mod_config_worktools_load_config(const char *path);
 static int         _e_mod_config_worktools_save_config(E_Config_Dialog_Data *cfdata);
 static Eina_Bool   _cb_fill_delay(void *data);
@@ -17,7 +16,7 @@ e_mod_config_worktools_selected_get()
    char buf[PATH_MAX];
    
    e_user_dir_concat_static(buf, "applications/productivity/.order");
-   if(ecore_file_exists(buf) == EINA_FALSE) return;
+   if(ecore_file_exists(buf) == EINA_FALSE) return NULL;
    return _e_mod_config_worktools_load_config(buf);
 }
 
@@ -214,7 +213,6 @@ static Eina_Bool
 _cb_fill_delay(void *data)
 {
    E_Config_Dialog_Data *cfdata;
-   int mw;
 
    if (!(cfdata = data)) return ECORE_CALLBACK_CANCEL;
    _e_mod_config_worktools_application_list(&cfdata->apps_user);

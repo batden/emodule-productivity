@@ -47,11 +47,13 @@ Eina_Bool    e_mod_config_worktools_create_data(E_Config_Dialog_Data *cfdata);
 Eina_Bool    e_mod_config_worktools_save(E_Config_Dialog_Data *cfdata);
 Eina_Bool    e_mod_config_windows_create_data(void *data);
 Eina_List   *e_mod_config_worktools_selected_get();
+void         e_mod_config_worktools_free(E_Config_Dialog_Data *cfdata);
 
 
 
 //    e_mod_config_schedule.c
-Eina_Bool    e_mod_config_schedule_create_data(E_Config_Dialog_Data *cfdata);
+void         e_mod_config_schedule_save_config(E_Config_Dialog_Data *cfdata);
+void         e_mod_config_schedule_create_data(E_Config_Dialog_Data *cfdata);
 Eina_Bool    e_mod_config_schedule_urgent_get();
 Evas_Object *e_mod_config_schedule_new(Evas_Object *otb, Evas *evas,
                                        E_Config_Dialog_Data *cfdata);

@@ -67,7 +67,6 @@ EAPI void *
 e_modapi_init(E_Module *m) 
 {
    char buf[PATH_MAX];
-   Eina_List *apps;
 
    /* Location of message catalogs for localization */
    snprintf(buf, sizeof(buf), "%s/locale", e_module_dir_get(m));
@@ -77,9 +76,7 @@ e_modapi_init(E_Module *m)
    /* Location of theme to load for this module */
    snprintf(buf, sizeof(buf), "%s/e-module-productivity.edj", m->dir);
 
-
    /* Display this Modules config info in the main Config Panel */
-
    /* starts with a category, create it if not already exists */
    e_configure_registry_category_add("advanced", 80, _("Advanced"), 
                                      NULL, "preferences-advanced");
@@ -379,9 +376,6 @@ _gc_icon(const E_Gadcon_Client_Class *client_class, Evas *evas)
 static void 
 _productivity_conf_new(void) 
 {
-   Config_Item *ci = NULL;
-   char buf[128];
-
    productivity_conf = E_NEW(Config, 1);
    productivity_conf->version = (MOD_CONFIG_FILE_EPOCH << 16);
 
@@ -399,8 +393,6 @@ _productivity_conf_new(void)
 
    /* update the version */
    productivity_conf->version = MOD_CONFIG_FILE_VERSION;
-
-   /* setup limits on the config properties here (if needed) */
 
    /* save the config to disk */
    e_config_save_queue();

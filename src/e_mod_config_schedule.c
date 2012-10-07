@@ -10,13 +10,13 @@ static void _e_mod_config_schedule_lock_update(E_Config_Schedule_Data *csd);
 static void _e_mod_config_schedule_label_update(E_Config_Schedule_Data *csd);
 
 
-Eina_Bool
+void
 e_mod_config_schedule_create_data(E_Config_Dialog_Data *cfdata)
 {  
    cfdata->schedule.lock            = productivity_conf->lock;
    cfdata->schedule.urgent          = productivity_conf->urgent;
-   cfdata->schedule.break_min     = productivity_conf->break_min;
-   cfdata->schedule.work_min     = productivity_conf->work_min;
+   cfdata->schedule.break_min       = productivity_conf->break_min;
+   cfdata->schedule.work_min        = productivity_conf->work_min;
 }
 
 Evas_Object *
@@ -63,10 +63,11 @@ e_mod_config_schedule_new_v2(Evas_Object *otb, Evas *evas, E_Config_Dialog_Data 
    _e_mod_config_schedule_lock_update(&S);
 #undef S
    e_widget_toolbook_page_append(otb, NULL, _("Schedule"), ol, 1, 1, 1, 1, 0.5, 0.0);
+   return otb;
 }
 
 
-Eina_Bool
+void
 e_mod_config_schedule_save_config(E_Config_Dialog_Data *cfdata)
 {
    productivity_conf->lock         = cfdata->schedule.lock;
@@ -80,7 +81,6 @@ _e_mod_config_schedule_start_working_cb(void *data, void *data2)
 {
    E_Config_Schedule_Data *csd;
    E_Config_Dialog_Data *cfdata;
-   unsigned int digedit;
 
    if(!(csd = data)) return;
    if(!(cfdata = data2)) return;
@@ -114,7 +114,6 @@ _e_mod_config_schedule_stop_working_cb(void *data, void *data2)
 {
    E_Config_Schedule_Data *csd;
    E_Config_Dialog_Data *cfdata;
-   unsigned int digedit;
 
    if(!(csd = data)) return;
    if(!(cfdata = data2)) return;

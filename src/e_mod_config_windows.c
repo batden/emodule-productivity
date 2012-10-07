@@ -228,7 +228,7 @@ _e_mod_config_window_event_border_add_cb(void *data, int type __UNUSED__, void *
 
    if(productivity_conf->init != E_MOD_PROD_STARTED) return EINA_TRUE;
 
-   if(!(cwl = data)) return;
+   if(!(cwl = data)) return EINA_TRUE;
    ev = event;
    ENLIGHTENMENT_CMD_IGNORE(ev->border->client.icccm.command, EINA_FALSE);
    EVENT_DBG();
@@ -269,7 +269,7 @@ _e_mod_config_window_event_border_remove_cb(void *data, int type __UNUSED__, voi
    E_Event_Border_Remove *ev;
    E_Config_Window_List *cwl;
    if(productivity_conf->init != E_MOD_PROD_STARTED) return EINA_TRUE;
-   if(!(cwl = data)) return;
+   if(!(cwl = data)) return EINA_TRUE;
    ev = event;
    ENLIGHTENMENT_CMD_IGNORE(ev->border->client.icccm.command, EINA_FALSE);
    EVENT_DBG();
@@ -291,7 +291,7 @@ _e_mod_config_window_event_border_iconify_cb(void *data, int type __UNUSED__, vo
    E_Event_Border_Iconify *ev;
    E_Config_Window_List *cwl;
    if(productivity_conf->init != E_MOD_PROD_STARTED) return EINA_TRUE;
-   if(!(cwl = data)) return;
+   if(!(cwl = data)) return EINA_TRUE;
    ev = event;
    ENLIGHTENMENT_CMD_IGNORE(ev->border->client.icccm.command, EINA_FALSE);
    //EVENT_DBG();
@@ -312,7 +312,7 @@ _e_mod_config_window_event_border_uniconify_cb(void *data, int type __UNUSED__, 
    E_Event_Border_Uniconify *ev;
    E_Config_Window_List *cwl;
    if(productivity_conf->init != E_MOD_PROD_STARTED) return EINA_TRUE;
-   if(!(cwl = data)) return;
+   if(!(cwl = data)) return EINA_TRUE;
    ev = event;
    ENLIGHTENMENT_CMD_IGNORE(ev->border->client.icccm.command, EINA_FALSE);
    EVENT_DBG();
@@ -333,7 +333,7 @@ _e_mod_config_window_event_border_focus_in_cb(void *data, int type __UNUSED__, v
    E_Event_Border_Focus_In *ev;
    E_Config_Window_List *cwl;
    if(productivity_conf->init != E_MOD_PROD_STARTED) return EINA_TRUE;
-   if(!(cwl = data)) return;
+   if(!(cwl = data)) return EINA_TRUE;
    ev = event;
    ENLIGHTENMENT_CMD_IGNORE(ev->border->client.icccm.command, EINA_FALSE);
    EVENT_DBG();
@@ -354,7 +354,7 @@ _e_mod_config_window_event_border_focus_out_cb(void *data, int type __UNUSED__, 
    E_Event_Border_Focus_Out *ev;
    E_Config_Window_List *cwl;
    if(productivity_conf->init != E_MOD_PROD_STARTED) return EINA_TRUE;
-   if(!(cwl = data)) return;
+   if(!(cwl = data)) return EINA_TRUE;
    ev = event;
    ENLIGHTENMENT_CMD_IGNORE(ev->border->client.icccm.command, EINA_FALSE);
    EVENT_DBG();
@@ -374,10 +374,9 @@ _e_mod_config_window_event_border_property_cb(void *data,
                                               int type __UNUSED__, void *event)
 {
    E_Event_Border_Property *ev;
-   E_Border *border;
    E_Config_Window_List *cwl;
    if(productivity_conf->init != E_MOD_PROD_STARTED) return EINA_TRUE;
-   if(!(cwl = data)) return;
+   if(!(cwl = data)) return EINA_TRUE;
    ev = event;
    ENLIGHTENMENT_CMD_IGNORE(ev->border->client.icccm.command, EINA_FALSE);
 
@@ -400,10 +399,9 @@ _e_mod_config_window_event_border_urgent_change_cb(void *data,
                                                    int type __UNUSED__, void *event)
 {
    E_Event_Border_Urgent_Change *ev;
-   E_Border *border;
    E_Config_Window_List *cwl;
    if(productivity_conf->init != E_MOD_PROD_STARTED) return EINA_TRUE;
-   if(!(cwl = data)) return;
+   if(!(cwl = data)) return EINA_TRUE;
    ev = event;
    ENLIGHTENMENT_CMD_IGNORE(ev->border->client.icccm.command, EINA_FALSE);
    EVENT_DBG();
@@ -633,6 +631,7 @@ break_time:
         e_mod_config_window_manager_v2(cwl);
         ecore_timer_thaw(productivity_conf->wm);
      }
+   return EINA_TRUE;
 }
 
 void e_mod_config_window_free(void)
@@ -845,7 +844,7 @@ e_mod_config_window_manager_v2(void *data)
              cbd->private.was_urgent = EINA_TRUE;
              CBD_DEBUG(cbd, "Final Focus Out!");
           }
-        if((cbd->focus_out == EINA_TRUE) && (cwl->event ==  E_BORDER_REMOVE | E_BORDER_NULL ) && (cbd->iconic == 0) && (cbd->private.property == 4))
+        if((cbd->focus_out == EINA_TRUE) && (cwl->event ==  (E_BORDER_REMOVE | E_BORDER_NULL) ) && (cbd->iconic == 0) && (cbd->private.property == 4))
           {
              cbd->focus_out = EINA_FALSE;
              cbd->private.property++;
@@ -854,7 +853,7 @@ e_mod_config_window_manager_v2(void *data)
           }
 
         if((cbd->private.was_urgent == EINA_FALSE) && (cbd->urgent == EINA_FALSE) &&
-           (cwl->event == E_BORDER_FOCUS_IN | E_BORDER_NULL | E_BORDER_REMOVE ) &&
+           (cwl->event == (E_BORDER_FOCUS_IN | E_BORDER_NULL | E_BORDER_REMOVE) ) &&
            (cbd->urgent == EINA_FALSE))
           {
              Eina_List *lll;
@@ -936,8 +935,6 @@ _e_mod_config_window_border_del(E_Config_Window_List *cwl, E_Config_Border_Data 
 static Eina_Bool
 _e_mod_config_window_border_match(E_Config_Border_Data *cbd, E_Border *bd)
 {
-   Eina_List *l;
-
    if(!(cbd)) return EINA_FALSE;
    if(!(bd)) return EINA_FALSE;
 
@@ -1097,21 +1094,12 @@ _e_mod_config_window_border_worktool_match_v2(E_Config_Border_Data *cbd, Eina_Li
    return EINA_FALSE;
 }
 
-static Eina_Bool
-_e_mod_config_window_border_hider(void *data)
-{
-
-
-   return EINA_TRUE;
-}
-
 static void 
 _e_mod_config_window_remember_show_all(Eina_List *cbd_lst, Eina_List *rem_lst)
 {
    E_Border *bd;
-   E_Config_Border_Data *cbd;
    Remember *rem;
-   Eina_List *l, *ll, *lll;
+   Eina_List *l, *ll;
 
    EINA_LIST_FOREACH(e_border_client_list(), l, bd)
      {

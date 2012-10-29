@@ -1,6 +1,13 @@
+# Can ignore specific files
+*.DS_Store
+# Use wildcards as well
 *~
-*.swo
-*.swp
+*.sw*
+*.out
+*.lock
+# debian build dirs
+debian
+# C EFL/Emodules files
 ABOUT-NLS
 Makefile
 Makefile.in
@@ -16,8 +23,8 @@ config.sub
 configure
 configure.ac.orig
 depcomp
-e-module-productivity.edj
-e_modules-productivity.spec
+e-module-*.edj
+e_modules-*.spec
 install-sh
 libtool
 ltmain.sh
@@ -98,7 +105,7 @@ po/remove-potcdate.sed
 po/remove-potcdate.sin
 po/ru.gmo
 po/sk.gmo
-po/productivity.pot
+po/*.pot
 po/sl.gmo
 po/stamp-po
 po/sv.gmo

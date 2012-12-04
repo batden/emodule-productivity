@@ -1,8 +1,8 @@
 #include <e.h>
 #include "e_mod_config.h"
 
-#define EVENT_DBG_()
-#define EVENT_DBG()                                                                 \
+#define EVENT_DBG()
+#define EVENT_DBG_()                                                                 \
 {                                                                                   \
    if((ev->border->client.icccm.name) &&                                            \
       (ev->border->client.icccm.class))                                             \
@@ -20,11 +20,13 @@
 }
 
 #define MINF(s)
-#define IINF(s)                                                                     \
+#define IINF(s)
+#define IINF_(s)                                                                     \
    if(productivity_conf->previous_init != productivity_conf->init)                  \
 INF(s)
 
-#define BINF(s)                                                                     \
+#define BINF(s)
+#define BINF_(s)                                                                     \
    if(productivity_conf->cwl->previous_event != productivity_conf->cwl->event)      \
 INF(s)
 
@@ -556,15 +558,15 @@ _e_mod_config_window_break_timer(void *data)
    if(!(cfg = productivity_conf)) return EINA_FALSE;
    if(!(cwl = data)) return EINA_FALSE;
 
-   if(cfg->init == E_MOD_PROD_STOPPED) return EINA_TRUE;
+   if(cfg->init == E_MOD_PROD_STOPPED) return ECORE_CALLBACK_PASS_ON;
 
    if(_e_mod_config_window_dpms_screen_blank_get() == EINA_TRUE)
-     return EINA_TRUE;
+     return ECORE_CALLBACK_PASS_ON;
 
    if(cfg->init == E_MOD_PROD_BREAK)
      goto break_time;
 
-   if(!cfg->work_min) return EINA_TRUE;
+   if(!cfg->work_min) return ECORE_CALLBACK_PASS_ON;
    sby = cfg->work_min * 59;
 
    if(!cfg->secs_to_break)
@@ -576,7 +578,7 @@ _e_mod_config_window_break_timer(void *data)
      DBG("Next Break in %d sec",cfg->secs_to_break);
 
    if(cfg->secs_to_break)
-     return EINA_TRUE;
+     return ECORE_CALLBACK_RENEW;
 
    if(!cfg->secs_to_break)
      {
@@ -593,6 +595,8 @@ _e_mod_config_window_break_timer(void *data)
         ecore_timer_freeze(productivity_conf->wm);
         e_mod_config_window_manager_v2(cwl);
         ecore_timer_thaw(productivity_conf->wm);
+
+        return ECORE_CALLBACK_PASS_ON;
      }
 
 break_time:
@@ -619,7 +623,7 @@ break_time:
      }
 
    if(cfg->secs_to_break)
-     return EINA_TRUE;
+     return ECORE_CALLBACK_RENEW;
 
    if(!cfg->secs_to_break)
      {
@@ -630,8 +634,9 @@ break_time:
         ecore_timer_freeze(productivity_conf->wm);
         e_mod_config_window_manager_v2(cwl);
         ecore_timer_thaw(productivity_conf->wm);
+        return ECORE_CALLBACK_DONE;
      }
-   return EINA_TRUE;
+   return ECORE_CALLBACK_RENEW;
 }
 
 void e_mod_config_window_free(void)

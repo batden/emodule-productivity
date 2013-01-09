@@ -116,7 +116,7 @@ e_modapi_init(E_Module *m)
    if (productivity_conf) 
      {
         /* Check config version */
-        if ((productivity_conf->version >> 16) < MOD_CONFIG_FILE_EPOCH) 
+        if ((productivity_conf->version) < E_CONFIG_FILE_EPOCH * 1000000)
           {
              /* config too old */
              _productivity_conf_free();
@@ -136,7 +136,7 @@ e_modapi_init(E_Module *m)
           }
 
         /* Ardvarks */
-        else if (productivity_conf->version > MOD_CONFIG_FILE_VERSION) 
+        else if ((productivity_conf->version) > E_CONFIG_FILE_EPOCH * 1000000) 
           {
              /* config too new...wtf ? */
              _productivity_conf_free();
@@ -376,20 +376,15 @@ _gc_icon(const E_Gadcon_Client_Class *client_class, Evas *evas)
 static void 
 _productivity_conf_new(void) 
 {
-   productivity_conf = E_NEW(Config, 1);
-   productivity_conf->version = (MOD_CONFIG_FILE_EPOCH << 16);
-
-#define IFMODCFG(v) if ((productivity_conf->version & 0xffff) < v) {
-#define IFMODCFGEND }
-
    /* setup defaults */
-   IFMODCFG(0x008e);
-   CRI("CREATING NEW CONFIG!!!");
-   productivity_conf->lock = 0;
-   productivity_conf->urgent = 1;
-   productivity_conf->break_min = 2;
-   productivity_conf->work_min = 15;
-   IFMODCFGEND;
+   if(!productivity_conf)
+     {
+        productivity_conf = E_NEW(Config, 1);
+        productivity_conf->lock = 0;
+        productivity_conf->urgent = 1;
+        productivity_conf->break_min = 2;
+        productivity_conf->work_min = 15;
+     }
 
    /* update the version */
    productivity_conf->version = MOD_CONFIG_FILE_VERSION;

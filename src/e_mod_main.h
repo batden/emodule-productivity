@@ -26,10 +26,9 @@ extern int _productivity_log;
  * compatible anymore, it creates an entire new one.
  * You need to increment GENERATION when you add new values to the
  * configuration file but is not needed to delete the existing conf  */
-#define MOD_CONFIG_FILE_EPOCH 0x0008
-#define MOD_CONFIG_FILE_GENERATION 0x008e
-#define MOD_CONFIG_FILE_VERSION \
-   ((MOD_CONFIG_FILE_EPOCH << 16) | MOD_CONFIG_FILE_GENERATION)
+#define MOD_CONFIG_FILE_EPOCH 1
+#define MOD_CONFIG_FILE_GENERATION 0
+#define MOD_CONFIG_FILE_VERSION    ((MOD_CONFIG_FILE_EPOCH * 1000000) + MOD_CONFIG_FILE_GENERATION)
 
 /* We create a structure config for our module, and also a config structure
  * for every item element (you can have multiple gadgets for the same module) */

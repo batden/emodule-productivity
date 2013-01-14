@@ -1,3 +1,5 @@
 src/e_mod_config.c
+src/e_mod_config_schedule.c
+src/e_mod_config_worktools.c
 src/e_mod_main.c
 src/e_mod_main.h

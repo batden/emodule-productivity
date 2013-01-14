@@ -116,42 +116,8 @@ e_modapi_init(E_Module *m)
    if (productivity_conf) 
      {
         /* Check config version */
-        if ((productivity_conf->version) < E_CONFIG_FILE_EPOCH * 1000000)
-          {
-             /* config too old */
-             _productivity_conf_free();
-             ecore_timer_add(1.0, _productivity_conf_timer,
-                             _("Productivity Module Configuration data needed "
-                               "upgrading. Your old configuration<br> has been"
-                               " wiped and a new set of defaults initialized. "
-                               "This<br>will happen regularly during "
-                               "development, so don't report a<br>bug. "
-                               "This simply means the module needs "
-                               "new configuration<br>data by default for "
-                               "usable functionality that your old<br>"
-                               "configuration simply lacks. This new set of "
-                               "defaults will fix<br>that by adding it in. "
-                               "You can re-configure things now to your<br>"
-                               "liking. Sorry for the inconvenience.<br>"));
-          }
-
-        /* Ardvarks */
-        else if ((productivity_conf->version) > E_CONFIG_FILE_EPOCH * 1000000) 
-          {
-             /* config too new...wtf ? */
-             _productivity_conf_free();
-             ecore_timer_add(1.0, _productivity_conf_timer, 
-                             _("Your Productivity Module configuration is NEWER "
-                               "than the module version. This is "
-                               "very<br>strange. This should not happen unless"
-                               " you downgraded<br>the module or "
-                               "copied the configuration from a place where"
-                               "<br>a newer version of the module "
-                               "was running. This is bad and<br>as a "
-                               "precaution your configuration has been now "
-                               "restored to<br>defaults. Sorry for the "
-                               "inconvenience.<br>"));
-          }
+        if (!e_util_module_config_check(_("Productivity"), productivity_conf->version, MOD_CONFIG_FILE_VERSION))
+          _productivity_conf_free();
      }
 
    /* if we don't have a config yet, or it got erased above, 

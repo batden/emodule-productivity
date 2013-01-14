@@ -78,10 +78,10 @@ e_modapi_init(E_Module *m)
 
    /* Display this Modules config info in the main Config Panel */
    /* starts with a category, create it if not already exists */
-   e_configure_registry_category_add("advanced", 80, _("Advanced"), 
-                                     NULL, "preferences-advanced");
+   e_configure_registry_category_add("extensions", 80, _("Extensions"),
+                                     NULL, "preferences-extensions");
    /* add right-side item */
-   e_configure_registry_item_add("advanced/productivity", 110, _("Productivity"), 
+   e_configure_registry_item_add("extensions/productivity", 110, _("Productivity"),
                                  NULL, buf, e_int_config_productivity_module);
 #undef T
 #undef D
@@ -197,11 +197,11 @@ EAPI int
 e_modapi_shutdown(E_Module *m) 
 {
    /* Unregister the config dialog from the main panel */
-   e_configure_registry_item_del("advanced/productivity");
+   e_configure_registry_item_del("extensions/productivity");
 
    /* Remove the config panel category if we can. E will tell us.
       category stays if other items using it */
-   e_configure_registry_category_del("advanced");
+   e_configure_registry_category_del("extensions");
 
    //Remove menu item
    if (productivity_conf->maug)
@@ -512,7 +512,7 @@ _productivity_cb_menu_configure(void *data, E_Menu *mn, E_Menu_Item *mi)
 static void 
 _productivity_mod_run_cb(void *data __UNUSED__, E_Menu *m, E_Menu_Item *mi __UNUSED__)
 {
-   e_configure_registry_call("advanced/productivity", m->zone->container, NULL);
+   e_configure_registry_call("extensions/productivity", m->zone->container, NULL);
 }
 
 /* menu item add hook */

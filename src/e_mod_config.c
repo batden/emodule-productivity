@@ -17,7 +17,7 @@ e_int_config_productivity_module(E_Container *con, const char *params)
    char buf[PATH_MAX];
 
    /* is this config dialog already visible ? */
-   if (e_config_dialog_find("Productivity", "advanced/productivity")) return NULL;
+   if (e_config_dialog_find("Productivity", "extensions/productivity")) return NULL;
 
    v = E_NEW(E_Config_Dialog_View, 1);
    if (!v) return NULL;
@@ -32,7 +32,7 @@ e_int_config_productivity_module(E_Container *con, const char *params)
 
    /* create our config dialog */
    cfd = e_config_dialog_new(con, _("Productivity Module"), "Productivity", 
-                             "advanced/productivity", buf, 0, v, NULL);
+                             "extensions/productivity", buf, 0, v, NULL);
 
    e_dialog_resizable_set(cfd->dia, 1);
    e_win_size_min_set(cfd->dia->win, 400, 400);

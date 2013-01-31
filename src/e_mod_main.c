@@ -78,10 +78,10 @@ e_modapi_init(E_Module *m)
 
    /* Display this Modules config info in the main Config Panel */
    /* starts with a category, create it if not already exists */
-   e_configure_registry_category_add("extensions", 80, _("Extensions"),
+   e_configure_registry_category_add("extensions", 80, D_("Extensions"),
                                      NULL, "preferences-extensions");
    /* add right-side item */
-   e_configure_registry_item_add("extensions/productivity", 110, _("Productivity"),
+   e_configure_registry_item_add("extensions/productivity", 110, D_("Productivity"),
                                  NULL, buf, e_int_config_productivity_module);
 #undef T
 #undef D
@@ -116,7 +116,7 @@ e_modapi_init(E_Module *m)
    if (productivity_conf) 
      {
         /* Check config version */
-        if (!e_util_module_config_check(_("Productivity"), productivity_conf->version, MOD_CONFIG_FILE_VERSION))
+        if (!e_util_module_config_check(D_("Productivity"), productivity_conf->version, MOD_CONFIG_FILE_VERSION))
           _productivity_conf_free();
      }
 
@@ -138,7 +138,7 @@ e_modapi_init(E_Module *m)
    productivity_conf->module = m;
 
    productivity_conf->maug =
-      e_int_menus_menu_augmentation_add_sorted("config/1", _("Productivity"),
+      e_int_menus_menu_augmentation_add_sorted("config/1", D_("Productivity"),
                                                _productivity_mod_menu_add, NULL, NULL, NULL);
 
    e_module_delayed_set(m, 3);
@@ -307,7 +307,7 @@ _gc_orient(E_Gadcon_Client *gcc, E_Gadcon_Orient orient)
 static const char *
 _gc_label(const E_Gadcon_Client_Class *client_class) 
 {
-   return _("Productivity");
+   return D_("Productivity");
 }
 
 /* so E can keep a unique instance per-container */
@@ -385,7 +385,7 @@ _productivity_conf_free(void)
 static Eina_Bool 
 _productivity_conf_timer(void *data) 
 {
-   e_util_dialog_internal( _("Productivity Configuration Updated"), data);
+   e_util_dialog_internal( D_("Productivity Configuration Updated"), data);
    return EINA_FALSE;
 }
 
@@ -426,7 +426,7 @@ _productivity_cb_mouse_down(void *data, Evas *evas, Evas_Object *obj, void *even
         /* create popup menu */
         m = e_menu_new();
         mi = e_menu_item_new(m);
-        e_menu_item_label_set(mi, _("Settings"));
+        e_menu_item_label_set(mi, D_("Settings"));
         e_util_menu_item_theme_icon_set(mi, "preferences-system");
         e_menu_item_callback_set(mi, _productivity_cb_menu_configure, NULL);
 
@@ -489,7 +489,7 @@ _productivity_mod_menu_add(void *data __UNUSED__, E_Menu *m)
    char buf[PATH_MAX];
 
    mi = e_menu_item_new(m);
-   e_menu_item_label_set(mi, _("Productivity"));
+   e_menu_item_label_set(mi, D_("Productivity"));
    snprintf(buf, sizeof(buf), "%s/e-module-productivity.edj",
             productivity_conf->module->dir);
    e_util_menu_item_theme_icon_set(mi, buf);

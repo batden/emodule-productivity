@@ -85,16 +85,16 @@ e_mod_config_worktools_new(Evas_Object *otb, Evas *evas, E_Config_Dialog_Data *c
    cfdata->apps_user.o_list = e_widget_ilist_add(evas, 24, 24, NULL);
    e_widget_ilist_multi_select_set(cfdata->apps_user.o_list, EINA_TRUE);
    e_widget_table_object_append(ot, cfdata->apps_user.o_list, 0, 0, 2, 1, 1, 1, 1, 1);
-   cfdata->apps_user.o_add = e_widget_button_add(evas, _("Add"), "list-add",
+   cfdata->apps_user.o_add = e_widget_button_add(evas, D_("Add"), "list-add",
             _e_mod_config_worktools_add_cb, &cfdata->apps_user, cfdata);
    e_widget_disabled_set(cfdata->apps_user.o_add, EINA_TRUE);
    e_widget_table_object_append(ot, cfdata->apps_user.o_add, 0, 1, 1, 1, 1, 1, 1, 0);
    
-   cfdata->apps_user.o_del = e_widget_button_add(evas, _("Remove"), "list-remove",
+   cfdata->apps_user.o_del = e_widget_button_add(evas, D_("Remove"), "list-remove",
             _e_mod_config_worktools_del_cb, &cfdata->apps_user, cfdata);
    e_widget_disabled_set(cfdata->apps_user.o_del, EINA_TRUE);
    e_widget_table_object_append(ot, cfdata->apps_user.o_del, 1, 1, 1, 1, 1, 1, 1, 0);
-   e_widget_toolbook_page_append(otb, NULL, _("Work Tools"), ot, 6, 1, 1, 1, 0.5, 0.0);
+   e_widget_toolbook_page_append(otb, NULL, D_("Work Tools"), ot, 6, 1, 1, 1, 0.5, 0.0);
    
    if (cfdata->fill_delay) ecore_timer_del(cfdata->fill_delay);
    cfdata->fill_delay = ecore_timer_add(0.2, _cb_fill_delay, cfdata);

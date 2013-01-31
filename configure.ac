@@ -26,26 +26,17 @@ AC_PROG_LIBTOOL
 AC_DISABLE_STATIC
 
 m4_ifdef([AM_GNU_GETTEXT_VERSION], [
-AM_GNU_GETTEXT_VERSION([0.18])
+AM_GNU_GETTEXT_VERSION([0.14])
 ])
 
 m4_ifdef([AM_GNU_GETTEXT], [
-AM_GNU_GETTEXT([external], [need-ngettext])
+AM_GNU_GETTEXT([external])
 po_makefile_in=po/Makefile.in
 AM_CONDITIONAL([HAVE_PO], [true])
 ],[
 AM_CONDITIONAL([HAVE_PO], [false])
 ])
 AC_SUBST(LTLIBINTL)
-if test "x$LIBINTL" = "x"; then
-  LIBINTL="$INTLLIBS"
-fi
-
-if test "x${POSUB}" = "x" ; then
-   have_po="no"
-fi
-
-AM_CONDITIONAL([HAVE_PO], [test "x${have_po}" = "xyes"])
 
 release=$(pkg-config --variable=release enlightenment)
 MODULE_ARCH="$host_os-$host_cpu-$release"

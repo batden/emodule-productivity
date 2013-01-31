@@ -31,7 +31,7 @@ e_int_config_productivity_module(E_Container *con, const char *params)
    snprintf(buf, sizeof(buf), "%s/e-module-productivity.edj", productivity_conf->module->dir);
 
    /* create our config dialog */
-   cfd = e_config_dialog_new(con, _("Productivity Settings"), "Productivity",
+   cfd = e_config_dialog_new(con, D_("Productivity Settings"), "Productivity",
                              "extensions/productivity", buf, 0, v, NULL);
 
    e_dialog_resizable_set(cfd->dia, 1);

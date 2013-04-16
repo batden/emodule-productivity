@@ -77,11 +77,18 @@ e_modules-productivity.spec
 $po_makefile_in
 ], [
 ])
+
+
+# report
+txt_strip() {
+  echo "[$]@" | sed -e 's/^[[ \t]]*\([[^ \t]]*\)[[ \t]]*$/\1/g'
+}
+
 echo
 cat << SUMMARY_EOF
 Summary:
  * project.........: $PACKAGE $VERSION
- * install.........: $datadir
- * CFLAGS..........: $CFLAGS
- * LDFLAGS.........: $LDFLAGS
+ * prefix..........: $(txt_strip $prefix)
+ * CFLAGS..........: $(txt_strip $CFLAGS)
+ * LDFLAGS.........: $(txt_strip $LDFLAGS)
 SUMMARY_EOF

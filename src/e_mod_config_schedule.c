@@ -142,7 +142,7 @@ _e_mod_config_schedule_stop_working_cb(void *data, void *data2)
 }
 
 static void
-_e_mod_config_schedule_urgent_cb(void *data, Evas_Object *obj, void *event_info)
+_e_mod_config_schedule_urgent_cb(void *data, Evas_Object *obj, void *event_info EINA_UNUSED)
 {
    E_Config_Dialog_Data *cfdata;
 
@@ -156,7 +156,7 @@ _e_mod_config_schedule_urgent_cb(void *data, Evas_Object *obj, void *event_info)
 }
 
 static void
-_e_mod_config_schedule_obbreak_time_cb(void *data, Evas_Object *obj, void *event_info)
+_e_mod_config_schedule_obbreak_time_cb(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
 {
    E_Config_Schedule_Data *csd;
 
@@ -166,7 +166,7 @@ _e_mod_config_schedule_obbreak_time_cb(void *data, Evas_Object *obj, void *event
 }
 
 static void
-_e_mod_config_schedule_obwork_time_cb(void *data, Evas_Object *obj, void *event_info)
+_e_mod_config_schedule_obwork_time_cb(void *data, Evas_Object *obj EINA_UNUSED, void *event_info EINA_UNUSED)
 {
    E_Config_Schedule_Data *csd;
 

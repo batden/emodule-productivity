@@ -535,6 +535,8 @@ _e_mod_config_window_dpms_screen_blank_get(void)
 {
    if(ecore_x_dpms_enabled_get() == EINA_TRUE)
      {
+        //FIXME: wait for ecore_x_dpms_power_level_get to be added to ecore,
+        //then replace these lines with that function call
         Ecore_X_Display *exd;
         unsigned char state;
         unsigned short power_lvl;
@@ -1100,7 +1102,7 @@ _e_mod_config_window_border_worktool_match_v2(E_Config_Border_Data *cbd, Eina_Li
 }
 
 static void 
-_e_mod_config_window_remember_show_all(Eina_List *cbd_lst, Eina_List *rem_lst)
+_e_mod_config_window_remember_show_all(Eina_List *cbd_lst EINA_UNUSED, Eina_List *rem_lst)
 {
    E_Border *bd;
    Remember *rem;

@@ -12,7 +12,6 @@ static Evas_Object *_gc_icon(const E_Gadcon_Client_Class *client_class, Evas *ev
 
 static void _productivity_conf_new(void);
 static void _productivity_conf_free(void);
-static Eina_Bool _productivity_conf_timer(void *data);
 static Config_Item *_productivity_conf_item_get(const char *id);
 static void _productivity_cb_mouse_down(void *data, Evas *evas, Evas_Object *obj, void *event);
 static void _productivity_cb_menu_post(void *data, E_Menu *menu);
@@ -160,7 +159,7 @@ e_modapi_init(E_Module *m)
  * Function to unload the module
  */
 EAPI int 
-e_modapi_shutdown(E_Module *m) 
+e_modapi_shutdown(E_Module *m EINA_UNUSED) 
 {
    /* Unregister the config dialog from the main panel */
    e_configure_registry_item_del("extensions/productivity");
@@ -223,7 +222,7 @@ e_modapi_shutdown(E_Module *m)
  * Function to Save the modules config
  */ 
 EAPI int 
-e_modapi_save(E_Module *m) 
+e_modapi_save(E_Module *m EINA_UNUSED) 
 {
    e_config_domain_save("module.productivity", conf_edd, productivity_conf);
    return 1;
@@ -297,7 +296,7 @@ _gc_shutdown(E_Gadcon_Client *gcc)
 
 /* For when container says we are changing position */
 static void 
-_gc_orient(E_Gadcon_Client *gcc, E_Gadcon_Orient orient) 
+_gc_orient(E_Gadcon_Client *gcc, E_Gadcon_Orient orient EINA_UNUSED) 
 {
    e_gadcon_client_aspect_set(gcc, 16, 16);
    e_gadcon_client_min_size_set(gcc, 16, 16);
@@ -305,14 +304,14 @@ _gc_orient(E_Gadcon_Client *gcc, E_Gadcon_Orient orient)
 
 /* Gadget/Module label, name for our module */
 static const char *
-_gc_label(const E_Gadcon_Client_Class *client_class) 
+_gc_label(const E_Gadcon_Client_Class *client_class EINA_UNUSED) 
 {
    return D_("Productivity");
 }
 
 /* so E can keep a unique instance per-container */
 static const char *
-_gc_id_new(const E_Gadcon_Client_Class *client_class) 
+_gc_id_new(const E_Gadcon_Client_Class *client_class EINA_UNUSED) 
 {
    Config_Item *ci = NULL;
 
@@ -321,7 +320,7 @@ _gc_id_new(const E_Gadcon_Client_Class *client_class)
 }
 
 static Evas_Object *
-_gc_icon(const E_Gadcon_Client_Class *client_class, Evas *evas) 
+_gc_icon(const E_Gadcon_Client_Class *client_class EINA_UNUSED, Evas *evas) 
 {
    Evas_Object *o = NULL;
    char buf[PATH_MAX];
@@ -381,14 +380,6 @@ _productivity_conf_free(void)
    E_FREE(productivity_conf);
 }
 
-/* timer for the config oops dialog (old configuration needs update) */
-static Eina_Bool 
-_productivity_conf_timer(void *data) 
-{
-   e_util_dialog_internal( D_("Productivity Configuration Updated"), data);
-   return EINA_FALSE;
-}
-
 /* function to search for any Config_Item struct for this Item
  * create if needed */
 static Config_Item *
@@ -406,7 +397,7 @@ _productivity_conf_item_get(const char *id)
 
 /* Pants On */
 static void 
-_productivity_cb_mouse_down(void *data, Evas *evas, Evas_Object *obj, void *event) 
+_productivity_cb_mouse_down(void *data, Evas *evas EINA_UNUSED, Evas_Object *obj EINA_UNUSED, void *event) 
 {
    Instance *inst = NULL;
    Evas_Event_Mouse_Down *ev;
@@ -454,7 +445,7 @@ _productivity_cb_mouse_down(void *data, Evas *evas, Evas_Object *obj, void *even
 
 /* popup menu closing, cleanup */
 static void 
-_productivity_cb_menu_post(void *data, E_Menu *menu) 
+_productivity_cb_menu_post(void *data, E_Menu *menu EINA_UNUSED) 
 {
    Instance *inst = NULL;
 
@@ -466,7 +457,7 @@ _productivity_cb_menu_post(void *data, E_Menu *menu)
 
 /* call configure from popup */
 static void 
-_productivity_cb_menu_configure(void *data, E_Menu *mn, E_Menu_Item *mi) 
+_productivity_cb_menu_configure(void *data EINA_UNUSED, E_Menu *mn, E_Menu_Item *mi EINA_UNUSED) 
 {
    if (!productivity_conf) return;
    if (productivity_conf->cfd) return;

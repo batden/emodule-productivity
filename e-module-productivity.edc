@@ -29,7 +29,8 @@ collections
    group 
    {
       name: "modules/productivity/main";
-      max: 128 128;
+      max: 300 350;
+      /*max: 128 128;*/
       parts 
       {
          part 
@@ -58,6 +59,24 @@ collections
                color: 255 255 255 0;
             }
          }
+
+         part { name: "keystrokes";
+            mouse_events: 0;
+            type: TEXT;
+            effect: SOFT_SHADOW;
+            description { state: "default" 0.0;
+               color: 255 255 255 255;
+               color3: 0 0 0 60;
+               text {
+                  font: "Sans:style=Bold";
+                  size: 20;
+                  text: "Run Workrave first";
+                  align: 0.5 1.0;
+                  text_class: "module_large";
+               }
+            }
+         }
+
       }
    }
 }

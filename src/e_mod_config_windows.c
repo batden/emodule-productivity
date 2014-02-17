@@ -75,7 +75,7 @@ struct _E_Config_Border_Data
    Eina_Bool focus_out;
    Eina_Bool focus_in;
 
-   struct 
+   struct
      {
         int property;
         Eina_Bool was_urgent;
@@ -127,54 +127,54 @@ e_mod_config_windows_create_data(void *data)
    if(!(cfg = data)) return EINA_FALSE;
 
    cfg->cwl = E_NEW(E_Config_Window_List, 1);
-   ev_border = E_NEW(E_Config_Border_Data, 1); 
+   ev_border = E_NEW(E_Config_Border_Data, 1);
 
    cfg->cwl->event = E_BORDER_NULL;
 
    cfg->handlers = eina_list_append
       (cfg->handlers, ecore_event_handler_add
-       (E_EVENT_BORDER_ADD, 
+       (E_EVENT_BORDER_ADD,
         _e_mod_config_window_event_border_add_cb, cfg->cwl));
 
    cfg->handlers = eina_list_append
       (cfg->handlers, ecore_event_handler_add
-       (E_EVENT_BORDER_REMOVE, 
+       (E_EVENT_BORDER_REMOVE,
         _e_mod_config_window_event_border_remove_cb, cfg->cwl));
 
    cfg->handlers = eina_list_append
       (cfg->handlers, ecore_event_handler_add
-       (E_EVENT_BORDER_ICONIFY, 
+       (E_EVENT_BORDER_ICONIFY,
         _e_mod_config_window_event_border_iconify_cb, cfg->cwl));
 
    cfg->handlers = eina_list_append
       (cfg->handlers, ecore_event_handler_add
-       (E_EVENT_BORDER_UNICONIFY, 
+       (E_EVENT_BORDER_UNICONIFY,
         _e_mod_config_window_event_border_uniconify_cb, cfg->cwl));
 
    cfg->handlers = eina_list_append
       (cfg->handlers, ecore_event_handler_add
-       (E_EVENT_BORDER_FOCUS_IN, 
+       (E_EVENT_BORDER_FOCUS_IN,
         _e_mod_config_window_event_border_focus_in_cb, cfg->cwl));
 
    cfg->handlers = eina_list_append
       (cfg->handlers, ecore_event_handler_add
-       (E_EVENT_BORDER_FOCUS_OUT, 
+       (E_EVENT_BORDER_FOCUS_OUT,
         _e_mod_config_window_event_border_focus_out_cb, cfg->cwl));
 
    cfg->handlers = eina_list_append
       (cfg->handlers, ecore_event_handler_add
-       (E_EVENT_BORDER_PROPERTY, 
+       (E_EVENT_BORDER_PROPERTY,
         _e_mod_config_window_event_border_property_cb, cfg->cwl));
 
    cfg->handlers = eina_list_append
       (cfg->handlers, ecore_event_handler_add
-       (E_EVENT_BORDER_URGENT_CHANGE, 
+       (E_EVENT_BORDER_URGENT_CHANGE,
         _e_mod_config_window_event_border_urgent_change_cb, cfg->cwl));
 
-   productivity_conf->wm = 
+   productivity_conf->wm =
       ecore_timer_loop_add(0.20, e_mod_config_window_manager_v2, cfg->cwl);
 
-   productivity_conf->brk = 
+   productivity_conf->brk =
       ecore_timer_loop_add(1.00, _e_mod_config_window_break_timer, cfg->cwl);
 
    if(cfg->cwl->borders) return EINA_TRUE;
@@ -251,7 +251,7 @@ _e_mod_config_window_event_border_add_cb(void *data, int type __UNUSED__, void *
           }
         if(exists == EINA_FALSE)
           _e_mod_config_window_border_add(cwl, ev->border);
-     }   
+     }
    else if(!cwl->borders)
      _e_mod_config_window_border_add(cwl, ev->border);
 
@@ -494,7 +494,7 @@ e_mod_config_window_remember_cleanup()
    bdl = eina_list_clone(e_border_client_list());
 
    EINA_LIST_FOREACH(productivity_conf->remember_list, l, rem)
-     {     
+     {
         EINA_LIST_FOREACH(bdl, ll, bd)
           {
                if(bd->win == rem->win)
@@ -675,10 +675,10 @@ void e_mod_config_window_free(void)
    eina_list_free(productivity_conf->cwl->borders);
    productivity_conf->cwl->borders = NULL;
    E_FREE(productivity_conf->cwl);
-   E_FREE(eh); 
+   E_FREE(eh);
 }
 
-Eina_Bool 
+Eina_Bool
 e_mod_config_window_manager_v2(void *data)
 {
    E_Config_Window_List *cwl;
@@ -905,7 +905,7 @@ _e_mod_config_window_border_add(E_Config_Window_List *cwl, E_Border *bd)
    if(!bd->desktop)
      {
         CRI("Could not find .desktop for:%s", bd->client.icccm.name);
-        return EINA_FALSE; 
+        return EINA_FALSE;
      }
 
    cbd = E_NEW(E_Config_Border_Data, 1);
@@ -1030,7 +1030,7 @@ _e_mod_config_window_border_add_all(E_Config_Window_List *cwl)
      }
 }
 
-static Efreet_Desktop * 
+static Efreet_Desktop *
 _e_mod_config_window_border_find_desktop(E_Border *bd)
 {
    Efreet_Desktop *desktop;
@@ -1077,7 +1077,7 @@ _e_mod_config_window_border_find_desktop(E_Border *bd)
    return desktop;
 }
 
-static Eina_Bool 
+static Eina_Bool
 _e_mod_config_window_border_worktool_match_v2(E_Config_Border_Data *cbd, Eina_List *worktools)
 {
    Efreet_Desktop *desktop;
@@ -1101,7 +1101,7 @@ _e_mod_config_window_border_worktool_match_v2(E_Config_Border_Data *cbd, Eina_Li
    return EINA_FALSE;
 }
 
-static void 
+static void
 _e_mod_config_window_remember_show_all(Eina_List *cbd_lst EINA_UNUSED, Eina_List *rem_lst)
 {
    E_Border *bd;
@@ -1158,7 +1158,7 @@ _e_mod_config_window_border_cleaner(E_Config_Window_List *cwl)
           }
         if(found == EINA_TRUE) continue;
 
-        _e_mod_config_window_border_del(cwl, cbd); 
+        _e_mod_config_window_border_del(cwl, cbd);
      }
 }
 

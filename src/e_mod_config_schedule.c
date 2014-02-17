@@ -12,7 +12,7 @@ static void _e_mod_config_schedule_label_update(E_Config_Schedule_Data *csd);
 
 void
 e_mod_config_schedule_create_data(E_Config_Dialog_Data *cfdata)
-{  
+{
    cfdata->schedule.lock            = productivity_conf->lock;
    cfdata->schedule.urgent          = productivity_conf->urgent;
    cfdata->schedule.break_min       = productivity_conf->break_min;
@@ -33,21 +33,21 @@ e_mod_config_schedule_new_v2(Evas_Object *otb, Evas *evas, E_Config_Dialog_Data 
    e_widget_list_object_append(ol, S.oburgent, 0, 0, 0.5);
 
    S.oblabel = e_widget_label_add(evas, NULL);
-   _e_mod_config_schedule_label_update(&S); 
+   _e_mod_config_schedule_label_update(&S);
    e_widget_list_object_append(ol, S.oblabel, 0, 0, 0.5);
 
    label = e_widget_label_add(evas, D_("Break Time"));
    e_widget_list_object_append(ol, label, 1, 0, 0.5);
 
    S.obbreak = e_widget_slider_add(evas, 1, 0, D_("%1.0f Minutes"), 0.0, 20.0, 1.00, 0, &(S.break_min), NULL, 100);
-   evas_object_smart_callback_add(S.obbreak, "changed", _e_mod_config_schedule_obbreak_time_cb, &S); 
+   evas_object_smart_callback_add(S.obbreak, "changed", _e_mod_config_schedule_obbreak_time_cb, &S);
    e_widget_list_object_append(ol, S.obbreak, 1, 0, 0.5);
 
    label = e_widget_label_add(evas, D_("Time to Work before Break"));
    e_widget_list_object_append(ol, label, 1, 0, 0.5);
 
    S.obwork = e_widget_slider_add(evas, 1, 0, D_("%1.0f Minutes"), 0.0, 90.0, 1.00, 0, &(S.work_min), NULL, 100);
-   evas_object_smart_callback_add(S.obwork, "changed", _e_mod_config_schedule_obwork_time_cb, &S); 
+   evas_object_smart_callback_add(S.obwork, "changed", _e_mod_config_schedule_obwork_time_cb, &S);
    e_widget_list_object_append(ol, S.obwork, 1, 0, 0.5);
 
    ot = e_widget_table_add(evas, EINA_FALSE);
@@ -74,7 +74,7 @@ e_mod_config_schedule_save_config(E_Config_Dialog_Data *cfdata)
    productivity_conf->urgent       = cfdata->schedule.urgent;
    productivity_conf->break_min  = cfdata->schedule.break_min;
    productivity_conf->work_min  = cfdata->schedule.work_min;
-} 
+}
 
 static void
 _e_mod_config_schedule_start_working_cb(void *data, void *data2)
@@ -133,7 +133,7 @@ _e_mod_config_schedule_stop_working_cb(void *data, void *data2)
    e_mod_config_schedule_save_config(cfdata);
    e_mod_config_worktools_save(cfdata);
 
-   productivity_conf->init = E_MOD_PROD_INIT_STOP; 
+   productivity_conf->init = E_MOD_PROD_INIT_STOP;
    ecore_timer_freeze(productivity_conf->wm);
    e_mod_config_window_manager_v2(productivity_conf->cwl);
    ecore_timer_thaw(productivity_conf->wm);

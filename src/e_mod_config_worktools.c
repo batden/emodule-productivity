@@ -14,7 +14,7 @@ Eina_List *
 e_mod_config_worktools_selected_get()
 {
    char buf[PATH_MAX];
-   
+
    e_user_dir_concat_static(buf, "applications/productivity/.order");
    if(ecore_file_exists(buf) == EINA_FALSE) return NULL;
    return _e_mod_config_worktools_load_config(buf);
@@ -41,7 +41,7 @@ e_mod_config_worktools_create_data(E_Config_Dialog_Data *cfdata)
 /*
  * This function saves the changes made in the application list
  */
-Eina_Bool 
+Eina_Bool
 e_mod_config_worktools_save(E_Config_Dialog_Data *cfdata)
 {
    _e_mod_config_worktools_save_config(cfdata);
@@ -71,7 +71,7 @@ e_mod_config_worktools_free(E_Config_Dialog_Data *cfdata)
       efreet_desktop_free(desk);
 }
 
-/* 
+/*
  * Configuration object to allow you to select which application you will use
  * during work time
  */
@@ -89,13 +89,13 @@ e_mod_config_worktools_new(Evas_Object *otb, Evas *evas, E_Config_Dialog_Data *c
             _e_mod_config_worktools_add_cb, &cfdata->apps_user, cfdata);
    e_widget_disabled_set(cfdata->apps_user.o_add, EINA_TRUE);
    e_widget_table_object_append(ot, cfdata->apps_user.o_add, 0, 1, 1, 1, 1, 1, 1, 0);
-   
+
    cfdata->apps_user.o_del = e_widget_button_add(evas, D_("Remove"), "list-remove",
             _e_mod_config_worktools_del_cb, &cfdata->apps_user, cfdata);
    e_widget_disabled_set(cfdata->apps_user.o_del, EINA_TRUE);
    e_widget_table_object_append(ot, cfdata->apps_user.o_del, 1, 1, 1, 1, 1, 1, 1, 0);
    e_widget_toolbook_page_append(otb, NULL, D_("Work Tools"), ot, 6, 1, 1, 1, 0.5, 0.0);
-   
+
    if (cfdata->fill_delay) ecore_timer_del(cfdata->fill_delay);
    cfdata->fill_delay = ecore_timer_add(0.2, _cb_fill_delay, cfdata);
    return otb;
@@ -323,7 +323,7 @@ _e_mod_config_worktools_load_config(const char *path)
 }
 
 /*
- * This functions when you click "Ok/Apply" from the dialog, it saves all the 
+ * This functions when you click "Ok/Apply" from the dialog, it saves all the
  * enabled applications to $USER/.e/e/applications/productivity/.order
  */
 static int

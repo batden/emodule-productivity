@@ -10,7 +10,7 @@ static int _check_changed(E_Config_Dialog *cfd, E_Config_Dialog_Data *cfdata);
 
 /* Function for calling our personal dialog menu */
 E_Config_Dialog *
-e_int_config_productivity_module(E_Container *con, const char *params EINA_UNUSED) 
+e_int_config_productivity_module(E_Container *con, const char *params EINA_UNUSED)
 {
    E_Config_Dialog *cfd = NULL;
    E_Config_Dialog_View *v = NULL;
@@ -43,19 +43,19 @@ e_int_config_productivity_module(E_Container *con, const char *params EINA_UNUSE
 
 /* Local Functions */
 static void *
-_create_data(E_Config_Dialog *cfd EINA_UNUSED) 
+_create_data(E_Config_Dialog *cfd EINA_UNUSED)
 {
    E_Config_Dialog_Data *cfdata = NULL;
-   
+
    cfdata = E_NEW(E_Config_Dialog_Data, 1);
-   
+
    e_mod_config_schedule_create_data(cfdata);
    e_mod_config_worktools_create_data(cfdata);
    return cfdata;
 }
 
-static void 
-_free_data(E_Config_Dialog *cfd EINA_UNUSED, E_Config_Dialog_Data *cfdata) 
+static void
+_free_data(E_Config_Dialog *cfd EINA_UNUSED, E_Config_Dialog_Data *cfdata)
 {
    e_mod_config_worktools_save(cfdata);
 
@@ -71,7 +71,7 @@ _free_data(E_Config_Dialog *cfd EINA_UNUSED, E_Config_Dialog_Data *cfdata)
 }
 
 static Evas_Object *
-_basic_create(E_Config_Dialog *cfd EINA_UNUSED, Evas *evas, E_Config_Dialog_Data *cfdata) 
+_basic_create(E_Config_Dialog *cfd EINA_UNUSED, Evas *evas, E_Config_Dialog_Data *cfdata)
 {
    Evas_Object *otb;
 
@@ -86,11 +86,11 @@ _basic_create(E_Config_Dialog *cfd EINA_UNUSED, Evas *evas, E_Config_Dialog_Data
    return otb;
 }
 
-static int 
-_check_changed(E_Config_Dialog *cfd EINA_UNUSED, E_Config_Dialog_Data *cfdata) 
+static int
+_check_changed(E_Config_Dialog *cfd EINA_UNUSED, E_Config_Dialog_Data *cfdata)
 {
    e_mod_config_schedule_save_config(cfdata);
-   e_config_save(); 
+   e_config_save();
    return 1;
 }
 

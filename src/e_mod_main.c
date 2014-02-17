@@ -21,7 +21,7 @@ static void _productivity_mod_run_cb(void *data, E_Menu *m, E_Menu_Item *mi);
 
 /* Local Structures */
 typedef struct _Instance Instance;
-struct _Instance 
+struct _Instance
 {
    /* An instance of our item (module) with its elements */
 
@@ -46,10 +46,10 @@ static E_Config_DD *conf_edd = NULL;
 static E_Config_DD *remember_edd = NULL;
 Config *productivity_conf = NULL;
 
-static const E_Gadcon_Client_Class _gc_class = 
+static const E_Gadcon_Client_Class _gc_class =
 {
-   GADCON_CLIENT_CLASS_VERSION, "productivity", 
-   {_gc_init, _gc_shutdown, _gc_orient, _gc_label, _gc_icon, 
+   GADCON_CLIENT_CLASS_VERSION, "productivity",
+   {_gc_init, _gc_shutdown, _gc_orient, _gc_label, _gc_icon,
       _gc_id_new, NULL, NULL},
    E_GADCON_CLIENT_STYLE_PLAIN
 };
@@ -63,7 +63,7 @@ EAPI E_Module_Api e_modapi = {E_MODULE_API_VERSION, "Productivity"};
 
 /* Function called when the module is initialized */
 EAPI void *
-e_modapi_init(E_Module *m) 
+e_modapi_init(E_Module *m)
 {
    char buf[PATH_MAX];
 
@@ -112,14 +112,14 @@ e_modapi_init(E_Module *m)
    /* Tell E to find any existing module data. First run ? */
    productivity_conf = e_config_domain_load("module.productivity", conf_edd);
 
-   if (productivity_conf) 
+   if (productivity_conf)
      {
         /* Check config version */
         if (!e_util_module_config_check(D_("Productivity"), productivity_conf->version, MOD_CONFIG_FILE_VERSION))
           _productivity_conf_free();
      }
 
-   /* if we don't have a config yet, or it got erased above, 
+   /* if we don't have a config yet, or it got erased above,
     * then create a default one */
    if (!productivity_conf) _productivity_conf_new();
    productivity_conf->log_name = eina_stringshare_add("MOD:PROD");
@@ -130,7 +130,7 @@ e_modapi_init(E_Module *m)
    eina_log_domain_level_set(
       productivity_conf->log_name, EINA_LOG_LEVEL_DBG);
    INF("Initialized Productivity Module");
-  
+
    if(productivity_conf->lock == EINA_TRUE)
      productivity_conf->init = E_MOD_PROD_INIT_START;
 
@@ -158,8 +158,8 @@ e_modapi_init(E_Module *m)
 /*
  * Function to unload the module
  */
-EAPI int 
-e_modapi_shutdown(E_Module *m EINA_UNUSED) 
+EAPI int
+e_modapi_shutdown(E_Module *m EINA_UNUSED)
 {
    /* Unregister the config dialog from the main panel */
    e_configure_registry_item_del("extensions/productivity");
@@ -183,7 +183,7 @@ e_modapi_shutdown(E_Module *m EINA_UNUSED)
    ecore_timer_del(productivity_conf->wm);
    ecore_timer_del(productivity_conf->brk);
    /* Cleanup our item list */
-   while (productivity_conf->conf_items) 
+   while (productivity_conf->conf_items)
      {
         Config_Item *ci = NULL;
 
@@ -191,8 +191,8 @@ e_modapi_shutdown(E_Module *m EINA_UNUSED)
         ci = productivity_conf->conf_items->data;
 
         /* remove it */
-        productivity_conf->conf_items = 
-           eina_list_remove_list(productivity_conf->conf_items, 
+        productivity_conf->conf_items =
+           eina_list_remove_list(productivity_conf->conf_items,
                                  productivity_conf->conf_items);
 
         /* cleanup stringshares */
@@ -220,9 +220,9 @@ e_modapi_shutdown(E_Module *m EINA_UNUSED)
 
 /*
  * Function to Save the modules config
- */ 
-EAPI int 
-e_modapi_save(E_Module *m EINA_UNUSED) 
+ */
+EAPI int
+e_modapi_save(E_Module *m EINA_UNUSED)
 {
    e_config_domain_save("module.productivity", conf_edd, productivity_conf);
    return 1;
@@ -232,13 +232,13 @@ e_modapi_save(E_Module *m EINA_UNUSED)
 
 /* Called when Gadget Controller (gadcon) says to appear in scene */
 static E_Gadcon_Client *
-_gc_init(E_Gadcon *gc, const char *name, const char *id, const char *style) 
+_gc_init(E_Gadcon *gc, const char *name, const char *id, const char *style)
 {
    Instance *inst = NULL;
    char buf[PATH_MAX];
 
    /* theme file */
-   snprintf(buf, sizeof(buf), "%s/e-module-productivity.edj", 
+   snprintf(buf, sizeof(buf), "%s/e-module-productivity.edj",
             productivity_conf->module->dir);
 
    /* New visual instance, any config ? */
@@ -248,7 +248,7 @@ _gc_init(E_Gadcon *gc, const char *name, const char *id, const char *style)
    /* create on-screen object */
    inst->o_productivity = edje_object_add(gc->evas);
    /* we have a theme ? */
-   if (!e_theme_edje_object_set(inst->o_productivity, "base/theme/modules/productivity", 
+   if (!e_theme_edje_object_set(inst->o_productivity, "base/theme/modules/productivity",
                                 "modules/productivity/main"))
      edje_object_file_set(inst->o_productivity, buf, "modules/productivity/main");
 
@@ -257,7 +257,7 @@ _gc_init(E_Gadcon *gc, const char *name, const char *id, const char *style)
    inst->gcc->data = inst;
 
    /* hook a mouse down. we want/have a popup menu, right ? */
-   evas_object_event_callback_add(inst->o_productivity, EVAS_CALLBACK_MOUSE_DOWN, 
+   evas_object_event_callback_add(inst->o_productivity, EVAS_CALLBACK_MOUSE_DOWN,
                                   _productivity_cb_mouse_down, inst);
 
    /* add to list of running instances so we can cleanup later */
@@ -268,8 +268,8 @@ _gc_init(E_Gadcon *gc, const char *name, const char *id, const char *style)
 }
 
 /* Called when Gadget_Container says stop */
-static void 
-_gc_shutdown(E_Gadcon_Client *gcc) 
+static void
+_gc_shutdown(E_Gadcon_Client *gcc)
 {
    Instance *inst = NULL;
 
@@ -277,17 +277,17 @@ _gc_shutdown(E_Gadcon_Client *gcc)
    instances = eina_list_remove(instances, inst);
 
    /* kill popup menu */
-   if (inst->menu) 
+   if (inst->menu)
      {
         e_menu_post_deactivate_callback_set(inst->menu, NULL, NULL);
         e_object_del(E_OBJECT(inst->menu));
         inst->menu = NULL;
      }
    /* delete the visual */
-   if (inst->o_productivity) 
+   if (inst->o_productivity)
      {
         /* remove mouse down callback hook */
-        evas_object_event_callback_del(inst->o_productivity, EVAS_CALLBACK_MOUSE_DOWN, 
+        evas_object_event_callback_del(inst->o_productivity, EVAS_CALLBACK_MOUSE_DOWN,
                                        _productivity_cb_mouse_down);
         evas_object_del(inst->o_productivity);
      }
@@ -295,8 +295,8 @@ _gc_shutdown(E_Gadcon_Client *gcc)
 }
 
 /* For when container says we are changing position */
-static void 
-_gc_orient(E_Gadcon_Client *gcc, E_Gadcon_Orient orient EINA_UNUSED) 
+static void
+_gc_orient(E_Gadcon_Client *gcc, E_Gadcon_Orient orient EINA_UNUSED)
 {
    e_gadcon_client_aspect_set(gcc, 16, 16);
    e_gadcon_client_min_size_set(gcc, 16, 16);
@@ -304,14 +304,14 @@ _gc_orient(E_Gadcon_Client *gcc, E_Gadcon_Orient orient EINA_UNUSED)
 
 /* Gadget/Module label, name for our module */
 static const char *
-_gc_label(const E_Gadcon_Client_Class *client_class EINA_UNUSED) 
+_gc_label(const E_Gadcon_Client_Class *client_class EINA_UNUSED)
 {
    return D_("Productivity");
 }
 
 /* so E can keep a unique instance per-container */
 static const char *
-_gc_id_new(const E_Gadcon_Client_Class *client_class EINA_UNUSED) 
+_gc_id_new(const E_Gadcon_Client_Class *client_class EINA_UNUSED)
 {
    Config_Item *ci = NULL;
 
@@ -320,7 +320,7 @@ _gc_id_new(const E_Gadcon_Client_Class *client_class EINA_UNUSED)
 }
 
 static Evas_Object *
-_gc_icon(const E_Gadcon_Client_Class *client_class EINA_UNUSED, Evas *evas) 
+_gc_icon(const E_Gadcon_Client_Class *client_class EINA_UNUSED, Evas *evas)
 {
    Evas_Object *o = NULL;
    char buf[PATH_MAX];
@@ -338,8 +338,8 @@ _gc_icon(const E_Gadcon_Client_Class *client_class EINA_UNUSED, Evas *evas)
 }
 
 /* new module needs a new config :), or config too old and we need one anyway */
-static void 
-_productivity_conf_new(void) 
+static void
+_productivity_conf_new(void)
 {
    /* setup defaults */
    if(!productivity_conf)
@@ -360,17 +360,17 @@ _productivity_conf_new(void)
 
 /* This is called when we need to cleanup the actual configuration,
  * for example when our configuration is too old */
-static void 
-_productivity_conf_free(void) 
+static void
+_productivity_conf_free(void)
 {
    /* cleanup any stringshares here */
-   while (productivity_conf->conf_items) 
+   while (productivity_conf->conf_items)
      {
         Config_Item *ci = NULL;
 
         ci = productivity_conf->conf_items->data;
-        productivity_conf->conf_items = 
-           eina_list_remove_list(productivity_conf->conf_items, 
+        productivity_conf->conf_items =
+           eina_list_remove_list(productivity_conf->conf_items,
                                  productivity_conf->conf_items);
         /* EPA */
         if (ci->id) eina_stringshare_del(ci->id);
@@ -383,7 +383,7 @@ _productivity_conf_free(void)
 /* function to search for any Config_Item struct for this Item
  * create if needed */
 static Config_Item *
-_productivity_conf_item_get(const char *id) 
+_productivity_conf_item_get(const char *id)
 {
    Config_Item *ci;
 
@@ -396,8 +396,8 @@ _productivity_conf_item_get(const char *id)
 }
 
 /* Pants On */
-static void 
-_productivity_cb_mouse_down(void *data, Evas *evas EINA_UNUSED, Evas_Object *obj EINA_UNUSED, void *event) 
+static void
+_productivity_cb_mouse_down(void *data, Evas *evas EINA_UNUSED, Evas_Object *obj EINA_UNUSED, void *event)
 {
    Instance *inst = NULL;
    Evas_Event_Mouse_Down *ev;
@@ -407,7 +407,7 @@ _productivity_cb_mouse_down(void *data, Evas *evas EINA_UNUSED, Evas_Object *obj
 
    if (!(inst = data)) return;
    ev = event;
-   if ((ev->button == 3) && (!inst->menu)) 
+   if ((ev->button == 3) && (!inst->menu))
      {
         E_Menu *m;
 
@@ -425,14 +425,14 @@ _productivity_cb_mouse_down(void *data, Evas *evas EINA_UNUSED, Evas_Object *obj
         m = e_gadcon_client_util_menu_items_append(inst->gcc, m, 0);
         e_menu_post_deactivate_callback_set(m, _productivity_cb_menu_post, inst);
         inst->menu = m;
-        e_gadcon_canvas_zone_geometry_get(inst->gcc->gadcon, &x, &y, 
+        e_gadcon_canvas_zone_geometry_get(inst->gcc->gadcon, &x, &y,
                                           NULL, NULL);
 
         /* show the menu relative to gadgets position */
-        e_menu_activate_mouse(m, zone, (x + ev->output.x), 
-                              (y + ev->output.y), 1, 1, 
+        e_menu_activate_mouse(m, zone, (x + ev->output.x),
+                              (y + ev->output.y), 1, 1,
                               E_MENU_POP_DIRECTION_AUTO, ev->timestamp);
-        evas_event_feed_mouse_up(inst->gcc->gadcon->evas, ev->button, 
+        evas_event_feed_mouse_up(inst->gcc->gadcon->evas, ev->button,
                                  EVAS_BUTTON_NONE, ev->timestamp, NULL);
      }
 
@@ -444,8 +444,8 @@ _productivity_cb_mouse_down(void *data, Evas *evas EINA_UNUSED, Evas_Object *obj
 }
 
 /* popup menu closing, cleanup */
-static void 
-_productivity_cb_menu_post(void *data, E_Menu *menu EINA_UNUSED) 
+static void
+_productivity_cb_menu_post(void *data, E_Menu *menu EINA_UNUSED)
 {
    Instance *inst = NULL;
 
@@ -456,8 +456,8 @@ _productivity_cb_menu_post(void *data, E_Menu *menu EINA_UNUSED)
 }
 
 /* call configure from popup */
-static void 
-_productivity_cb_menu_configure(void *data EINA_UNUSED, E_Menu *mn, E_Menu_Item *mi EINA_UNUSED) 
+static void
+_productivity_cb_menu_configure(void *data EINA_UNUSED, E_Menu *mn, E_Menu_Item *mi EINA_UNUSED)
 {
    if (!productivity_conf) return;
    if (productivity_conf->cfd) return;
@@ -466,7 +466,7 @@ _productivity_cb_menu_configure(void *data EINA_UNUSED, E_Menu *mn, E_Menu_Item 
 
 
 /* menu item callback(s) */
-static void 
+static void
 _productivity_mod_run_cb(void *data __UNUSED__, E_Menu *m, E_Menu_Item *mi __UNUSED__)
 {
    e_configure_registry_call("extensions/productivity", m->zone->container, NULL);

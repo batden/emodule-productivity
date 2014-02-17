@@ -394,13 +394,16 @@ _productivity_keystroke_capture_handler_event_del(void *data EINA_UNUSED, int ty
 static void
 _productivity_keystroke_capture(void *data)
 {
-   const char *cmd = "/home/princeamd/launcher.sh";
+   char cmd[PATH_MAX];
+
+   snprintf(cmd, sizeof(cmd), "%s/scripts/launcher.sh keystrokes", productivity_conf->module->dir);
+
    if (!ecore_file_exists(cmd)) return;
 
    productivity_conf->exe = ecore_exe_pipe_run(cmd,
                                     ECORE_EXE_PIPE_WRITE |
                                     ECORE_EXE_PIPE_READ_LINE_BUFFERED |
-                                    ECORE_EXE_PIPE_ERROR_LINE_BUFFERED | 
+                                    ECORE_EXE_PIPE_ERROR_LINE_BUFFERED |
                                     ECORE_EXE_PIPE_ERROR |
                                     ECORE_EXE_USE_SH |
                                     ECORE_EXE_PIPE_READ,

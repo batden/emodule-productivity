@@ -72,6 +72,7 @@ AC_OUTPUT([
 Makefile
 src/Makefile
 data/Makefile
+script/Makefile
 module.desktop
 e_modules-productivity.spec
 $po_makefile_in

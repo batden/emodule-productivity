@@ -25,7 +25,7 @@ main(){
     case $mode in
 	keystrokes)
 
-	    while inotifywait -q -e modify "${keystrokes_history}"
+	    while inotifywait -q -e modify "${keystrokes_history}" 1>/dev/null
 	    do
 		tail -1 "${keystrokes_history}" | awk '{print $8}'
 		# that file is not inmediately writed but in any case we add a little pause for not enter in possible infinite loops

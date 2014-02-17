@@ -72,7 +72,7 @@ collections
                   size: 20;
                   text: "Run Workrave first";
                   align: 0.5 1.0;
-                  text_class: "module_large";
+                  /*text_class: "module_large";*/
                }
             }
          }

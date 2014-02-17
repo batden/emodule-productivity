@@ -397,7 +397,7 @@ _productivity_keystroke_capture(void *data)
    char cmd[PATH_MAX];
    const char *arg = "keystrokes";
 
-   snprintf(cmd, sizeof(cmd), "%s/scripts/launcher.sh", productivity_conf->module->dir);
+   snprintf(cmd, sizeof(cmd), "%s/script/launcher.sh", productivity_conf->module->dir);
    if (!ecore_file_exists(cmd))
      ERR("Unable to find CMD: %s ", cmd);
 

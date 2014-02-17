@@ -395,10 +395,14 @@ static void
 _productivity_keystroke_capture(void *data)
 {
    char cmd[PATH_MAX];
+   const char *arg = "keystrokes";
 
-   snprintf(cmd, sizeof(cmd), "%s/scripts/launcher.sh keystrokes", productivity_conf->module->dir);
+   snprintf(cmd, sizeof(cmd), "%s/scripts/launcher.sh", productivity_conf->module->dir);
+   if (!ecore_file_exists(cmd))
+     ERR("Unable to find CMD: %s ", cmd);
 
-   if (!ecore_file_exists(cmd)) return;
+   snprintf(cmd, sizeof(cmd), "%s %s", strdup(cmd), arg);
+   DBG("CMD: %s ", cmd);
 
    productivity_conf->exe = ecore_exe_pipe_run(cmd,
                                     ECORE_EXE_PIPE_WRITE |

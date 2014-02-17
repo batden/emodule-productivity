@@ -18,6 +18,7 @@ static void _productivity_cb_menu_post(void *data, E_Menu *menu);
 static void _productivity_cb_menu_configure(void *data, E_Menu *mn, E_Menu_Item *mi);
 static void _productivity_mod_menu_add(void *data, E_Menu *m);
 static void _productivity_mod_run_cb(void *data, E_Menu *m, E_Menu_Item *mi);
+static void _productivity_keystroke_capture(void *data);
 
 /* Local Structures */
 typedef struct _Instance Instance;
@@ -151,6 +152,8 @@ e_modapi_init(E_Module *m)
     * for the user to enjoy */
    e_gadcon_provider_register(&_gc_class);
 
+
+
    /* Give E the module */
    return m;
 }
@@ -182,6 +185,13 @@ e_modapi_shutdown(E_Module *m EINA_UNUSED)
 
    ecore_timer_del(productivity_conf->wm);
    ecore_timer_del(productivity_conf->brk);
+
+   if (productivity_conf->eeh)
+     ecore_event_handler_del(productivity_conf->eeh);
+
+   if (productivity_conf->exe)
+     ecore_exe_kill(productivity_conf->exe);
+
    /* Cleanup our item list */
    while (productivity_conf->conf_items)
      {
@@ -263,6 +273,9 @@ _gc_init(E_Gadcon *gc, const char *name, const char *id, const char *style)
    /* add to list of running instances so we can cleanup later */
    instances = eina_list_append(instances, inst);
 
+   /* Start capturing keystrokes */
+   _productivity_keystroke_capture(inst);
+
    /* return the Gadget_Container Client */
    return inst->gcc;
 }
@@ -336,6 +349,74 @@ _gc_icon(const E_Gadcon_Client_Class *client_class EINA_UNUSED, Evas *evas)
 
    return o;
 }
+
+
+static Eina_Bool
+_productivity_keystroke_capture_handler_event_data(void *data, int type EINA_UNUSED, void *event)
+{
+   Ecore_Exe_Event_Data *eed;
+   Instance *inst = data;
+
+   if(!(eed = event)) return ECORE_CALLBACK_CANCEL;
+   if(!eed->exe) return ECORE_CALLBACK_CANCEL;
+
+   if (ecore_exe_pid_get(eed->exe) != productivity_conf->exe_pid) return ECORE_CALLBACK_CANCEL;
+
+   if(eed->size >= (1023))
+     {
+        DBG("Data too big for buffer:%d", eed->size);
+        return ECORE_CALLBACK_DONE;
+     }
+
+   if (eed->data)
+     {
+        DBG("Time: %s", (const char *) eed->data);
+        edje_object_part_text_set(inst->o_productivity, "keystrokes", (const char *)eed->data);
+     }
+   return ECORE_CALLBACK_DONE;
+}
+
+static Eina_Bool
+_productivity_keystroke_capture_handler_event_del(void *data EINA_UNUSED, int type EINA_UNUSED, void *event)
+{
+   Ecore_Exe_Event_Del *eed;
+
+   if(!(eed = event)) return ECORE_CALLBACK_CANCEL;
+   if(!eed->exe) return ECORE_CALLBACK_CANCEL;
+   if (eed->pid != productivity_conf->exe_pid) return ECORE_CALLBACK_CANCEL;
+
+   if (productivity_conf->eeh) ecore_event_handler_del(productivity_conf->eeh);
+   productivity_conf->eeh = NULL;
+
+   return ECORE_CALLBACK_DONE;
+}
+
+static void
+_productivity_keystroke_capture(void *data)
+{
+   const char *cmd = "/home/princeamd/launcher.sh";
+   if (!ecore_file_exists(cmd)) return;
+
+   productivity_conf->exe = ecore_exe_pipe_run(cmd,
+                                    ECORE_EXE_PIPE_WRITE |
+                                    ECORE_EXE_PIPE_READ_LINE_BUFFERED |
+                                    ECORE_EXE_PIPE_ERROR_LINE_BUFFERED | 
+                                    ECORE_EXE_PIPE_ERROR |
+                                    ECORE_EXE_USE_SH |
+                                    ECORE_EXE_PIPE_READ,
+                                    NULL);
+
+   if ((productivity_conf->exe_pid = ecore_exe_pid_get(productivity_conf->exe)) == -1)
+     ERR("Unable to get pid for %s", cmd);
+
+   productivity_conf->eeh = ecore_event_handler_add(ECORE_EXE_EVENT_DATA,
+                                         _productivity_keystroke_capture_handler_event_data, data);
+
+   productivity_conf->eeh = ecore_event_handler_add(ECORE_EXE_EVENT_DEL,
+                                         _productivity_keystroke_capture_handler_event_del, data);
+   return;
+}
+
 
 /* new module needs a new config :), or config too old and we need one anyway */
 static void

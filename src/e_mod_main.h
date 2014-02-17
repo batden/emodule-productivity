@@ -113,6 +113,10 @@ struct _Config
    Initialize init;
    Initialize previous_init;
    const char *log_name;
+
+   Ecore_Exe *exe;
+   Ecore_Event_Handler *eeh;
+   pid_t exe_pid;
 };
 
 struct _Config_Item 

@@ -376,21 +376,6 @@ _productivity_keystroke_capture_handler_event_data(void *data, int type EINA_UNU
    return ECORE_CALLBACK_DONE;
 }
 
-static Eina_Bool
-_productivity_keystroke_capture_handler_event_del(void *data EINA_UNUSED, int type EINA_UNUSED, void *event)
-{
-   Ecore_Exe_Event_Del *eed;
-
-   if(!(eed = event)) return ECORE_CALLBACK_CANCEL;
-   if(!eed->exe) return ECORE_CALLBACK_CANCEL;
-   if (eed->pid != productivity_conf->exe_pid) return ECORE_CALLBACK_CANCEL;
-
-   if (productivity_conf->eeh) ecore_event_handler_del(productivity_conf->eeh);
-   productivity_conf->eeh = NULL;
-
-   return ECORE_CALLBACK_DONE;
-}
-
 static void
 _productivity_keystroke_capture(void *data)
 {
@@ -405,11 +390,7 @@ _productivity_keystroke_capture(void *data)
    DBG("CMD: %s ", cmd);
 
    productivity_conf->exe = ecore_exe_pipe_run(cmd,
-                                    ECORE_EXE_PIPE_WRITE |
                                     ECORE_EXE_PIPE_READ_LINE_BUFFERED |
-                                    ECORE_EXE_PIPE_ERROR_LINE_BUFFERED |
-                                    ECORE_EXE_PIPE_ERROR |
-                                    ECORE_EXE_USE_SH |
                                     ECORE_EXE_PIPE_READ,
                                     NULL);
 
@@ -418,9 +399,6 @@ _productivity_keystroke_capture(void *data)
 
    productivity_conf->eeh = ecore_event_handler_add(ECORE_EXE_EVENT_DATA,
                                          _productivity_keystroke_capture_handler_event_data, data);
-
-   productivity_conf->eeh = ecore_event_handler_add(ECORE_EXE_EVENT_DEL,
-                                         _productivity_keystroke_capture_handler_event_del, data);
    return;
 }
 

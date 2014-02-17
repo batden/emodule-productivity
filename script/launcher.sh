@@ -30,7 +30,7 @@ main(){
 	    tail -1 "${keystrokes_history}" | awk '{print $8}'
 
 	    # listen and update
-	    while inotifywait -q -e modify "${keystrokes_history}" 1>/dev/null
+	    while inotifywait -q -m -e modify "${keystrokes_history}" 1>/dev/null
 	    do
 		echo -ne "Keys Today: "
 		tail -1 "${keystrokes_history}" | awk '{print $8}'

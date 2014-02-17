@@ -19,6 +19,8 @@ static void _productivity_cb_menu_configure(void *data, E_Menu *mn, E_Menu_Item 
 static void _productivity_mod_menu_add(void *data, E_Menu *m);
 static void _productivity_mod_run_cb(void *data, E_Menu *m, E_Menu_Item *mi);
 
+static void _workrave_update_keystrokes(Evas_Object *obj);
+
 /* Local Structures */
 typedef struct _Instance Instance;
 struct _Instance
@@ -147,6 +149,9 @@ e_modapi_init(E_Module *m)
    //Creates data, and adds callbacks
    e_mod_config_windows_create_data(productivity_conf);
 
+
+
+
    /* Tell any gadget containers (shelves, etc) that we provide a module
     * for the user to enjoy */
    e_gadcon_provider_register(&_gc_class);
@@ -256,6 +261,14 @@ _gc_init(E_Gadcon *gc, const char *name, const char *id, const char *style)
    inst->gcc = e_gadcon_client_new(gc, name, id, style, inst->o_productivity);
    inst->gcc->data = inst;
 
+   /* keystrokes */
+   edje_object_part_text_set(inst->o_productivity, "keystrokes", "foo");
+
+   ecore_timer_loop_add(2, _workrave_update_keystrokes, inst->o_productivity);
+
+
+
+
    /* hook a mouse down. we want/have a popup menu, right ? */
    evas_object_event_callback_add(inst->o_productivity, EVAS_CALLBACK_MOUSE_DOWN,
                                   _productivity_cb_mouse_down, inst);
@@ -275,6 +288,8 @@ _gc_shutdown(E_Gadcon_Client *gcc)
 
    if (!(inst = gcc->data)) return;
    instances = eina_list_remove(instances, inst);
+
+   /*ecore_timer_del(_workrave_update_keystrokes);*/ // FIXME
 
    /* kill popup menu */
    if (inst->menu)
@@ -485,5 +500,22 @@ _productivity_mod_menu_add(void *data __UNUSED__, E_Menu *m)
             productivity_conf->module->dir);
    e_util_menu_item_theme_icon_set(mi, buf);
    e_menu_item_callback_set(mi, _productivity_mod_run_cb, NULL);
+}
+
+static void
+_workrave_update_keystrokes(Evas_Object *obj)
+{
+   char launcher[4096];
+   char buf[4096];
+
+   snprintf(launcher, sizeof(launcher), "%s/scripts/launcher.sh keystrokes", productivity_conf->module->dir);
+
+   buf = ecore_exe_pipe_run(launcher, ECORE_EXE_PIPE_READ |
+                      ECORE_EXE_PIPE_READ_LINE_BUFFERED |
+                      ECORE_EXE_NOT_LEADER, NULL);
+
+   // FIXME how to get the values of "buf" and to send them to the next function ?
+
+   edje_object_part_text_set(obj, "keystrokes", buf);
 }
 

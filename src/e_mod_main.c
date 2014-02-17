@@ -19,6 +19,7 @@ static void _productivity_cb_menu_configure(void *data, E_Menu *mn, E_Menu_Item 
 static void _productivity_mod_menu_add(void *data, E_Menu *m);
 static void _productivity_mod_run_cb(void *data, E_Menu *m, E_Menu_Item *mi);
 static void _productivity_keystroke_capture(void *data);
+static void _productivity_keystroke_capture_stop(void);
 
 /* Local Structures */
 typedef struct _Instance Instance;
@@ -46,6 +47,8 @@ static Eina_List *instances = NULL;
 static E_Config_DD *conf_edd = NULL;
 static E_Config_DD *remember_edd = NULL;
 Config *productivity_conf = NULL;
+
+const char *launcher_cmd = "/scripts/launcher.sh";
 
 static const E_Gadcon_Client_Class _gc_class =
 {
@@ -186,11 +189,14 @@ e_modapi_shutdown(E_Module *m EINA_UNUSED)
    ecore_timer_del(productivity_conf->wm);
    ecore_timer_del(productivity_conf->brk);
 
-   if (productivity_conf->eeh)
-     ecore_event_handler_del(productivity_conf->eeh);
+   if (productivity_conf->eeh) ecore_event_handler_del(productivity_conf->eeh);
+   productivity_conf->eeh = NULL;
 
-   if (productivity_conf->exe)
-     ecore_exe_kill(productivity_conf->exe);
+   if (productivity_conf->exe) ecore_exe_kill(productivity_conf->exe);
+   productivity_conf->exe = NULL;
+
+   /*close any open launcher.sh*/
+   _productivity_keystroke_capture_stop();
 
    /* Cleanup our item list */
    while (productivity_conf->conf_items)
@@ -382,7 +388,7 @@ _productivity_keystroke_capture(void *data)
    char cmd[PATH_MAX];
    const char *arg = "keystrokes";
 
-   snprintf(cmd, sizeof(cmd), "%s/scripts/launcher.sh", productivity_conf->module->dir);
+   snprintf(cmd, sizeof(cmd), "%s/%s", productivity_conf->module->dir, launcher_cmd);
    if (!ecore_file_exists(cmd))
      ERR("Unable to find CMD: %s ", cmd);
 
@@ -399,9 +405,22 @@ _productivity_keystroke_capture(void *data)
 
    productivity_conf->eeh = ecore_event_handler_add(ECORE_EXE_EVENT_DATA,
                                          _productivity_keystroke_capture_handler_event_data, data);
-   return;
 }
 
+static void
+_productivity_keystroke_capture_stop(void)
+{
+   char cmd[PATH_MAX];
+   const char *arg = "keystrokes-stop";
+
+   snprintf(cmd, sizeof(cmd), "%s/%s", productivity_conf->module->dir, launcher_cmd);
+   if (!ecore_file_exists(cmd))
+     ERR("Unable to find CMD: %s ", cmd);
+
+   snprintf(cmd, sizeof(cmd), "%s %s", strdup(cmd), arg);
+   DBG("CMD: %s ", cmd);
+   ecore_exe_run(cmd, NULL);
+}
 
 /* new module needs a new config :), or config too old and we need one anyway */
 static void

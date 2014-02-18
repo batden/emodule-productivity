@@ -167,6 +167,9 @@ e_modapi_init(E_Module *m)
 EAPI int
 e_modapi_shutdown(E_Module *m EINA_UNUSED)
 {
+   /*close any open launcher.sh*/
+   _productivity_keystroke_capture_stop();
+
    /* Unregister the config dialog from the main panel */
    e_configure_registry_item_del("extensions/productivity");
 
@@ -194,9 +197,6 @@ e_modapi_shutdown(E_Module *m EINA_UNUSED)
 
    if (productivity_conf->exe) ecore_exe_kill(productivity_conf->exe);
    productivity_conf->exe = NULL;
-
-   /*close any open launcher.sh*/
-   _productivity_keystroke_capture_stop();
 
    /* Cleanup our item list */
    while (productivity_conf->conf_items)

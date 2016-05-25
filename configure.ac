@@ -43,11 +43,7 @@ MODULE_ARCH="$host_os-$host_cpu-$release"
 AC_SUBST(MODULE_ARCH)
 AC_DEFINE_UNQUOTED(MODULE_ARCH, "$MODULE_ARCH", "Module architecture")
 
-PKG_CHECK_MODULES(E, [
-    enlightenment >= 0.17.0
-])
-requirements_e="enlightenment >= 0.17.0"
-
+PKG_CHECK_MODULES(E, [enlightenment])
 
 AC_ARG_WITH(edje-cc,
   AC_HELP_STRING([--with-edje-cc=PATH], [specify a specific path to edje_cc]),

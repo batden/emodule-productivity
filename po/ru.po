@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: productivity\n"
 "Report-Msgid-Bugs-To: enlightenment-devel@lists.sourceforge.net\n"
-"POT-Creation-Date: 2013-01-15 02:00+0400\n"
+"POT-Creation-Date: 2020-12-22 07:20-0500\n"
 "PO-Revision-Date: 2013-01-15 02:00+0400\n"
 "Last-Translator: Igor Murzov <e-mail@date.by>\n"
 "Language-Team: Russian <ru@li.org>\n"
@@ -65,19 +65,18 @@ msgstr "Убрать"
 msgid "Work Tools"
 msgstr "Рабочие инструменты"
 
-#: src/e_mod_main.c:81
+#: src/e_mod_main.c:80
 msgid "Extensions"
 msgstr "Расширения"
 
-#: src/e_mod_main.c:84 src/e_mod_main.c:119 src/e_mod_main.c:141
-#: src/e_mod_main.c:310 src/e_mod_main.c:492
+#: src/e_mod_main.c:83 src/e_mod_main.c:118 src/e_mod_main.c:140
+#: src/e_mod_main.c:309 src/e_mod_main.c:483
 msgid "Productivity"
 msgstr "Продуктивность"
 
-#: src/e_mod_main.c:388
-msgid "Productivity Configuration Updated"
-msgstr "Настройки Продуктивности обновлены"
-
-#: src/e_mod_main.c:429
+#: src/e_mod_main.c:420
 msgid "Settings"
 msgstr "Настройки"
+
+#~ msgid "Productivity Configuration Updated"
+#~ msgstr "Настройки Продуктивности обновлены"

@@ -2,6 +2,7 @@
 # Copyright (C) 2024 Bodhi Linux development team
 # This file is distributed under the same license as the PACKAGE package.
 # Robert Wiley <ylee@bodhilinux.com>, 2024.
+# Štefan Uram <thewaiter@bodhilinux.com>, 2024.
 #
 msgid ""
 msgstr ""
@@ -9,7 +10,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: moksha@bodhilinux.com\n"
 "POT-Creation-Date: 2024-12-14 04:38-0500\n"
 "PO-Revision-Date: 2024-12-14 04:38-0500\n"
-"Last-Translator: Automatically generated\n"
+"Last-Translator: Štefan Uram <thewaiter@bodhilinux.com>\n"
 "Language-Team: none\n"
 "Language: cs\n"
 "MIME-Version: 1.0\n"
@@ -19,63 +20,63 @@ msgstr ""
 
 #: src/e_mod_config.c:34
 msgid "Productivity Settings"
-msgstr ""
+msgstr "Nastavení Produktivity"
 
 #: src/e_mod_config_schedule.c:30
 msgid "Satisfy urgent windows instantly"
-msgstr ""
+msgstr "Okamžite vybavit naléhavé okna"
 
 #: src/e_mod_config_schedule.c:39
 msgid "Break Time"
-msgstr ""
+msgstr "Čas na přestávku"
 
 #: src/e_mod_config_schedule.c:42 src/e_mod_config_schedule.c:49
 #, c-format
 msgid "%1.0f Minutes"
-msgstr ""
+msgstr "%1.0f Minut"
 
 #: src/e_mod_config_schedule.c:46
 msgid "Time to Work before Break"
-msgstr ""
+msgstr "Čas na práci před přestávkou"
 
 #: src/e_mod_config_schedule.c:55
 msgid "Start Working"
-msgstr ""
+msgstr "Začátek práce"
 
 #: src/e_mod_config_schedule.c:59
 msgid "Stop Working"
-msgstr ""
+msgstr "Ukončení práce"
 
 #: src/e_mod_config_schedule.c:65
 msgid "Schedule"
-msgstr ""
+msgstr "Harmonogram"
 
 #: src/e_mod_config_schedule.c:183
 #, c-format
 msgid "%1.0f Minutes of Break per every %1.0f Minutes of Work"
-msgstr ""
+msgstr "%1.0f Minut přestávky na každých %1.0f minut práce"
 
 #: src/e_mod_config_worktools.c:88
 msgid "Add"
-msgstr ""
+msgstr "Přidat"
 
 #: src/e_mod_config_worktools.c:93
 msgid "Remove"
-msgstr ""
+msgstr "Odstranit"
 
 #: src/e_mod_config_worktools.c:97
 msgid "Work Tools"
-msgstr ""
+msgstr "Pracovní nástroje"
 
 #: src/e_mod_main.c:80
 msgid "Extensions"
-msgstr ""
+msgstr "Doplňky"
 
 #: src/e_mod_main.c:83 src/e_mod_main.c:118 src/e_mod_main.c:140
 #: src/e_mod_main.c:309 src/e_mod_main.c:483
 msgid "Productivity"
-msgstr ""
+msgstr "Produktivita"
 
 #: src/e_mod_main.c:420
 msgid "Settings"
-msgstr ""
+msgstr "Nastavení"

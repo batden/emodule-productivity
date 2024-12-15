@@ -2,14 +2,16 @@
 # Copyright (C) 2024 Bodhi Linux development team
 # This file is distributed under the same license as the PACKAGE package.
 # Robert Wiley <ylee@bodhilinux.com>, 2024.
+# Štefan Uram <thewaiter@bodhilinux.com>, 2024.
 #
+
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: moksha@bodhilinux.com\n"
 "POT-Creation-Date: 2024-12-14 04:38-0500\n"
 "PO-Revision-Date: 2024-12-14 04:38-0500\n"
-"Last-Translator: Automatically generated\n"
+"Last-Translator: Štefan Uram <thewaiter@bodhilinux.com>\n"
 "Language-Team: none\n"
 "Language: sk\n"
 "MIME-Version: 1.0\n"

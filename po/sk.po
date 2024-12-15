@@ -19,63 +19,63 @@ msgstr ""
 
 #: src/e_mod_config.c:34
 msgid "Productivity Settings"
-msgstr ""
+msgstr "Nastavenie Produktivity"
 
 #: src/e_mod_config_schedule.c:30
 msgid "Satisfy urgent windows instantly"
-msgstr ""
+msgstr "Okamžite vybaviť naliehavé okná"
 
 #: src/e_mod_config_schedule.c:39
 msgid "Break Time"
-msgstr ""
+msgstr "Čas na prestávku"
 
 #: src/e_mod_config_schedule.c:42 src/e_mod_config_schedule.c:49
 #, c-format
 msgid "%1.0f Minutes"
-msgstr ""
+msgstr "%1.0f Minút"
 
 #: src/e_mod_config_schedule.c:46
 msgid "Time to Work before Break"
-msgstr ""
+msgstr "Čas na prácu pred prestávkou"
 
 #: src/e_mod_config_schedule.c:55
 msgid "Start Working"
-msgstr ""
+msgstr "Začiatok práce"
 
 #: src/e_mod_config_schedule.c:59
 msgid "Stop Working"
-msgstr ""
+msgstr "Ukončenie práce"
 
 #: src/e_mod_config_schedule.c:65
 msgid "Schedule"
-msgstr ""
+msgstr "Harmonogram"
 
 #: src/e_mod_config_schedule.c:183
 #, c-format
 msgid "%1.0f Minutes of Break per every %1.0f Minutes of Work"
-msgstr ""
+msgstr "%1.0f Minút prestávky na každých %1.0f minút práce"
 
 #: src/e_mod_config_worktools.c:88
 msgid "Add"
-msgstr ""
+msgstr "Pridať"
 
 #: src/e_mod_config_worktools.c:93
 msgid "Remove"
-msgstr ""
+msgstr "Odstrániť"
 
 #: src/e_mod_config_worktools.c:97
 msgid "Work Tools"
-msgstr ""
+msgstr "Pracovné nástroje"
 
 #: src/e_mod_main.c:80
 msgid "Extensions"
-msgstr ""
+msgstr "Doplnky"
 
 #: src/e_mod_main.c:83 src/e_mod_main.c:118 src/e_mod_main.c:140
 #: src/e_mod_main.c:309 src/e_mod_main.c:483
 msgid "Productivity"
-msgstr ""
+msgstr "Produktivita"
 
 #: src/e_mod_main.c:420
 msgid "Settings"
-msgstr ""
+msgstr "Nastavenie"

@@ -1,11 +1,11 @@
-# Arabic translations for PACKAGE package.
+# Arabic translations for Productivity Module.
 # Copyright (C) 2024 Bodhi Linux development team
-# This file is distributed under the same license as the PACKAGE package.
+# This file is distributed under the same license as the Productivity Module.
 # Robert Wiley <moksha@bodhilinux.com>, 2024.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: productivity\n"
 "Report-Msgid-Bugs-To: moksha@bodhilinux.com\n"
 "POT-Creation-Date: 2024-12-14 04:38-0500\n"
 "PO-Revision-Date: 2024-12-14 04:57-0500\n"

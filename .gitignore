@@ -34,7 +34,6 @@ missing
 mkinstalldirs
 module.desktop
 po/*.gmo
-po/*.pot
 po/Makefile
 po/Makefile.in
 po/Makefile.in.in

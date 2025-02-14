@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: productivity\n"
 "Report-Msgid-Bugs-To: moksha@bodhilinux.com\n"
 "POT-Creation-Date: 2024-12-14 04:38-0500\n"
-"PO-Revision-Date: 2024-12-14 04:38-0500\n"
-"Last-Translator: Automatically generated\n"
+"PO-Revision-Date: 2025-02-14 17:12-0100\n"
+"Last-Translator: diekrz2\n"
 "Language-Team: none\n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
@@ -20,63 +20,63 @@ msgstr ""
 
 #: src/e_mod_config.c:34
 msgid "Productivity Settings"
-msgstr ""
+msgstr "Ustawienia Productivity"
 
 #: src/e_mod_config_schedule.c:30
 msgid "Satisfy urgent windows instantly"
-msgstr ""
+msgstr "Zaspokajaj natychmiast pilne okna"
 
 #: src/e_mod_config_schedule.c:39
 msgid "Break Time"
-msgstr ""
+msgstr "Przerwa"
 
 #: src/e_mod_config_schedule.c:42 src/e_mod_config_schedule.c:49
 #, c-format
 msgid "%1.0f Minutes"
-msgstr ""
+msgstr "%1.0f Minut"
 
 #: src/e_mod_config_schedule.c:46
 msgid "Time to Work before Break"
-msgstr ""
+msgstr "Czas pracy do przerwy"
 
 #: src/e_mod_config_schedule.c:55
 msgid "Start Working"
-msgstr ""
+msgstr "Zacznij pracę"
 
 #: src/e_mod_config_schedule.c:59
 msgid "Stop Working"
-msgstr ""
+msgstr "Przerwij pracę"
 
 #: src/e_mod_config_schedule.c:65
 msgid "Schedule"
-msgstr ""
+msgstr "Harmonogram"
 
 #: src/e_mod_config_schedule.c:183
 #, c-format
 msgid "%1.0f Minutes of Break per every %1.0f Minutes of Work"
-msgstr ""
+msgstr "%1.0f Minut przerwy co %1.0f Minut pracy"
 
 #: src/e_mod_config_worktools.c:88
 msgid "Add"
-msgstr ""
+msgstr "Dodaj"
 
 #: src/e_mod_config_worktools.c:93
 msgid "Remove"
-msgstr ""
+msgstr "Usuń"
 
 #: src/e_mod_config_worktools.c:97
 msgid "Work Tools"
-msgstr ""
+msgstr "Narzędzia pracy"
 
 #: src/e_mod_main.c:80
 msgid "Extensions"
-msgstr ""
+msgstr "Rozszerzenia"
 
 #: src/e_mod_main.c:83 src/e_mod_main.c:118 src/e_mod_main.c:140
 #: src/e_mod_main.c:309 src/e_mod_main.c:483
 msgid "Productivity"
-msgstr ""
+msgstr "Productivity"
 
 #: src/e_mod_main.c:420
 msgid "Settings"
-msgstr ""
+msgstr "Ustawienia"
